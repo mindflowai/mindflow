@@ -7,6 +7,8 @@ import subprocess
 from mindflow.resolve.resolve import resolve
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
+from mindflow.query.mfq import MindFlowQueryHandler, MFQ_FILE
+
 
 def generate_diff_prompt(args):
     """
@@ -20,13 +22,21 @@ def generate_diff_prompt(args):
     return f"{GIT_DIFF_PROMPT_PREFIX}\n\n{diff_result}"
 
 
-def generate_prompt_from_files(args, model, question):
+def generate_prompt_from_files(args, model, user_query: str):
     """
     This function is used to generate a prompt based on a question or summarization task
     """
     reference_text_dict = {}
-    {reference_text_dict.update(resolve(reference, model, question)) for reference in args.references}
 
-    json_str = json.dumps(reference_text_dict, indent=4)
+    refs = set(args.references)
 
-    return f"{question}\n\n{json_str}"
+    if MFQ_FILE in refs:
+        # When an MFQ_FILE is passed, this is a special case of the query command.
+        q = MindFlowQueryHandler(user_query, refs)
+        prompt = q.get_prompt()
+    else:
+        {reference_text_dict.update(resolve(reference, model, user_query)) for reference in refs}
+        context_prompt = json.dumps(reference_text_dict, indent=4)
+        prompt = f"{user_query}\n\n{context_prompt}"
+
+    return prompt
