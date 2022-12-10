@@ -86,9 +86,35 @@ function openQuery() {
 	});
   }
 
+class MyCompletionItemProvider implements vscode.CompletionItemProvider {
+	public provideCompletionItems(
+		document: vscode.TextDocument,
+		position: vscode.Position,
+		token: vscode.CancellationToken,
+		context: vscode.CompletionContext,
+	): vscode.ProviderResult<vscode.CompletionItem[]> {
+		// Get the list of files in the current working directory
+		// that begin with the "@" symbol
+		// const files = vscode.workspace.findFiles('@*');
+
+		// Create a CompletionItem for each file
+		// const completionItems = files.map(file => {
+		// const completionItem = new CompletionItem(file.fsPath);
+		// completionItem.kind = CompletionItemKind.File;
+		// return completionItem;
+		// });
+
+		const item = new vscode.CompletionItem("Hello World");
+
+		return [item]
+	}
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+
+	vscode.languages.registerCompletionItemProvider('mfq', new MyCompletionItemProvider(), '@');
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
