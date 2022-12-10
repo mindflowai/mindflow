@@ -17,6 +17,12 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from mindflow!');
+			
+		// If there is no active terminal, create a new one
+		if (!vscode.window.activeTerminal) {
+			vscode.window.createTerminal();
+		}
+
 
 		// Open a search bar that is overlaying the current editor
 		vscode.window.showInputBox({
@@ -26,7 +32,21 @@ export function activate(context: vscode.ExtensionContext) {
 		}).then((value) => {
 			// treat the value as a command and execute it in the terminal
 
-			console.log(value);
+			if (!value) {
+				return;
+			}
+
+			let terminal = vscode.window.activeTerminal;
+
+			// If there is no active terminal, create a new one
+			if (!terminal) {
+				terminal = vscode.window.createTerminal();
+			}
+
+			terminal.sendText(value);
+			// console.log(value);
+
+			
 		});
 	});
 
