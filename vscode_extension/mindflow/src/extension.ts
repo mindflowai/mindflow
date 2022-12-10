@@ -103,7 +103,15 @@ class MyCompletionItemProvider implements vscode.CompletionItemProvider {
 		// completionItem.kind = CompletionItemKind.File;
 		// return completionItem;
 		// });
+		
+		// get the string that the user has typed so far
+		// const currentText = document.lineAt(position).text
 
+		const range = document.getWordRangeAtPosition(position);
+		const variableName = document.getText(range);
+		const charactersAfterAtSymbol = variableName.substring(1); // get the characters after the "@" symbol
+		console.log(charactersAfterAtSymbol);
+	
 		const item = new vscode.CompletionItem("Hello World");
 
 		return [item]
