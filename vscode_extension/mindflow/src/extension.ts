@@ -40,7 +40,10 @@ function openQuery() {
 				terminal = vscode.window.createTerminal();
 			}
 
-			terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
+			// terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
+			const command = "mf q \"" + queryString + "\" " + paths?.join(" ");
+			console.log('running command: ' + command);
+			terminal.sendText(command);
 		});
 
 	});
