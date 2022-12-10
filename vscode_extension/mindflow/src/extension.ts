@@ -9,12 +9,12 @@ function openQuery() {
 		vscode.window.createTerminal();
 	}
 	
-	// show open dialog and choose multiple files
+	// show open dialog and choose multiple files/folders
 	vscode.window.showOpenDialog({
 		canSelectMany: true,
-		canSelectFolders: false,
+		canSelectFolders: true,
 		canSelectFiles: true,
-		openLabel: "Select",
+		openLabel: "Select Files to use as Query Context",
 		// filters: {
 			// 'Images': ['png', 'jpg'],
 			// 'TypeScript': ['ts', 'tsx'],
