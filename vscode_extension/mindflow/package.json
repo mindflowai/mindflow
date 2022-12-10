@@ -7,7 +7,8 @@
     "vscode": "^1.74.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages"
   ],
   "activationEvents": [
     "onCommand:mindflow.helloWorld"
@@ -19,7 +20,18 @@
         "command": "mindflow.query",
         "title": "MindFlow: File Query"
       }
-    ]
+    ],
+    "languages": [{
+      "id": "mfq",
+      "aliases": ["MindFlow Query", "mfq"],
+      "extensions": [".mfq"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "mfq",
+      "scopeName": "source.mfq",
+      "path": "./syntaxes/mfq.tmLanguage.json"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
