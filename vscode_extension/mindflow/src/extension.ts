@@ -87,34 +87,26 @@ function openQuery() {
   }
 
 class MyCompletionItemProvider implements vscode.CompletionItemProvider {
+	
 	public provideCompletionItems(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
 		context: vscode.CompletionContext,
 	): vscode.ProviderResult<vscode.CompletionItem[]> {
-		// Get the list of files in the current working directory
-		// that begin with the "@" symbol
-		// const files = vscode.workspace.findFiles('@*');
-
-		// Create a CompletionItem for each file
-		// const completionItems = files.map(file => {
-		// const completionItem = new CompletionItem(file.fsPath);
-		// completionItem.kind = CompletionItemKind.File;
-		// return completionItem;
-		// });
-		
-		// get the string that the user has typed so far
-		// const currentText = document.lineAt(position).text
-
 		const range = document.getWordRangeAtPosition(position);
 		const variableName = document.getText(range);
-		const charactersAfterAtSymbol = variableName.substring(1); // get the characters after the "@" symbol
-		console.log(charactersAfterAtSymbol);
-	
-		const item = new vscode.CompletionItem("Hello World");
-
-		return [item]
+		const files = vscode.workspace.findFiles(`**/${variableName}*/**`);
+		return files.then((value) => {
+			// add completion items for each file
+			const completionItems = value.map(file => {
+				const relPath = vscode.workspace.asRelativePath(file.path);
+				const completionItem = new vscode.CompletionItem(relPath);
+				completionItem.kind = vscode.CompletionItemKind.File;
+				return completionItem;
+			});
+			return completionItems;
+		});
 	}
 }
 
