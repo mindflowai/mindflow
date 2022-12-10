@@ -3,38 +3,141 @@
 import * as vscode from 'vscode';
 
 
-function openQuery() {
-	// If there is no active terminal, create a new one
-	if (!vscode.window.activeTerminal) {
-		vscode.window.createTerminal();
-	}
 
+// function openQuery() {
+// 	const editor = vscode.window.activeTextEditor;
 
-	// Open a search bar that is overlaying the current editor
-	vscode.window.showInputBox({
-		placeHolder: "Search for a note",
-		prompt: "Search for a note",
-		ignoreFocusOut: true
-	}).then((value) => {
-		// treat the value as a command and execute it in the terminal
+// 	if (!editor) {
+// 		return;
+// 	}
 
-		if (!value) {
-			return;
-		}
+// 	const decorationType = vscode.window.createTextEditorDecorationType({
+// 		backgroundColor: 'green',
+// 		border: '2px solid white',
+// 	});
 
-		let terminal = vscode.window.activeTerminal;
+// 	let sourceCode = editor.document.getText()
+// 	// let regex = /(console\.log)/
+  
+// 	let decorationsArray: vscode.DecorationOptions[] = []
 
-		// If there is no active terminal, create a new one
-		if (!terminal) {
-			terminal = vscode.window.createTerminal();
-		}
+// 	let decoration = { range: new vscode.Range(0, 0, 0, 0) }
 
-		terminal.sendText(value);
-		// console.log(value);
+// 	decorationsArray.push(decoration)
+  
+// 	// const sourceCodeArr = sourceCode.split('\n')
+  
+// 	// for (let line = 0; line < sourceCodeArr.length; line++) {
+// 	//   let match = sourceCodeArr[line].match(regex)
+  
+// 	//   if (match !== null && match.index !== undefined) {
+// 	// 	let range = new vscode.Range(
+// 	// 	  new vscode.Position(line, match.index),
+// 	// 	  new vscode.Position(line, match.index + match[1].length)
+// 	// 	)
+  
+// 	// 	let decoration = { range }
+  
+// 	// 	decorationsArray.push(decoration)
+// 	//   }
+// 	// }
+  
+// 	editor.setDecorations(decorationType, decorationsArray)
+//   }
+
+// function openQuery() {
+// 	vscode.window.activeTextEditor?.setDecorations
+
+// 	// If there is no active terminal, create a new one
+// 	if (!vscode.window.activeTerminal) {
+// 		vscode.window.createTerminal();
+// 	}
+
+// 	// Open a search bar that is overlaying the current editor
+// 	vscode.window.showInputBox({
+// 		placeHolder: "Search for a note",
+// 		prompt: "Search for a note",
+// 		ignoreFocusOut: true
+// 	}).then((value) => {
+// 		// treat the value as a command and execute it in the terminal
+
+// 		if (!value) {
+// 			return;
+// 		}
+
+// 		let terminal = vscode.window.activeTerminal;
+
+// 		// If there is no active terminal, create a new one
+// 		if (!terminal) {
+// 			terminal = vscode.window.createTerminal();
+// 		}
+
+// 		terminal.sendText(value);
+// 		// console.log(value);
 
 		
+// 	});
+// }
+
+
+function openQuery() {
+	// Create a new webview panel that overlays the current editor
+	// const panel = vscode.window.createWebviewPanel(
+	// 	'myWebview', // Identifies the type of the webview. Used internally
+	// 	"My Webview", // Title of the panel displayed to the user
+	// 	vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+	// 	{
+	// 		enableScripts: true, // Allow scripts in the webview
+	// 		// preserveFocus: true, // Do not take focus when the webview is shown
+	// 		// preserveFocus: true
+	// 	},
+	// );
+  
+	// // Set the HTML content of the webview panel
+	// panel.webview.html = `
+	
+	// <html>
+	// <body>
+	
+	// <!-- This is a large input text box -->
+	// <input type="text" style="width: 100%; height: 50px;">
+	
+	// </body>
+	// </html>
+
+	// `;
+  
+	// // Show the webview panel
+	// panel.reveal();
+
+	// let uri = new vscode.Uri
+
+	// vscode.window.openTextDocument({
+	// content: 'This is some pre-populated text.'
+	// }).then(doc => {
+	// vscode.window.showTextDocument(doc).then(editor => {
+	// 	// Open the editor in Vim mode
+	// 	vscode.commands.executeCommand('setEditorMode', {
+	// 	editor,
+	// 	mode: 'vim'
+	// 	});
+	// });
+	// });
+
+	// Open a new text editor window and pre-populate it with some text and give it a filename
+
+	// create a new file
+
+	vscode.workspace.fs.writeFile(vscode.Uri.file('test.md'), new Uint8Array([1, 2, 3])).then(() => {
+
+		// open the file in the editor
+		vscode.window.showTextDocument(vscode.Uri.file('test.md'));
 	});
-}
+	
+	
+
+
+  }
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
