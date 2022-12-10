@@ -20,12 +20,12 @@ def generate_diff_prompt(args):
     return f"{GIT_DIFF_PROMPT_PREFIX}\n\n{diff_result}"
 
 
-def generate_prompt_from_files(args, question):
+def generate_prompt_from_files(args, model, question):
     """
     This function is used to generate a prompt based on a question or summarization task
     """
     reference_text_dict = {}
-    {reference_text_dict.update(resolve(reference)) for reference in args.references}
+    {reference_text_dict.update(resolve(reference, model, question)) for reference in args.references}
 
     json_str = json.dumps(reference_text_dict, indent=4)
 
