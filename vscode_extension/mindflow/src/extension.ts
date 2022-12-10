@@ -159,14 +159,22 @@ function openQuery() {
 
 		// console.log(paths);
 
-		let terminal = vscode.window.activeTerminal;
+		// Open an input text box that is overlaying the current editor
+		vscode.window.showInputBox({
+			placeHolder: "Can you summarize this information as thoroughly as possible?",
+			prompt: "What would you like to know about these files?",
+			ignoreFocusOut: true,
+		}).then((queryString) => {
+			let terminal = vscode.window.activeTerminal;
 
-		// If there is no active terminal, create a new one
-		if (!terminal) {
-			terminal = vscode.window.createTerminal();
-		}
+			// If there is no active terminal, create a new one
+			if (!terminal) {
+				terminal = vscode.window.createTerminal();
+			}
 
-		terminal.sendText("mf query \"What is this?\" " + paths?.join(" ") + " -s");
+			terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
+		});
+
 		// console.log(value);
 	});
   }
