@@ -19,7 +19,20 @@ function openTextFileQuery() {
 	let fileName = "_mf_query.mfq";
 	let filePath = path.join(vscode.workspace.workspaceFolders?.[0].uri.path || "", fileName);
 	let fileUri = vscode.Uri.file(filePath);
-	let content = "Can you summarize this information as thoroughly as possible?";
+	let content = `Can you summarize this information as thoroughly as possible?
+
+#########################################################
+# What would you like to know about these files?  		#
+# You can write your query in natural language!   		#
+# Also, you can use the \`@\` symbol to reference 		#
+# specific files!								  		#
+# 											      		#
+# Example Queries:						          		#
+# - What does the file @index.js do?		      		#
+# - Please summarize the @src/ directory.      	  		#
+# - How do the files @setup.py and @README.md relate?   #
+#########################################################
+	`;
 
 	vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(content)).then((value) => {
 		vscode.window.showTextDocument(fileUri, { preview: false }).then((editor) => {
