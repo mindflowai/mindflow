@@ -6,7 +6,10 @@ import sys
 
 import pyperclip
 
-from mindflow.models.chat_gpt import get_chat_gpt
+try:
+    from mindflow.models.chat_gpt import get_chat_gpt
+except:
+    pass
 from mindflow.prompt_generator import generate_diff_prompt
 from mindflow.prompt_generator import generate_prompt_from_files
 from mindflow.utils.git import check_is_git_repo
