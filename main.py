@@ -152,7 +152,7 @@ class MindFlow:
 
     # Alias for question
     def q(self):
-        return self.question()
+        return self.query()
 
 
 def main():
