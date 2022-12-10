@@ -87,6 +87,8 @@ class MindFlow:
     """
 
     def __init__(self):
+        
+        self.model = get_chat_gpt()
         check_is_git_repo()
 
         parser = argparse.ArgumentParser(
@@ -106,18 +108,8 @@ class MindFlow:
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
-    def _handle_prompt(self, args, prompt: str):
-
-        if args.skip_response:
-            if args.skip_clipboard:
-                return
-
-            print("The prompt has been copied to your clipboard!")
-            pyperclip.copy(prompt)
-            return
-
-        model = get_chat_gpt()
-        response = get_response(model, prompt)
+    def _handle_prompt(self, prompt: str):
+        response = get_response(self.model, prompt)
         print(response)
 
     def diff(self):
@@ -132,7 +124,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_diff_prompt(args)
-        self._handle_prompt(args, prompt)
+        self._handle_prompt(prompt)
 
     def query(self):
         """
@@ -147,8 +139,8 @@ class MindFlow:
         _add_reference_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        prompt = generate_prompt_from_files(args, args.question)
-        self._handle_prompt(args, prompt)
+        prompt = generate_prompt_from_files(args, self.model, args.question)
+        self._handle_prompt(prompt)
 
     # Alias for question
     def q(self):
