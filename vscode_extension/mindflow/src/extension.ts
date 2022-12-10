@@ -17,6 +17,17 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from mindflow!');
+
+		// Open a search bar that is overlaying the current editor
+		vscode.window.showInputBox({
+			placeHolder: "Search for a note",
+			prompt: "Search for a note",
+			ignoreFocusOut: true
+		}).then((value) => {
+			// treat the value as a command and execute it in the terminal
+
+			console.log(value);
+		});
 	});
 
 	context.subscriptions.push(disposable);
