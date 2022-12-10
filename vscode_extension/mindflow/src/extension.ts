@@ -1,6 +1,43 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import path = require('path');
+import { TextEncoder } from 'util';
+
+
+function openTextFileQuery() {
+
+	// vscode.workspace.openTextDocument({
+	// 	content: "Can you summarize this information as thoroughly as possible?",
+	// 	language: "plaintext"
+	// }).then((doc) => {
+	// 	vscode.window.showTextDocument(doc).then((editor) => {
+	// 		// editor
+	// 	});
+	// });
+
+	let fileName = "_mf_query.mfq";
+	let filePath = path.join(vscode.workspace.workspaceFolders?.[0].uri.path || "", fileName);
+	let fileUri = vscode.Uri.file(filePath);
+	let content = "Can you summarize this information as thoroughly as possible?";
+
+	vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(content)).then((value) => {
+		vscode.window.showTextDocument(fileUri, { preview: false }).then((editor) => {
+		});
+	});
+
+	vscode.workspace.onDidCloseTextDocument((doc) => {
+		if (!doc) return;
+
+		console.log("Closed a doc", doc.uri.path, filePath)
+
+		const isDoc = doc.uri.path == filePath || doc.uri.path == filePath + ".git";  // i'm not sure why it adds the .git thing...
+		if (isDoc) {
+			console.log("closed THE doc!");
+		}
+	})	
+
+}
 
 
 function openQuery() {
@@ -60,7 +97,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('mindflow.query', openQuery);
+	// let disposable = vscode.commands.registerCommand('mindflow.query', openQuery);
+	let disposable = vscode.commands.registerCommand('mindflow.query', openTextFileQuery);
 
 	context.subscriptions.push(disposable);
 }
