@@ -12,8 +12,8 @@
 	"repository": {
 		"keywords": {
 			"patterns": [{
-				"name": "keyword.control.mfq",
-				"match": "\\b(if|while|for|return)\\b"
+				"name": "variable.parameter.mfq",
+				"match": "\\s(@[\\w|\/|\\.|\\_]+)"
 			}]
 		},
 		"strings": {
