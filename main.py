@@ -8,7 +8,7 @@ import pyperclip
 
 try:
     from mindflow.models.chat_gpt import get_chat_gpt
-except:
+except ImportError:
     pass
 from mindflow.prompt_generator import generate_diff_prompt
 from mindflow.prompt_generator import generate_prompt_from_files

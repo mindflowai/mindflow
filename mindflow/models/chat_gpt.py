@@ -5,7 +5,7 @@ This file is used to load the chat gpt model.
 import json
 import os
 
-from ChatGPT.src.revChatGPT.revChatGPT import Chatbot
+from revChatGPT.revChatGPT import Chatbot
 
 
 def get_chat_gpt():
