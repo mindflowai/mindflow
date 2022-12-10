@@ -106,9 +106,12 @@ class MindFlow:
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
-    def _handle_prompt(self, prompt: str):
-        response = get_response(self.model, prompt)
-        print(response)
+    def _handle_prompt(self, args, prompt: str):
+        if args.skip_response:
+            print(prompt)
+        else:
+            response = get_response(self.model, prompt)
+            print(response)
 
     def diff(self):
         """
@@ -122,7 +125,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_diff_prompt(args)
-        self._handle_prompt(prompt)
+        self._handle_prompt(args, prompt)
 
     def query(self):
         """
@@ -138,7 +141,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_prompt_from_files(args, self.model, args.query)
-        self._handle_prompt(prompt)
+        self._handle_prompt(args, prompt)
 
     # Alias for query
     def q(self):
