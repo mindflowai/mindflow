@@ -17,7 +17,7 @@
     "commands": [
       {
         "command": "mindflow.query",
-        "title": "MindFlow"
+        "title": "MindFlow: File Query"
       }
     ]
   },

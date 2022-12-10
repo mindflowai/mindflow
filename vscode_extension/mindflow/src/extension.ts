@@ -81,6 +81,11 @@ import * as vscode from 'vscode';
 
 
 function openQuery() {
+	// If there is no active terminal, create a new one
+	if (!vscode.window.activeTerminal) {
+		vscode.window.createTerminal();
+	}
+	
 	// Create a new webview panel that overlays the current editor
 	// const panel = vscode.window.createWebviewPanel(
 	// 	'myWebview', // Identifies the type of the webview. Used internally
@@ -128,15 +133,42 @@ function openQuery() {
 
 	// create a new file
 
-	vscode.workspace.fs.writeFile(vscode.Uri.file('test.md'), new Uint8Array([1, 2, 3])).then(() => {
+	// vscode.workspace.fs.writeFile(vscode.Uri.file('test.md'), new Uint8Array([1, 2, 3])).then(() => {
 
-		// open the file in the editor
-		vscode.window.showTextDocument(vscode.Uri.file('test.md'));
+	// 	// open the file in the editor
+	// 	vscode.window.showTextDocument(vscode.Uri.file('test.md'));
+	// });
+	
+	// show open dialog and choose multiple files
+	vscode.window.showOpenDialog({
+		canSelectMany: true,
+		canSelectFolders: false,
+		canSelectFiles: true,
+		openLabel: "Select",
+		// filters: {
+			// 'Images': ['png', 'jpg'],
+			// 'TypeScript': ['ts', 'tsx'],
+			// 'JavaScript': ['js', 'jsx']
+	}).then((value) => {
+		// console.log(value);
+
+		// get the paths of the selected files
+		let paths = value?.map((uri) => {
+			return uri.path;
+		});
+
+		// console.log(paths);
+
+		let terminal = vscode.window.activeTerminal;
+
+		// If there is no active terminal, create a new one
+		if (!terminal) {
+			terminal = vscode.window.createTerminal();
+		}
+
+		terminal.sendText("mf query \"What is this?\" " + paths?.join(" ") + " -s");
+		// console.log(value);
 	});
-	
-	
-
-
   }
 
 // This method is called when your extension is activated
