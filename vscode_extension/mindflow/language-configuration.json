@@ -7,12 +7,13 @@
     },
     // symbols used as brackets
     "brackets": [
-        ["{", "}"],
-        ["[", "]"],
-        ["(", ")"]
+        // ["{", "}"],
+        // ["[", "]"],
+        // ["(", ")"]
     ],
     // symbols that are auto closed when typing
     "autoClosingPairs": [
+        ["@[", "]"],  // special case for referencing files
         ["{", "}"],
         ["[", "]"],
         ["(", ")"],
@@ -21,10 +22,6 @@
     ],
     // symbols that can be used to surround a selection
     "surroundingPairs": [
-        ["{", "}"],
-        ["[", "]"],
-        ["(", ")"],
-        ["\"", "\""],
-        ["'", "'"]
+        ["@[", "]"],
     ]
 }

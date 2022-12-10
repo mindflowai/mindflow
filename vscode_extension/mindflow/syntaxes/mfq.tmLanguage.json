@@ -14,6 +14,9 @@
 			"patterns": [{
 				"name": "variable.parameter.mfq",
 				"match": "\\s(@[\\w|\/|\\.|\\_]+)"
+			}, {
+				"name": "variable.parameter.mfq",
+				"match": "\\s(@\\[.*\\])"
 			}]
 		},
 		"strings": {
