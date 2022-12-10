@@ -4,8 +4,6 @@ This module contains the main CLI for Mindflow.
 import argparse
 import sys
 
-import pyperclip
-
 try:
     from mindflow.models.chat_gpt import get_chat_gpt
 except ImportError:
@@ -30,7 +28,7 @@ mf <command> [<args>]
 The commands available in this CLI are:
 
 diff       Runs a `git diff` and summarizes the changes.
-question   Ask a question using all or a subset of your notes as a reference.
+query      Ask a query using all or a subset of your notes as a reference.
 
 """
 
@@ -117,7 +115,7 @@ class MindFlow:
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
         """
         parser = argparse.ArgumentParser(
-            description="Summarize a note or set of notes.",
+            description="Summarize a git diff.",
         )
 
         _add_diff_args(parser)
@@ -128,21 +126,21 @@ class MindFlow:
 
     def query(self):
         """
-        This function is used to ask a custom question about any number of files and folders.
+        This function is used to ask a custom question about any number of files, folders, and websites.
         """
         parser = argparse.ArgumentParser(
-            description="Ask a custom question about your notes.",
+            description="This command is use to query files, folders, and websites.",
         )
 
-        parser.add_argument("question", type=str, help="The question to ask.")
+        parser.add_argument("query", type=str, help="The query you want to make on some data.")
 
         _add_reference_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        prompt = generate_prompt_from_files(args, self.model, args.question)
+        prompt = generate_prompt_from_files(args, self.model, args.query)
         self._handle_prompt(prompt)
 
-    # Alias for question
+    # Alias for query
     def q(self):
         return self.query()
 

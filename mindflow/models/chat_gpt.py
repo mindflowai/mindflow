@@ -12,12 +12,10 @@ def get_chat_gpt():
     """
     Get the chat gpt model.
     """
-    path = os.environ["CHAT_GTP_CONFIG_FILE_PATH"]
+    path = os.environ["CHAT_GPT_CONFIG_FILE_PATH"]
     with open(path, "r", encoding="utf-8") as file:
         config = json.load(file)
 
     model = Chatbot(config)
-    if "session_token" in config:
-        model.refresh_session()
 
     return model
