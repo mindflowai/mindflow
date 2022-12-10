@@ -16,8 +16,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "mindflow.helloWorld",
-        "title": "Hello World"
+        "command": "mindflow.query",
+        "title": "MindFlow"
       }
     ]
   },
