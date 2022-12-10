@@ -13,6 +13,11 @@ from mindflow.utils.response import get_response
 MAX_LENGTH = 20_000
 FILES_RETURNED_IF_OVER_MAX = 3
 
+
+def preprocess_file_text(text):
+    return text.strip().replace("\n", " ")
+
+
 class PathResolver(BaseResolver):
     """
     Resolver for file or directory paths to text.
@@ -36,23 +41,25 @@ class PathResolver(BaseResolver):
 
         # Execute the git diff command and retrieve the output as a string
         if os.path.isdir(self.reference):
-            #print(subprocess.check_output(command).decode("utf-8").split("\n"))
-    
-            git_files = subprocess.check_output(command).decode("utf-8").split("\n")[:-1]
-            
-            def criteria(file): 
+            # print(subprocess.check_output(command).decode("utf-8").split("\n"))
+
+            git_files = (
+                subprocess.check_output(command).decode("utf-8").split("\n")[:-1]
+            )
+
+            def criteria(file):
                 try:
-                    return chardet.detect(open(file, "rb").read())["encoding"] in ["utf-8", "ascii"]
+                    return chardet.detect(open(file, "rb").read())["encoding"] in [
+                        "utf-8",
+                        "ascii",
+                    ]
                 except:
                     return False
 
             return list(filter(criteria, git_files))
-                
-                
+
         return [self.reference]
 
-
-    
     def _files_over_max_length(self) -> bool:
         """
         Validates that the total length/size of the files is less than MAX_LENGTH.
@@ -65,20 +72,18 @@ class PathResolver(BaseResolver):
         if total_size > MAX_LENGTH:
             print("Searching relevant files...")
             return True
-        
+
         return False
-    
-    def _query_and_trim_files(self): 
-        """
-        
-        """
+
+    def _query_and_trim_files(self):
+        """ """
         prompt = f"Can you please make your best guess for the top 3 most relevant files below for answering the question `{self.prompt}`?\n\n{' '.join(self.files)}"
         response = get_response(self.model, prompt)
 
         levenshteins = []
-        for file in self.files: 
+        for file in self.files:
             levenshteins.append(Levenshtein.distance(file, response))
-        
+
         # Get index and value for each element in the list of Levenshtein distances
         indexed_list = list(enumerate(levenshteins))
 
@@ -86,7 +91,10 @@ class PathResolver(BaseResolver):
         sorted_list = sorted(indexed_list, key=lambda x: x[1], reverse=True)
 
         # Take the first three elements of the sorted list
-        top_indices = [x[0] for x in sorted_list[:min(self.max_files_if_over_length, len(self.files))]]
+        top_indices = [
+            x[0]
+            for x in sorted_list[: min(self.max_files_if_over_length, len(self.files))]
+        ]
 
         self.files = [self.files[i] for i in top_indices]
 
@@ -100,12 +108,12 @@ class PathResolver(BaseResolver):
         """
         Extract text from files.
         """
+        proc = lambda file: preprocess_file_text(
+            open(file, encoding="utf-8", errors="ignore").read()
+        )
         return {
             file: {
-                "text": open(file, encoding="utf-8", errors="ignore")
-                .read()
-                .strip()
-                .replace("\n", " "),
+                "text": proc(file),
                 "type": "path",
             }
             for file in self.files

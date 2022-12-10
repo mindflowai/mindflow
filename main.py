@@ -85,7 +85,7 @@ class MindFlow:
     """
 
     def __init__(self):
-        
+
         self.model = get_chat_gpt()
         check_is_git_repo()
 
@@ -135,7 +135,9 @@ class MindFlow:
             description="This command is use to query files, folders, and websites.",
         )
 
-        parser.add_argument("query", type=str, help="The query you want to make on some data.")
+        parser.add_argument(
+            "query", type=str, help="The query you want to make on some data."
+        )
 
         _add_reference_args(parser)
 

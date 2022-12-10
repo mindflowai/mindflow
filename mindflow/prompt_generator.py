@@ -26,17 +26,20 @@ def generate_prompt_from_files(args, model, user_query: str):
     """
     This function is used to generate a prompt based on a question or summarization task
     """
-    reference_text_dict = {}
 
+    reference_text_dict = {}
     refs = set(args.references)
 
     if MFQ_FILE in refs:
         # When an MFQ_FILE is passed, this is a special case of the query command.
-        q = MindFlowQueryHandler(user_query, refs)
-        prompt = q.get_prompt()
-    else:
-        {reference_text_dict.update(resolve(reference, model, user_query)) for reference in refs}
-        context_prompt = json.dumps(reference_text_dict, indent=4)
-        prompt = f"{user_query}\n\n{context_prompt}"
+        q = MindFlowQueryHandler(user_query, refs, model)
+        user_query, refs = q.parse_query()
+
+    {
+        reference_text_dict.update(resolve(reference, model, user_query))
+        for reference in refs
+    }
+    context_prompt = json.dumps(reference_text_dict, indent=4)
+    prompt = f"{user_query}\n\n{context_prompt}"
 
     return prompt

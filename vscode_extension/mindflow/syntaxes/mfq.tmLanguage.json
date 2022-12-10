@@ -13,7 +13,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "variable.parameter.mfq",
-				"match": "(@[\\w|\/|\\.|\\_]+)"
+				"match": "(@[\\w|\/|\\.|\\_\\-]+)"
 			}, {
 				"name": "variable.parameter.mfq",
 				"match": "(@\\[.*\\])"
