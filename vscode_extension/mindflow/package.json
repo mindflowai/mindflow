@@ -17,8 +17,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "mindflow.query",
-        "title": "MindFlow: File Query"
+        "command": "mindflow.query.write",
+        "title": "MindFlow: Write Query"
+      },
+      {
+        "command": "mindflow.query.run",
+        "title": "MindFlow: Run Query"
       }
     ],
     "languages": [{

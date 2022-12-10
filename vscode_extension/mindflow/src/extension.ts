@@ -5,20 +5,17 @@ import path = require('path');
 import { TextEncoder } from 'util';
 
 
-function openTextFileQuery() {
+function getQueryUri(): vscode.Uri {
+	const fileName = "_mf_query.mfq";
+	const filePath = path.join(vscode.workspace.workspaceFolders?.[0].uri.path || "", fileName);
+	const fileUri = vscode.Uri.file(filePath);
+	return fileUri;
+}
 
-	// vscode.workspace.openTextDocument({
-	// 	content: "Can you summarize this information as thoroughly as possible?",
-	// 	language: "plaintext"
-	// }).then((doc) => {
-	// 	vscode.window.showTextDocument(doc).then((editor) => {
-	// 		// editor
-	// 	});
-	// });
 
-	let fileName = "_mf_query.mfq";
-	let filePath = path.join(vscode.workspace.workspaceFolders?.[0].uri.path || "", fileName);
-	let fileUri = vscode.Uri.file(filePath);
+function writeQueryFile(): vscode.Uri {
+	const fileUri = getQueryUri();
+
 	let content = `Can you summarize this information as thoroughly as possible?
 
 #########################################################
@@ -35,9 +32,16 @@ function openTextFileQuery() {
 	`;
 
 	vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(content)).then((value) => {
-		vscode.window.showTextDocument(fileUri, { preview: false }).then((editor) => {
-		});
+		vscode.window.showTextDocument(fileUri, { preview: false });
 	});
+
+	return fileUri;
+}
+
+
+function openTextFileQuery() {
+	const fileUri = writeQueryFile();
+	const filePath = fileUri.path;
 
 	vscode.workspace.onDidCloseTextDocument((doc) => {
 		if (!doc) return;
@@ -50,6 +54,28 @@ function openTextFileQuery() {
 		}
 	})	
 
+}
+
+
+function runTextFileQuery() {
+	// vscode.languages.typesc
+
+	// vscode.languages.getLanguages().then((value) => {
+	// 	// value.forEach((lang) => {
+	// 	// 	console.log(lang);
+	// 	// });
+
+	// 	// get the "mindflow" language
+	// 	const mindflowLang = value.find((lang) => {
+	// 		return lang == "mfq";
+	// 	});
+	// });
+
+	// vscode.workspace.fs.readFile(getQueryUri()).then((value) => {
+	// 	console.log(value);
+	// });
+
+	
 }
 
 
@@ -137,9 +163,12 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	// let disposable = vscode.commands.registerCommand('mindflow.query', openQuery);
-	let disposable = vscode.commands.registerCommand('mindflow.query', openTextFileQuery);
 
-	context.subscriptions.push(disposable);
+	const openQuery = vscode.commands.registerCommand('mindflow.query.write', openTextFileQuery);
+	const runQuery = vscode.commands.registerCommand('mindflow.query.run', runTextFileQuery);
+
+	context.subscriptions.push(openQuery);
+	context.subscriptions.push(runQuery);
 }
 
 // This method is called when your extension is deactivated
