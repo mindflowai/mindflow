@@ -5,3 +5,5 @@ __pycache__/*
 config.json
 .DS_Store
 *config.ini
+build/*
+dist/*
