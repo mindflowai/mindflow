@@ -97,8 +97,6 @@ class PathResolver(BaseResolver):
         
     def _attempt_trim_files(self, prompt, sub_index: dict):
         for _ in range(MAX_INDEX_RETRIES):
-
-            # Get files from response
             response = get_response(self.model, prompt)
             files = response.split('\n')
             

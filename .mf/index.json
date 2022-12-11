@@ -62,5 +62,69 @@
   "mindflow/utils/validation.py": {
     "hash": "aaaca43c4c3848291aba0140aa1fa5aa423694a2e3bb8d85971dcf1b05049454",
     "index": "The module contains validation functions that check if the total length of files is less than a maximum length value."
+  },
+  "vscode_extension/mindflow/.eslintrc.json": {
+    "hash": "f9d5e0dbbe18070ff7c6e125fcf9a7e24611cfde008b32faa33aee72b9996b3d",
+    "index": "This file is a configuration file for the linting tool ESLint. It specifies the parser to use, parser options, plugins, rules, and files to ignore when linting."
+  },
+  "vscode_extension/mindflow/.gitignore": {
+    "hash": "d86d936b5aca66dae66f54d7db03853fe8f9528c2245b005ac9ecdf3f94bb0aa",
+    "index": "This file is a list of file paths to exclude from a project. It includes all files in the `node_modules` directory, the `package-lock.json` file, and all files in the `out` directory."
+  },
+  "vscode_extension/mindflow/.vscode/extensions.json": {
+    "hash": "14fd32798e8cf876d70480bc882aed7a09bcf599a03d64db561adaa1d6096602",
+    "index": "This file is a configuration file for the Visual Studio Code editor. It specifies recommendations for editor extensions, in this case recommending the \"dbaeumer.vscode-eslint\" extension."
+  },
+  "vscode_extension/mindflow/.vscode/launch.json": {
+    "hash": "a1fff6b7ce0128a357ec1eea901637a85c0b7ef74629549a1c90f646c587d32e",
+    "index": "This file is a configuration file for the Visual Studio Code editor. It contains launch configurations for running and testing an extension. It specifies settings such as the name, type, arguments, and task to run before launching the extension."
+  },
+  "vscode_extension/mindflow/.vscode/settings.json": {
+    "hash": "1675fe797f525e9ea64cfaf72425f0e0981b2c3fff02f399ac6788b6434b665a",
+    "index": "This file is a configuration file for the Visual Studio Code editor. It specifies settings such as which files to exclude from the editor and from search results, and it turns off automatic detection of TypeScript tasks."
+  },
+  "vscode_extension/mindflow/.vscode/tasks.json": {
+    "hash": "cecd0f8f99d153170ca1e1bee74141da11f7c47bfe0932078ad7c0c187c4c434",
+    "index": "This file is a configuration file for the Visual Studio Code editor. It specifies a task to run using the `npm` command. The task is set to run in the background and is grouped under the \"build\" category. The task is specified using the `script` property, and the `problemMatcher` property specifies which problem matcher to use when running the task."
+  },
+  "vscode_extension/mindflow/.vscodeignore": {
+    "hash": "99217d86d6cea3a008e1e48daf1fc51421b0ff5f0e2b55607652cabaa24a6c6b",
+    "index": "This file is a list of file paths to exclude from a project. It includes all files and directories in the `.vscode` and `.vscode-test` directories, all files in the `src` directory, and various configuration files, such as `.gitignore`, `.yarnrc`, and `tsconfig.json`. It also includes all files with the `.map` and `.ts` file extensions."
+  },
+  "vscode_extension/mindflow/CHANGELOG.md": {
+    "hash": "b03fd7a1775510d5e820bb5772613aba8391be9c1abd4a8e0ee88baca657f905",
+    "index": "This file is a changelog for the \"mindflow\" extension. It lists notable changes to the extension, with the most recent changes listed under the \"Unreleased\" heading. The file follows the recommendations of the \"Keep a Changelog\" document."
+  },
+  "vscode_extension/mindflow/README.md": {
+    "hash": "09d3e7f98ca57d31f1e609402c840cb560fb9260650014c4f616c22e9965b736",
+    "index": "This file is a README for the \"mindflow\" extension for the Visual Studio Code editor. It provides an overview of the extension's features, requirements, settings, and known issues. It also includes release notes and instructions for working with Markdown."
+  },
+  "vscode_extension/mindflow/language-configuration.json": {
+    "hash": "ec9b236bbd36cf1494068d8d3e1c67deb671eaa69fede4b70ccc614a7e865c86",
+    "index": "This file is a configuration file for the Visual Studio Code editor. It specifies settings for comments, brackets, and auto-closing and surrounding pairs for the language the file is associated with. These settings determine how the editor will handle language-specific syntax when editing a file."
+  },
+  "vscode_extension/mindflow/package.json": {
+    "hash": "2a77cb03100df9d002ebe4439f14aab1c79c556c17c9322347c045456b4c2794",
+    "index": "This file is a package manifest for an extension for the Visual Studio Code editor. It specifies metadata for the extension, such as its name, description, and version, as well as its dependencies and scripts. It also defines the extension's activation events, and contributes commands, languages, and grammars to the editor."
+  },
+  "vscode_extension/mindflow/src/extension.ts": {
+    "hash": "3538d39a66899b0250d66de5210f025826704a4fb278548b1a3349d746b99e65",
+    "index": "The file contains code that creates a query file, writes a query to it, and sends the query to a terminal using the `mf` command. It also includes a function to open the query file in a text editor and a function to handle the closing of the query file."
+  },
+  "vscode_extension/mindflow/src/test/runTest.ts": {
+    "hash": "19d3aeb6cf0da4dc150243d9f5399a91eb4d7d13d5aa94e64ebe79250a46f7c6",
+    "index": "This file contains a script that runs tests for a VS Code extension. It imports the `runTests` function from the `@vscode/test-electron` module and uses it to run the tests in the `./suite/index` directory. The script also specifies the path to the extension's manifest file (`package.json`) and the path to the test runner."
+  },
+  "vscode_extension/mindflow/src/test/suite/extension.test.ts": {
+    "hash": "01620e51ccb2919d33fdedb05ccc005a27d55ab92e107c894eda4edc1c781f88",
+    "index": "This file contains a test suite for a VS Code extension. The suite contains a single test that uses the `assert` module to test whether certain values are included in an array. The test suite uses the `vscode` module to display a message in the VS Code window."
+  },
+  "vscode_extension/mindflow/src/test/suite/index.ts": {
+    "hash": "303598a15f6d31dcc4e29c20702b085490dd039577d3ca2f7914d011d5c9d4f9",
+    "index": "This file contains a script that runs tests using the Mocha test framework. The script uses the `glob` module to find all files ending in `.test.js` in the `testsRoot` directory, and adds them to a Mocha test suite. It then runs the test suite and returns a promise that resolves if all tests pass, or rejects if any tests fail. The script uses the `mocha` module to create and configure the test suite, and the `path` module to work with file paths."
+  },
+  "vscode_extension/mindflow/syntaxes/mfq.tmLanguage.json": {
+    "hash": "7ce9daa6e359538621c2fdd4b9f48b2fa00b1f559389343d8bbac94aa3f4a3f9",
+    "index": "This file is a JSON-formatted syntax definition file for the MindFlow Query language. It specifies the syntax and structure of the language using regular expressions, and defines the scope and names of different language elements, such as keywords and strings. The file is used by text editors and other tools to enable syntax highlighting and other language-aware features for MindFlow Query."
   }
 }

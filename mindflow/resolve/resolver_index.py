@@ -10,7 +10,8 @@ import hashlib
 
 import git
 
-MAX_INDEX_RETRIES = 3
+
+MAX_INDEX_RETRIES = 5
 
 
 class ResolverIndex:
@@ -52,9 +53,21 @@ class ResolverIndex:
         """
         for _ in range(MAX_INDEX_RETRIES):
             try:
-                return get_response(self.model, prompt)
+                response = get_response(self.model, prompt)
+                return response
+
             except IndexGenerationFailure:
+                # index generation failure, allow to pass
                 pass
+
+            except Exception:
+                # NOTE! THIS IS A HACK!!!
+                # trim the prompt length with each failure to at least try to get a response
+                percent_left_after_trim = 0.75
+                assert percent_left_after_trim < 1 and percent_left_after_trim > 0
+                max_characters = max(10, int(len(prompt) * percent_left_after_trim))
+                print(f"Failed to get response, trimming prompt length from {len(prompt)} to {max_characters}")
+                prompt = prompt[:max_characters]
 
         raise IndexGenerationFailure(f"Failed to generate an index after {MAX_INDEX_RETRIES} tries.")
 
