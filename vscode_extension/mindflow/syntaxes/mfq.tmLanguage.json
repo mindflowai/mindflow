@@ -12,11 +12,14 @@
 	"repository": {
 		"keywords": {
 			"patterns": [{
-				"name": "variable.parameter.mfq",
+				"name": "variable.parameter",
 				"match": "(@[\\w|\/|\\.|\\_\\-]+)"
 			}, {
-				"name": "variable.parameter.mfq",
+				"name": "variable.parameter",
 				"match": "(@\\[.*\\])"
+			}, {
+				"name": "entity.name.function",
+				"match": "\\git\\-diff"
 			}]
 		},
 		"strings": {
