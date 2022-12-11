@@ -18,9 +18,11 @@ from mindflow.utils.exceptions.index_failure import FailureToTrimFiles, IndexGen
 from mindflow.utils.response import get_response
 
 from mindflow.resolve.resolver_index import ResolverIndex, MAX_INDEX_RETRIES
+from time import sleep
 
 MAX_LENGTH = 10_000
 FILES_RETURNED_IF_OVER_MAX = 5
+SLEEP_SECONDS = 5
 
 
 def preprocess_file_text(text):
@@ -109,7 +111,9 @@ class PathResolver(BaseResolver):
                 self.files = files
                 return
 
-        raise FailureToTrimFiles("Error in getting valid response from GPT, can you please re-formulate your query?")
+            sleep(SLEEP_SECONDS)
+
+        raise FailureToTrimFiles("Error in getting valid response from GPT, can you please re-formulate your query? Model returned: " + response)
 
     def should_resolve(self) -> bool:
         """
