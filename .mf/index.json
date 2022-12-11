@@ -4,8 +4,8 @@
     "index": "\"BaseModel: class for all language models with methods for initialization, getting response, and logging in.\""
   },
   "mindflow/models/chat_gpt.py": {
-    "hash": "6d6ef68cff1fcc27ce4388bf75df8be9b5d976207c26bc784837be3e29986149",
-    "index": "File loads Chatbot class from revChatGPT module to create and return a chatbot instance."
+    "hash": "b0876eb0fff6732e82201467228d4d397f2e3e25a10544bed704ff4e8061b95a",
+    "index": "This file is used to load a chatbot model. It contains functions to import modules and access a Chatbot object with specified login credentials. The chatbot may throw a value error if it fails to load."
   },
   "mindflow/prompt_generator.py": {
     "hash": "d9b3afa653fa5f052443cd7dca053ffdf5fc608e8aee8d35c71a6b01e256900e",
@@ -27,6 +27,10 @@
     "hash": "43ecfae6d215f16ba5ded992d75b442a0cc65fd34336a3a40dc683698da741ed",
     "index": "\"BaseResolver: base class for resolving references to text with should_resolve and resolve methods.\""
   },
+  "mindflow/resolve/resolvers/path_resolver.py": {
+    "hash": "2ee4aa0d6d45011d9287ff7df6f85dc097004a7e238c6be81f938fc962161526",
+    "index": "This file defines a `PathResolver` class that can be used to resolve file or directory paths to text. It contains methods for filtering and trimming files, as well as generating a sub-index of file paths and descriptions. It also has a `should_resolve` method to check if a path is valid, and a `get_response` method that returns the resolved text."
+  },
   "mindflow/resolve/resolvers/url_resolver.py": {
     "hash": "950e9d3c66ac31f88399668655f33886bbba019ac2737222e4579788faf1599a",
     "index": "The file defines a URLResolver class that resolves URLs to text by parsing and cleaning the HTML content of a website. The class has methods to check if a string is a valid URL and to return the cleaned text from the website."
@@ -42,6 +46,10 @@
   "mindflow/utils/git.py": {
     "hash": "ac282e0bb432df451eff1f2123210789d8150eef6708c3edd120a047b50c97cf",
     "index": "This file contains functions for interacting with Git, including checking if the current directory is within a Git repository and getting the username of the current Git user."
+  },
+  "mindflow/utils/login_credentials.py": {
+    "hash": "442ee6d74754380cb7369ba60f199f0c9c4c5eb3a4a6cff4614860f430ff7a97",
+    "index": "This file contains a `get_login_credentials` function that reads or prompts the user for their email, password, and session token and saves the configuration to a file. It returns a dictionary containing the login credentials."
   },
   "mindflow/utils/prompts.py": {
     "hash": "b607296daf558bc7ea532297f6352b9521f0269cc2f7968f59ac6cd1f35721f3",
