@@ -101,17 +101,22 @@ class PathResolver(BaseResolver):
         for _ in range(MAX_INDEX_RETRIES):
             response = get_response(self.model, prompt)
             files = response.split('\n')
-            
-            # Remove codeblock separators (at the beginning and end there are ```s)
-            files.pop(0)
-            files.pop(-1)
 
-            # sanity check: make sure the response is correct, otherwise r
-            if all(file in sub_index for file in files):
-                self.files = files
-                return
+            if len(files) >= 3:
+                # Remove codeblock separators (at the beginning and end there are ```s)
+                files.pop(0)
+                files.pop(-1)
+
+                # sanity check: make sure the response is correct, otherwise r
+                if all(file in sub_index for file in files):
+                    self.files = files
+                    return
 
             sleep(SLEEP_SECONDS)
+
+        print(files)
+
+        print(sub_index)
 
         raise FailureToTrimFiles("Error in getting valid response from GPT, can you please re-formulate your query? Model returned: " + response)
 

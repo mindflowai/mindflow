@@ -14,10 +14,9 @@ def get_chat_gpt(login_credentials):
     """
 
     try:
-        model = Chatbot(login_credentials)
+        return Chatbot(login_credentials)
     except ValueError as e:
         if hasattr(e, "message"):
             print(e.message)
         print("\n\nChat GPT API Failure occured. If using a session token, it may have expired so try updating it.")
-
-    return model
+        exit(1)

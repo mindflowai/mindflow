@@ -11,6 +11,7 @@ from mindflow.resolve.resolve import resolve
 MFQ_FILE = "_mf_query.mfq"
 
 FILE_REF_REGEXES = [r"(@[\w|\/|\.|\_\-]+)", r"(@\[.*\])"]
+GIT_REF_REGEX = r"git\-diff"
 
 
 class MindFlowQueryHandler:
@@ -46,8 +47,17 @@ class MindFlowQueryHandler:
         parsed_query = re.sub(r"#.*", "", self.query)
 
         # then, we need to parse the `@` references in the text
-        refs = set()
+        file_refs = set()
+        
         for regex in FILE_REF_REGEXES:
-            refs.update(re.findall(regex, parsed_query))
-        refs = set(map(lambda x: x[1:], refs))
-        return parsed_query, refs
+            file_refs.update(re.findall(regex, parsed_query))
+        file_refs = set(map(lambda x: x[1:], file_refs))  # NOTE: remove the `@` from the reference
+
+        all_refs = set()
+        all_refs.update(file_refs)
+
+        # then, we need to parse the `git-diff` references in the text
+        all_refs.update(re.findall(GIT_REF_REGEX, parsed_query))
+
+        print(all_refs)
+        return parsed_query, all_refs
