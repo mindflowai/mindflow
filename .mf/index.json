@@ -1,1 +1,54 @@
-{"main.py": {"index": "This file is a CLI for Mindflow, a command line tool for intelligent development and collaboration. It contains two commands: `diff` and `query`. The `diff` command generates a git diff and uses it as a prompt for GPT bot. The `query` command allows the user to ask a custom question about any number of files, folders, and websites.", "hash": "9c353136acb2658626d6ece87757974cdd7334cde60e4385079498ce3aede607"}, "mindflow/models/base_model.py": {"index": "\"Class for base model with initialization and methods for response and login.\"", "hash": "80fbc5008d23c77fb26e2368e3d2544ae33cd6075f414ca57c31f176d0738396"}, "mindflow/models/chat_gpt.py": {"index": "\"Script for loading Chat GPT model with configuration from environment variable.\"", "hash": "9900ccf6d0ab61074ae33c2a9b447c3c7ae6b036c9f364192c4accfcb1d0c447"}, "mindflow/prompt_generator.py": {"index": "\"Module with functions for generating chatbot prompts based on git diff and input files.\"", "hash": "e5f43d7ce609c67fad54ff5690e141bf89998425dcbae5bc4d6258cabac36b17"}, "mindflow/resolve/resolve.py": {"index": "\"Function for resolving references to text using path and URL resolvers.\"", "hash": "33bdcbd68023f128bd686d6d8f310cc3d207335391e6c75990349de40416a4ef"}, "mindflow/resolve/resolvers/base_resolver.py": {"index": "\"Base class for resolvers with methods for checking validity and resolving references to text.\"", "hash": "43ecfae6d215f16ba5ded992d75b442a0cc65fd34336a3a40dc683698da741ed"}, "mindflow/resolve/resolvers/path_resolver.py": {"index": "\"Resolver class for file/directory paths to text with methods for generating indices and querying files.\"", "hash": "c8fab03395cd28022056c47e415e071a2193e868b433e9f82c271e687bc142d9"}, "mindflow/resolve/resolvers/url_resolver.py": {"index": "\"Resolver class for URLs to text with methods for checking validity and resolving references to text.\"", "hash": "950e9d3c66ac31f88399668655f33886bbba019ac2737222e4579788faf1599a"}, "mindflow/tests/cli_test.py": {"index": "\"Test functions for running `mf` commands with sample input and checking the output.\"", "hash": "39825242286ac84fce0ef00fc2e79e6f8e3773bb5374b388bdff85322a5df396"}, "mindflow/utils/git.py": {"index": "\"Module with functions for checking if in a git repository and getting git username.\"", "hash": "ac282e0bb432df451eff1f2123210789d8150eef6708c3edd120a047b50c97cf"}, "mindflow/utils/prompts.py": {"index": "\"Module with constant for prefix used in git diff prompt for CLI.\"", "hash": "b607296daf558bc7ea532297f6352b9521f0269cc2f7968f59ac6cd1f35721f3"}, "mindflow/utils/response.py": {"index": "\"Function for getting a response from a chatbot model.\"", "hash": "64d0a17bcb23e8cae7613be04b77fd4d21904e1c6970ce35a75d93394e479dd6"}, "mindflow/utils/validation.py": {"index": "\"Module with functions for validating input, such as checking total length of input files.\"", "hash": "aaaca43c4c3848291aba0140aa1fa5aa423694a2e3bb8d85971dcf1b05049454"}}
+{
+  "mindflow/models/base_model.py": {
+    "hash": "80fbc5008d23c77fb26e2368e3d2544ae33cd6075f414ca57c31f176d0738396",
+    "index": "\"Base class for all language models, with methods for initializing, getting chat response, and logging in.\""
+  },
+  "mindflow/models/chat_gpt.py": {
+    "hash": "9900ccf6d0ab61074ae33c2a9b447c3c7ae6b036c9f364192c4accfcb1d0c447",
+    "index": "\"Loads the chat gpt model using a config file.\""
+  },
+  "mindflow/prompt_generator.py": {
+    "hash": "e49a603fa76ef42894a04e243b3e284d5ebb730647fa6eff47b21a1b94396dcc",
+    "index": "\"Generates a chatbot prompt using git diff or a user query and optional reference files.\""
+  },
+  "mindflow/query/mfq.py": {
+    "hash": "a99ff3d88a664950158a169dddcfe3c34da0c6d0af4b05476cfa0c464547ba68",
+    "index": "\"Parses and validates a user query and reference file(s) passed to the `mf query` command.\""
+  },
+  "mindflow/resolve/resolve.py": {
+    "hash": "33bdcbd68023f128bd686d6d8f310cc3d207335391e6c75990349de40416a4ef",
+    "index": "\"Resolves a reference to text using path and URL resolvers.\""
+  },
+  "mindflow/resolve/resolvers/base_resolver.py": {
+    "hash": "43ecfae6d215f16ba5ded992d75b442a0cc65fd34336a3a40dc683698da741ed",
+    "index": "\"Base class for resolving references to text, with methods for checking if a string is a valid reference and resolving it to text.\""
+  },
+  "mindflow/resolve/resolvers/path_resolver.py": {
+    "hash": "78785af19ac2e027cfb004cfb00781935065ecd8863d83db9d2f952637f76106",
+    "index": "This script provides a class `ResolverIndex` that generates an index for a file using a given model. The index is a condensed string that can serve as an index for the file's contents. The `generate_single_index` method attempts to generate the index for a file by passing the file's contents to a model as a prompt. If the model fails to generate an index, the method will retry up to 3 times before raising an error. The `generate_all_indexes` method generates indexes for a list of files, writing the indexes to a JSON file for future reference. The `PathResolver` class uses the `ResolverIndex` class to generate indexes for files in a given directory or subdirectories."
+  },
+  "mindflow/resolve/resolvers/url_resolver.py": {
+    "hash": "950e9d3c66ac31f88399668655f33886bbba019ac2737222e4579788faf1599a",
+    "index": "\"Resolves URLs to text using BeautifulSoup.\""
+  },
+  "mindflow/tests/cli_test.py": {
+    "hash": "39825242286ac84fce0ef00fc2e79e6f8e3773bb5374b388bdff85322a5df396",
+    "index": "\"Tests the `mf diff` and `mf query` command line interface commands.\""
+  },
+  "mindflow/utils/git.py": {
+    "hash": "ac282e0bb432df451eff1f2123210789d8150eef6708c3edd120a047b50c97cf",
+    "index": "\"Contains functions for interacting with git, including checking if a repository exists and getting the current git user's username.\""
+  },
+  "mindflow/utils/prompts.py": {
+    "hash": "b607296daf558bc7ea532297f6352b9521f0269cc2f7968f59ac6cd1f35721f3",
+    "index": "The file contains a prompt that is used in the CLI when a git diff is being performed. The prompt asks the user to explain the changes in bullet points."
+  },
+  "mindflow/utils/response.py": {
+    "hash": "64d0a17bcb23e8cae7613be04b77fd4d21904e1c6970ce35a75d93394e479dd6",
+    "index": "The \"get_response\" function gets a response from a chatbot model based on a given prompt. It prints a \"please wait\" message and tries to get the response from the model. If it encounters a ValueError, it prints an error message and exits with status code 1. If it successfully gets a response from the model, it erases the \"please wait\" message and returns the response."
+  },
+  "mindflow/utils/validation.py": {
+    "hash": "aaaca43c4c3848291aba0140aa1fa5aa423694a2e3bb8d85971dcf1b05049454",
+    "index": "The module contains validation functions that check if the total length of files is less than a maximum length value."
+  }
+}
