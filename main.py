@@ -4,6 +4,8 @@ This module contains the main CLI for Mindflow.
 import argparse
 import sys
 
+from mindflow.utils.login_credentials import get_login_credentials
+
 try:
     from mindflow.models.chat_gpt import get_chat_gpt
 except ImportError:
@@ -85,8 +87,7 @@ class MindFlow:
     """
 
     def __init__(self):
-
-        self.model = get_chat_gpt()
+        self.login_credentials = get_login_credentials()
         check_is_git_repo()
 
         parser = argparse.ArgumentParser(
@@ -117,6 +118,7 @@ class MindFlow:
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
         """
+        self.model = get_chat_gpt(self.login_credentials)
         parser = argparse.ArgumentParser(
             description="Summarize a git diff.",
         )
@@ -131,6 +133,7 @@ class MindFlow:
         """
         This function is used to ask a custom question about any number of files, folders, and websites.
         """
+        self.model = get_chat_gpt(self.login_credentials)
         parser = argparse.ArgumentParser(
             description="This command is use to query files, folders, and websites.",
         )
@@ -144,6 +147,12 @@ class MindFlow:
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_prompt_from_files(args, self.model, args.query)
         self._handle_prompt(args, prompt)
+    
+    def config(self):
+        """
+        This function is used to ask a custom question about any number of files, folders, and websites.
+        """
+        get_login_credentials(create_new=True)
 
     # Alias for query
     def q(self):
