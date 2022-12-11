@@ -50,5 +50,9 @@
   "mindflow/utils/validation.py": {
     "hash": "aaaca43c4c3848291aba0140aa1fa5aa423694a2e3bb8d85971dcf1b05049454",
     "index": "The module contains validation functions that check if the total length of files is less than a maximum length value."
+  },
+  "setup.py": {
+    "hash": "0fa55d015f369b2ab6a209ae52f0f03b5595b39e2aa31a78690e1ffd9bc40558",
+    "index": "Setup script for mindflow package with version 1.0.0, requiring requests, revChatGPT, bs4, chardet, pyperclip, and gitpython packages."
   }
 }
