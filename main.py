@@ -112,7 +112,11 @@ class MindFlow:
             print(prompt)
         else:
             response = get_response(self.model, prompt)
+            print("\n\n\n\n")
+            print("----------------RESPONSE FROM MODEL----------------")
             print(response)
+            print("---------------------------------------------------")
+            print("\n")
 
     def diff(self):
         """
