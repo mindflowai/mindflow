@@ -16,6 +16,11 @@ def get_chat_gpt():
     with open(path, "r", encoding="utf-8") as file:
         config = json.load(file)
 
-    model = Chatbot(config)
+    try:
+        model = Chatbot(config)
+    except ValueError as e:
+        if hasattr(e, "message"):
+            print(e.message)
+        print("\n\nChat GPT API Failure occured. If using a session token, it may have expired so try updating it.")
 
     return model
