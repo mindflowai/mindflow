@@ -8,14 +8,9 @@ import os
 from revChatGPT.revChatGPT import Chatbot
 
 
-def get_chat_gpt():
+def get_chat_gpt(login_credentials):
     """
     Get the chat gpt model.
     """
-    path = os.environ["CHAT_GPT_CONFIG_FILE_PATH"]
-    with open(path, "r", encoding="utf-8") as file:
-        config = json.load(file)
-
-    model = Chatbot(config)
-
+    model = Chatbot(login_credentials)
     return model
