@@ -45,35 +45,7 @@ class ResolverIndex:
     def get_file_index_description(self, file):
         file_contents = open(file, encoding="utf-8", errors="ignore").read().strip().replace("\n", " ")
         prompt = f"Pretend you are a search engine trying to provide an information rich yet condensed string that can serve as an index for the contents of a file. I want you to respond in as few words as possible while still conveying the contents of this file.\n\n{file_contents}"
-        return self._attempt_index_generation(prompt)
-    
-    def _attempt_index_generation(self, prompt):
-        """
-        Attempts to generate an index for a file.
-        """
-        for _ in range(MAX_INDEX_RETRIES):
-            try:
-                response = get_response(self.model, prompt)
-                return response
-
-            except IndexGenerationFailure:
-                # index generation failure, allow to pass
-                pass
-
-            except Exception:
-                # NOTE! THIS IS A HACK!!! IT'S TERRIBLE!
-
-                # IMPORTANT NOTE: THIS TRIMS THE END OF THE PROMPT,
-                # SO MAKE SURE YOU PLACE THE PROMPT PREFIX AT THE BEGINNING AND NOT THE END!
-
-                # trim the prompt length with each failure to at least try to get a response
-                percent_left_after_trim = 0.75
-                assert percent_left_after_trim < 1 and percent_left_after_trim > 0
-                max_characters = max(10, int(len(prompt) * percent_left_after_trim))
-                print(f"Failed to get response, trimming prompt length from {len(prompt)} to {max_characters}")
-                prompt = prompt[:max_characters]
-
-        raise IndexGenerationFailure(f"Failed to generate an index after {MAX_INDEX_RETRIES} tries.")
+        return get_response(self.model, prompt)
 
     def _get_index_json(self):
         os.makedirs(self.mf_dir, exist_ok=True)
