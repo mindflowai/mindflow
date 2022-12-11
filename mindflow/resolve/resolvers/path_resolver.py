@@ -1,20 +1,14 @@
 """
 File/Directory Resolver
 """
-import json
 import os
 import subprocess
 
-from typing import List
-
 import chardet
-import hashlib
-
-import git
 
 
 from mindflow.resolve.resolvers.base_resolver import BaseResolver
-from mindflow.utils.exceptions.index_failure import FailureToTrimFiles, IndexGenerationFailure
+from mindflow.utils.exceptions.index_failure import FailureToTrimFiles
 from mindflow.utils.response import get_response
 
 from mindflow.resolve.resolver_index import ResolverIndex, MAX_INDEX_RETRIES
@@ -113,10 +107,6 @@ class PathResolver(BaseResolver):
                     return
 
             sleep(SLEEP_SECONDS)
-
-        print(files)
-
-        print(sub_index)
 
         raise FailureToTrimFiles("Error in getting valid response from GPT, can you please re-formulate your query? Model returned: " + response)
 
