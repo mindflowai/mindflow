@@ -9,12 +9,12 @@ from time import sleep
 def progressively_trim_response(
     model, 
     prompt, 
-    max_retires: int=5, 
+    max_retries: int=5, 
     percent_left_after_trim: float = 0.5,
     sleep_seconds: float = 0,
 ):
     # trim the prompt length with each failure to at least try to get a response
-    for _ in range(max_retires):
+    for _ in range(max_retries):
         try:
             response = model.get_chat_response(prompt)
             return response
@@ -42,7 +42,7 @@ def get_response(model, prompt, max_retries: int = 5):
     """
     try:
         print("Please wait for model to formulate its full response...")
-        response = progressively_trim_response(model, prompt, max_retries= max_retries)
+        response = progressively_trim_response(model, prompt, max_retries=max_retries)
     except ValueError as error:
         print("Something went wrong!")
         print(error)
