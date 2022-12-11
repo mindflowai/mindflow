@@ -57,73 +57,101 @@ function openTextFileQuery() {
 }
 
 
+function getMfResponse() {
+
+	// If there is no active terminal, create a new one
+	// if (!vscode.window.activeTerminal) {
+	// 	vscode.window.createTerminal();
+	// }
+
+	let terminal = vscode.window.activeTerminal;
+
+	// If there is no active terminal, create a new one
+	if (!terminal) {
+		terminal = vscode.window.createTerminal();
+	}
+
+	// terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
+	// const command = "mf q \"" + queryString + "\" " + paths?.join(" ");
+	const command = "mf q \"\" _mf_query.mfq"
+	console.log('running command: ' + command);
+	terminal.sendText(command);
+	terminal.show();
+}
+
+
 function runTextFileQuery() {
-	// vscode.languages.typesc
+	const panel = vscode.window.createWebviewPanel(
+		'mf_query_response', // unique view type identifier
+		'MindFlow Query Response', // title to be displayed
+		vscode.ViewColumn.One, // show the webview to the side of the editor
+		{
+		  enableScripts: false,
+		  // if it already exists, reuse it
+		}
+	  );
 
-	// vscode.languages.getLanguages().then((value) => {
-	// 	// value.forEach((lang) => {
-	// 	// 	console.log(lang);
-	// 	// });
+	const response = "Hello World!";
 
-	// 	// get the "mindflow" language
-	// 	const mindflowLang = value.find((lang) => {
-	// 		return lang == "mfq";
-	// 	});
-	// });
+	panel.webview.html = `
+	<html>
+	  <body>
+		<input type="text" readonly value="${response}"
+		  style="width: 100%; max-width: 1000px; white-space: pre-wrap; height: 100%; min-height: 200px; max-height: 800px;">
+	  </body>
+	</html>
+	`;
 
-	// vscode.workspace.fs.readFile(getQueryUri()).then((value) => {
-	// 	console.log(value);
-	// });
-
+	getMfResponse();
 	
 }
 
 
-function openQuery() {
-	// If there is no active terminal, create a new one
-	if (!vscode.window.activeTerminal) {
-		vscode.window.createTerminal();
-	}
+// function openQuery() {
+// 	// If there is no active terminal, create a new one
+// 	if (!vscode.window.activeTerminal) {
+// 		vscode.window.createTerminal();
+// 	}
 	
-	// show open dialog and choose multiple files/folders
-	vscode.window.showOpenDialog({
-		canSelectMany: true,
-		canSelectFolders: true,
-		canSelectFiles: true,
-		openLabel: "Select Files to use as Query Context",
-		// filters: {
-			// 'Images': ['png', 'jpg'],
-			// 'TypeScript': ['ts', 'tsx'],
-			// 'JavaScript': ['js', 'jsx']
-	}).then((value) => {
-		// console.log(value);
+// 	// show open dialog and choose multiple files/folders
+// 	vscode.window.showOpenDialog({
+// 		canSelectMany: true,
+// 		canSelectFolders: true,
+// 		canSelectFiles: true,
+// 		openLabel: "Select Files to use as Query Context",
+// 		// filters: {
+// 			// 'Images': ['png', 'jpg'],
+// 			// 'TypeScript': ['ts', 'tsx'],
+// 			// 'JavaScript': ['js', 'jsx']
+// 	}).then((value) => {
+// 		// console.log(value);
 
-		// get the paths of the selected files
-		let paths = value?.map((uri) => {
-			return uri.path;
-		});
+// 		// get the paths of the selected files
+// 		let paths = value?.map((uri) => {
+// 			return uri.path;
+// 		});
 
-		// Open an input text box that is overlaying the current editor
-		vscode.window.showInputBox({
-			placeHolder: "Can you summarize this information as thoroughly as possible?",
-			prompt: "What would you like to know about these files?",
-			ignoreFocusOut: true,
-		}).then((queryString) => {
-			let terminal = vscode.window.activeTerminal;
+// 		// Open an input text box that is overlaying the current editor
+// 		vscode.window.showInputBox({
+// 			placeHolder: "Can you summarize this information as thoroughly as possible?",
+// 			prompt: "What would you like to know about these files?",
+// 			ignoreFocusOut: true,
+// 		}).then((queryString) => {
+// 			let terminal = vscode.window.activeTerminal;
 
-			// If there is no active terminal, create a new one
-			if (!terminal) {
-				terminal = vscode.window.createTerminal();
-			}
+// 			// If there is no active terminal, create a new one
+// 			if (!terminal) {
+// 				terminal = vscode.window.createTerminal();
+// 			}
 
-			// terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
-			const command = "mf q \"" + queryString + "\" " + paths?.join(" ");
-			console.log('running command: ' + command);
-			terminal.sendText(command);
-		});
+// 			// terminal.sendText("mf query \"" + queryString + "\" " + paths?.join(" ") + " -s");
+// 			const command = "mf q \"" + queryString + "\" " + paths?.join(" ");
+// 			console.log('running command: ' + command);
+// 			terminal.sendText(command);
+// 		});
 
-	});
-  }
+// 	});
+//   }
 
 class MyCompletionItemProvider implements vscode.CompletionItemProvider {
 	
