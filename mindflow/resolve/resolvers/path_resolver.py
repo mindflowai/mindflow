@@ -19,7 +19,7 @@ from mindflow.utils.response import get_response
 
 from mindflow.resolve.resolver_index import ResolverIndex, MAX_INDEX_RETRIES
 
-MAX_LENGTH = 20
+MAX_LENGTH = 20_000
 FILES_RETURNED_IF_OVER_MAX = 5
 
 
