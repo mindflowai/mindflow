@@ -10,6 +10,7 @@ MindFlow is a command-line tool and Visual Studio Code Extension for intelligent
     - `mf query "What is the purpose of this function?" main.py`
     - You can list any number of files, foldes, and HTTP links at the end of the command to query.
     - For queries over large amounts of files, MindFlow will will generate an index using ChatGPT, and search relevant files using the index, to use in response to your query.
+        - You can view the cache for your repo in `.mf/index.json`
 
 - Generate a summary of your `git diff`. 
     - `mf diff [args]`
