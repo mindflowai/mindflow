@@ -15,7 +15,7 @@ def get_login_credentials(create_new = False) -> dict:
         config.read(config_file)
     else:
         # Prompt the user for the configuration values
-        print("Please specify either your email and password or your session token.")
+        print("Please specify either your OpenAI registered email and password or your session token.")
         email = input("Enter your email (leave blank if using session token): ")
         password = input("Enter your password (leave blank if using session token): ")
         session_token = input("Enter your session token: ")
