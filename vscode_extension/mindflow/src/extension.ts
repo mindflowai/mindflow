@@ -5,9 +5,14 @@ import path = require('path');
 import { TextEncoder } from 'util';
 
 
+function getDirPath() {
+	return vscode.workspace.workspaceFolders?.[0].uri.path || "";
+}
+
+
 function getQueryUri(): vscode.Uri {
 	const fileName = "_mf_query.mfq";
-	const filePath = path.join(vscode.workspace.workspaceFolders?.[0].uri.path || "", fileName);
+	const filePath = path.join(getDirPath(), fileName);
 	const fileUri = vscode.Uri.file(filePath);
 	return fileUri;
 }
@@ -153,6 +158,19 @@ function runTextFileQuery() {
 // 	});
 //   }
 
+import * as cp from "child_process";
+
+const execShell = (cmd: string) =>
+    new Promise<string>((resolve, reject) => {
+        cp.exec(cmd, (err, out) => {
+			console.log(cmd);
+            if (err) {
+                return reject(err);
+            }
+            return resolve(out);
+        });
+    });
+
 class MyCompletionItemProvider implements vscode.CompletionItemProvider {
 	
 	public provideCompletionItems(
@@ -162,17 +180,34 @@ class MyCompletionItemProvider implements vscode.CompletionItemProvider {
 		context: vscode.CompletionContext,
 	): vscode.ProviderResult<vscode.CompletionItem[]> {
 		const range = document.getWordRangeAtPosition(position);
-		const variableName = document.getText(range);
-		const files = vscode.workspace.findFiles(`**/${variableName}*/**`);
-		return files.then((value) => {
-			// add completion items for each file
-			const completionItems = value.map(file => {
-				const relPath = vscode.workspace.asRelativePath(file.path);
+		// const variableName = document.getText(range);
+
+		// Completion items are based on the git files that are not being git ignored
+		// They're sorted to show the files in the current directory first and then the files in subdirectories progressively further down
+		// Files beginning with a dot are sorted to the bottom.
+
+		return execShell(`cd ${getDirPath()} && git ls-files`).then(value => {
+			const fileList: string[] = [];
+			value.split("\n").forEach((line) => {
+				fileList.push(line);
+			});
+
+			const completionItems = fileList.map(relPath => {
 				const completionItem = new vscode.CompletionItem(relPath);
 				completionItem.kind = vscode.CompletionItemKind.File;
+
+				let sortNum = relPath.split("/").length;
+				if (relPath.startsWith(".")) {
+					sortNum += 999;
+				}
+
+				completionItem.sortText = `${sortNum}`;
+				completionItem.label = relPath;
+
 				return completionItem;
 			});
-			return completionItems;
+
+			return completionItems
 		});
 	}
 }
