@@ -15,3 +15,10 @@ def resolve(reference, model, prompt):
             return resolver.resolve()
 
     raise ValueError(f"Cannot resolve reference: {reference}")
+
+
+def parallel_resolve(references, model, prompt):
+    """
+    Resolves a list of references to text.
+    """
+    return [resolve(reference, model, prompt) for reference in references]
