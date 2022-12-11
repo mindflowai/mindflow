@@ -15,9 +15,27 @@ MAX_INDEX_RETRIES = 3
 
 class ResolverIndex:
 
-    def __init__(self, model, verbose: bool = True):
+    def __init__(self, model, index_filename: str = "index.json", verbose: bool = True):
         self.model = model
         self.verbose = verbose
+
+        self._index_filename = index_filename
+
+    @property
+    def root_path(self):
+        """The root path is the root of the git repository."""
+
+        git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+        git_root = git_repo.git.rev_parse("--show-toplevel")
+        return git_root
+
+    @property
+    def mf_dir(self):
+        return os.path.join(self.root_path, '.mf')
+
+    @property
+    def index_path(self):
+        return os.path.join(self.mf_dir, self._index_filename)
 
     def log(self, message):
         if self.verbose:
@@ -39,32 +57,21 @@ class ResolverIndex:
                 pass
 
         raise IndexGenerationFailure(f"Failed to generate an index after {MAX_INDEX_RETRIES} tries.")
-    
-    def _get_git_root(self):
-        git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
-        git_root = git_repo.git.rev_parse("--show-toplevel")
-        return git_root
 
     def _get_index_json(self):
-        git_root = self._get_git_root()
+        os.makedirs(self.mf_dir, exist_ok=True)
 
-        if not os.path.exists(os.path.join(git_root, '.mf')):
-            os.mkdir(os.path.join(git_root, '.mf'))
-            
-        # Open the mf_index.json file in read mode
-        try:
-            with open(os.path.join(git_root, '.mf/index.json'), 'r') as f:
+        if os.path.exists(self.index_path):
+            with open(self.index_path, 'r') as f:
                 index = json.load(f)
-        except FileNotFoundError: 
-            index = {} 
+        else:
+            index = {}
 
         return index
 
     def _write_index_json(self, index_json):
-        git_root = self._get_git_root()
-        
         # write to the json
-        with open(os.path.join(git_root, '.mf/index.json'), "w") as file:
+        with open(self.index_path, "w") as file:
             # Write the contents of the dictionary to the JSON file
             json.dump(index_json, file, indent=2, sort_keys=True)
 
