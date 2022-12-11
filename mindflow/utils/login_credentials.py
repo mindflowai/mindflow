@@ -16,19 +16,33 @@ def get_login_credentials(create_new = False) -> dict:
     else:
         # Prompt the user for the configuration values
         print("Please specify either your email and password or your session token.")
-        email = input("Enter your email: ")
-        password = input("Enter your password: ")
+        email = input("Enter your email (leave blank if using session token): ")
+        password = input("Enter your password (leave blank if using session token): ")
         session_token = input("Enter your session token: ")
+
+        err_msg = "You must specify either your email and password or your session token."
+
+        using_session = None
+        if email == "" and password == "":
+            using_session = False
+        elif email != "" and password != "":
+            using_session = True
 
         # Create the config parser
         config = configparser.ConfigParser()
 
-        # Set the configuration values
-        config["DEFAULT"] = {
-            "email": email,
-            "password": password,
-            "session_token": session_token,
-        }
+        if using_session:
+            # Set the configuration values
+            config["DEFAULT"] = {
+                "email": email,
+                "password": password,
+            }
+        else:
+            # Set the configuration values
+            config["DEFAULT"] = {
+                "Authorization": "<API-KEY>",
+                "session_token": session_token,
+            }
 
         # Save the configuration to the file
         with open(config_file, "w") as f:

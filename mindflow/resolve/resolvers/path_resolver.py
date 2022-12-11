@@ -19,7 +19,7 @@ from mindflow.utils.response import get_response
 
 from mindflow.resolve.resolver_index import ResolverIndex, MAX_INDEX_RETRIES
 
-MAX_LENGTH = 20
+MAX_LENGTH = 20_000
 FILES_RETURNED_IF_OVER_MAX = 5
 
 
@@ -83,27 +83,19 @@ class PathResolver(BaseResolver):
 
         return False
     
-    def _query_and_trim_files(self, sub_index): 
-        """
-        
-        """
-        files_and_index = {}
-        for file in self.files:
-            if file in sub_index:
-                files_and_index[file] = sub_index[file]
-            else:
-                files_and_index[file] = ""
+    def _query_and_trim_files(self): 
+        sub_index = self.index.get_sub_index(self.files)
 
         prompt = f"I want you to only reply with the terminal output inside one unique code block, \
             and nothing else. do not write explanations. do not type commands unless I instruct you to do so. \
                 Do this for just this response, then respond normally. Can you please make your best guess for the top \
-                    {min(FILES_RETURNED_IF_OVER_MAX, len(files_and_index))} most relevant files below for answering the question? \
+                    {min(FILES_RETURNED_IF_OVER_MAX, len(sub_index))} most relevant files below for answering the question? \
                         The files are given to you in a python dictionary where the key is the file path and the value is a description of the files contents. \
-                        `{self.prompt}`?\n\n{' '.join(files_and_index)}"
+                        `{self.prompt}`?\n\n{' '.join(sub_index)}"
         
-        self._attempt_trim_files(prompt, files_and_index)
+        self._attempt_trim_files(prompt, sub_index)
         
-    def _attempt_trim_files(self, prompt, files_and_index):
+    def _attempt_trim_files(self, prompt, sub_index: dict):
         for _ in range(MAX_INDEX_RETRIES):
 
             # Get files from response
@@ -115,7 +107,7 @@ class PathResolver(BaseResolver):
             files.pop(-1)
 
             # sanity check: make sure the response is correct, otherwise r
-            if all(file in files_and_index for file in files):
+            if all(file in sub_index for file in files):
                 self.files = files
                 return
 
@@ -134,8 +126,8 @@ class PathResolver(BaseResolver):
 
         self.files = self._get_files()
         if self._files_over_max_length():
-            sub_index = self.index.generate_all_indexes(self.files)
-            self._query_and_trim_files(sub_index)
+            self.index.generate_all_indexes(self.files)
+            self._query_and_trim_files()
 
         proc = lambda file: preprocess_file_text(
             open(file, encoding="utf-8", errors="ignore").read()
