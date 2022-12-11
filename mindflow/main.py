@@ -29,8 +29,9 @@ MF_USAGE = """
 mf <command> [<args>]
 The commands available in this CLI are:
 
-diff       Runs a `git diff` and summarizes the changes.
-query      Ask a query using all or a subset of your notes as a reference.
+diff       `mf diff [<git diff args>]`                   Runs a `git diff` and summarizes the changes.
+query      `mf query "<YOUR QUERY>" [<Files + Folders>]` Ask a query using all or a subset of your notes as a reference.
+config     Configure your Mindflow credentials.
 
 """
 

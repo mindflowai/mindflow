@@ -86,29 +86,7 @@ function getMfResponse() {
 
 
 function runTextFileQuery() {
-	const panel = vscode.window.createWebviewPanel(
-		'mf_query_response', // unique view type identifier
-		'MindFlow Query Response', // title to be displayed
-		vscode.ViewColumn.One, // show the webview to the side of the editor
-		{
-		  enableScripts: false,
-		  // if it already exists, reuse it
-		}
-	  );
-
-	const response = "Hello World!";
-
-	panel.webview.html = `
-	<html>
-	  <body>
-		<input type="text" readonly value="${response}"
-		  style="width: 100%; max-width: 1000px; white-space: pre-wrap; height: 100%; min-height: 200px; max-height: 800px;">
-	  </body>
-	</html>
-	`;
-
 	getMfResponse();
-	
 }
 
 
