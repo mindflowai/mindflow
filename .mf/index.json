@@ -126,5 +126,9 @@
   "vscode_extension/mindflow/syntaxes/mfq.tmLanguage.json": {
     "hash": "7ce9daa6e359538621c2fdd4b9f48b2fa00b1f559389343d8bbac94aa3f4a3f9",
     "index": "This file is a JSON-formatted syntax definition file for the MindFlow Query language. It specifies the syntax and structure of the language using regular expressions, and defines the scope and names of different language elements, such as keywords and strings. The file is used by text editors and other tools to enable syntax highlighting and other language-aware features for MindFlow Query."
+  },
+  "vscode_extension/mindflow/tsconfig.json": {
+    "hash": "4f5d24e22447acb9389e2795b04d8c6310937dce5cfc8c4beb5f2a53bd070280",
+    "index": "This file is a TypeScript project configuration file. It specifies the options that are used by the TypeScript compiler when it builds the project. The file specifies that the project uses the CommonJS module system, targets the ECMAScript 2020 language specification, and generates source maps. It also enables strict type checking and specifies the directories for the source files and the compiled output."
   }
 }

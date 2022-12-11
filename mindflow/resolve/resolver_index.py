@@ -61,7 +61,11 @@ class ResolverIndex:
                 pass
 
             except Exception:
-                # NOTE! THIS IS A HACK!!!
+                # NOTE! THIS IS A HACK!!! IT'S TERRIBLE!
+
+                # IMPORTANT NOTE: THIS TRIMS THE END OF THE PROMPT,
+                # SO MAKE SURE YOU PLACE THE PROMPT PREFIX AT THE BEGINNING AND NOT THE END!
+
                 # trim the prompt length with each failure to at least try to get a response
                 percent_left_after_trim = 0.75
                 assert percent_left_after_trim < 1 and percent_left_after_trim > 0
