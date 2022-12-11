@@ -37,9 +37,9 @@ class ResolverIndex:
     def index_path(self):
         return os.path.join(self.mf_dir, self._index_filename)
 
-    def log(self, message):
+    def log(self, message, *args):
         if self.verbose:
-            print(message)
+            print(message, *args)
 
     def get_file_index_description(self, file):
         file_contents = open(file, encoding="utf-8", errors="ignore").read().strip().replace("\n", " ")
@@ -75,6 +75,8 @@ class ResolverIndex:
             # Write the contents of the dictionary to the JSON file
             json.dump(index_json, file, indent=2, sort_keys=True)
 
+        self.log("Index updated.")
+
     def get_file_hash(self, path: str):
         file_bytes = open(path, "rb").read()
         file_hash = hashlib.sha256(file_bytes).hexdigest()
@@ -89,7 +91,7 @@ class ResolverIndex:
 
         file_hash = self.get_file_hash(file_path)
 
-        if not force_reindex:
+        if not force_reindex and file_path in index_json:
             data = index_json[file_path]
             should_reindex = data["hash"] != file_hash
 

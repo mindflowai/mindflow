@@ -1,58 +1,62 @@
 {
   "mindflow/models/base_model.py": {
     "hash": "80fbc5008d23c77fb26e2368e3d2544ae33cd6075f414ca57c31f176d0738396",
-    "index": "\"Base class for all language models, with methods for initializing, getting chat response, and logging in.\""
+    "index": "\"BaseModel: class for all language models with methods for initialization, getting response, and logging in.\""
   },
   "mindflow/models/chat_gpt.py": {
-    "hash": "9900ccf6d0ab61074ae33c2a9b447c3c7ae6b036c9f364192c4accfcb1d0c447",
-    "index": "\"Loads the chat gpt model using a config file.\""
+    "hash": "725b7b153718b47e6e743969144d32425d19806701220928af17ff451d486d6d",
+    "index": "\"Loading Chat GPT model and getting instance with configuration from file.\""
   },
   "mindflow/prompt_generator.py": {
-    "hash": "e49a603fa76ef42894a04e243b3e284d5ebb730647fa6eff47b21a1b94396dcc",
-    "index": "\"Generates a chatbot prompt using git diff or a user query and optional reference files.\""
+    "hash": "d9b3afa653fa5f052443cd7dca053ffdf5fc608e8aee8d35c71a6b01e256900e",
+    "index": "\"Generating prompt for chatbot based on git diff or user query and references.\""
   },
   "mindflow/query/mfq.py": {
     "hash": "a99ff3d88a664950158a169dddcfe3c34da0c6d0af4b05476cfa0c464547ba68",
-    "index": "\"Parses and validates a user query and reference file(s) passed to the `mf query` command.\""
+    "index": "\"Parsing and validating user query and references from a file for chatbot prompt generation.\""
   },
   "mindflow/resolve/resolve.py": {
-    "hash": "33bdcbd68023f128bd686d6d8f310cc3d207335391e6c75990349de40416a4ef",
-    "index": "\"Resolves a reference to text using path and URL resolvers.\""
+    "hash": "7a79e960f6770e3d5ec06dde6184bad2819a55aded0ab0492e22e9a1aafb2e2e",
+    "index": "\"Resolving references to text with path and URL resolvers.\""
+  },
+  "mindflow/resolve/resolver_index.py": {
+    "hash": "5d701379ae1cacb93691f93341143e3b93837a278b65b9a33b75047b54aa53ec",
+    "index": "\"Generating and updating index of file contents for search engine with hash-based caching and configurable verbosity.\""
   },
   "mindflow/resolve/resolvers/base_resolver.py": {
     "hash": "43ecfae6d215f16ba5ded992d75b442a0cc65fd34336a3a40dc683698da741ed",
-    "index": "\"Base class for resolving references to text, with methods for checking if a string is a valid reference and resolving it to text.\""
+    "index": "\"BaseResolver: base class for resolving references to text with should_resolve and resolve methods.\""
   },
   "mindflow/resolve/resolvers/path_resolver.py": {
-    "hash": "78785af19ac2e027cfb004cfb00781935065ecd8863d83db9d2f952637f76106",
-    "index": "This script provides a class `ResolverIndex` that generates an index for a file using a given model. The index is a condensed string that can serve as an index for the file's contents. The `generate_single_index` method attempts to generate the index for a file by passing the file's contents to a model as a prompt. If the model fails to generate an index, the method will retry up to 3 times before raising an error. The `generate_all_indexes` method generates indexes for a list of files, writing the indexes to a JSON file for future reference. The `PathResolver` class uses the `ResolverIndex` class to generate indexes for files in a given directory or subdirectories."
+    "hash": "081694831bc8b7367259d6bdd7fed40f4eace2bef49ad142986f34b641ddd81a",
+    "index": "This module defines a PathResolver class that is used to resolve file or directory paths to text. It contains methods for getting files, validating that the total length/size of the files is less than a certain threshold, and for trimming down a list of files to a specified number of most relevant files. It also contains a method for resolving references to text."
   },
   "mindflow/resolve/resolvers/url_resolver.py": {
     "hash": "950e9d3c66ac31f88399668655f33886bbba019ac2737222e4579788faf1599a",
-    "index": "\"Resolves URLs to text using BeautifulSoup.\""
+    "index": "The file defines a URLResolver class that resolves URLs to text by parsing and cleaning the HTML content of a website. The class has methods to check if a string is a valid URL and to return the cleaned text from the website."
   },
   "mindflow/tests/cli_test.py": {
     "hash": "39825242286ac84fce0ef00fc2e79e6f8e3773bb5374b388bdff85322a5df396",
-    "index": "\"Tests the `mf diff` and `mf query` command line interface commands.\""
+    "index": "This file contains tests for the command line interface of a project called MindFlow. The tests run commands to summarize and query files, and check that the output is as expected."
+  },
+  "mindflow/utils/exceptions/index_failure.py": {
+    "hash": "429314a3699dbb9b83d956974051cf5f22e396de089ef89e9753dc1946b9a172",
+    "index": "This file contains two custom exception classes, `IndexGenerationFailure` and `FailureToTrimFiles`, that are raised when an index cannot be generated or files cannot be trimmed, respectively."
   },
   "mindflow/utils/git.py": {
     "hash": "ac282e0bb432df451eff1f2123210789d8150eef6708c3edd120a047b50c97cf",
-    "index": "\"Contains functions for interacting with git, including checking if a repository exists and getting the current git user's username.\""
+    "index": "This file contains functions for interacting with Git, including checking if the current directory is within a Git repository and getting the username of the current Git user."
   },
   "mindflow/utils/prompts.py": {
     "hash": "b607296daf558bc7ea532297f6352b9521f0269cc2f7968f59ac6cd1f35721f3",
-    "index": "The file contains a prompt that is used in the CLI when a git diff is being performed. The prompt asks the user to explain the changes in bullet points."
+    "index": "The file contains the prompts for the command line interface, including a prompt for a git diff."
   },
   "mindflow/utils/response.py": {
     "hash": "64d0a17bcb23e8cae7613be04b77fd4d21904e1c6970ce35a75d93394e479dd6",
-    "index": "The \"get_response\" function gets a response from a chatbot model based on a given prompt. It prints a \"please wait\" message and tries to get the response from the model. If it encounters a ValueError, it prints an error message and exits with status code 1. If it successfully gets a response from the model, it erases the \"please wait\" message and returns the response."
+    "index": "This module contains a function to generate a response from a given prompt using a language model. The response is generated by the model's `get_chat_response` method, and may be returned as output or printed to the console. An exception is raised if the response is not generated successfully."
   },
   "mindflow/utils/validation.py": {
     "hash": "aaaca43c4c3848291aba0140aa1fa5aa423694a2e3bb8d85971dcf1b05049454",
-    "index": "The module contains validation functions that check if the total length of files is less than a maximum length value."
-  },
-  "setup.py": {
-    "hash": "0fa55d015f369b2ab6a209ae52f0f03b5595b39e2aa31a78690e1ffd9bc40558",
-    "index": "Setup script for mindflow package with version 1.0.0, requiring requests, revChatGPT, bs4, chardet, pyperclip, and gitpython packages."
+    "index": "The file contains validation functions that check if the total length/size of a list of files is less than a maximum length value."
   }
 }

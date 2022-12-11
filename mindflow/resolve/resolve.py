@@ -9,6 +9,7 @@ def resolve(reference, model, prompt):
     """
     Resolves a reference to text.
     """
+    
     resolvers = [PathResolver(reference, model, prompt), URLResolver(reference)]
     for resolver in resolvers:
         if resolver.should_resolve():
@@ -21,4 +22,6 @@ def parallel_resolve(references, model, prompt):
     """
     Resolves a list of references to text.
     """
+
+    raise NotImplementedError
     return [resolve(reference, model, prompt) for reference in references]
