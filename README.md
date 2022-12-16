@@ -1,4 +1,4 @@
-![Alt text](images/MindFloHeader.png)
+![Alt text](images/MindFlowHeader.png)
 
 Inspired by the need for a more efficient and intelligent way to search code, we created MindFlow, the search engine powered by ChatGPT. With MindFlow, you can talk to your code like you were pinging a senior software engineer on Slack who knows everything about your project!
 
