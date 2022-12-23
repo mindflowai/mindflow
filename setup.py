@@ -6,5 +6,5 @@ setup(
     py_modules=["mindflow"],
     entry_points={"console_scripts": ["mf = mindflow.main:main"]},
     packages=find_packages(),
-    install_requires=["requests", "revChatGPT", "bs4", "chardet", "pyperclip", "gitpython"],
+    install_requires=["requests", "bs4", "chardet", "pyperclip", "gitpython"],
 )
