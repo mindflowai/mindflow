@@ -135,8 +135,8 @@ class MindFlow:
         _add_reference_args(parser)
         args = parser.parse_args(sys.argv[2:])
         response = QueryRequestHandler(args.query, args.references).query()
+        print(response)
     
-
     # Alias for query
     def q(self):
         return self.query()

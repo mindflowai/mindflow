@@ -1,7 +1,7 @@
 class Reference: 
-    def __init__(self, hash, text_bytes, type, path):
+    def __init__(self, hash, text, type, path):
         self.hash = hash
-        self.text_bytes = text_bytes
+        self.text = text
         self.type = type
         self.path = path
     
