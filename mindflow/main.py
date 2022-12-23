@@ -4,16 +4,8 @@ This module contains the main CLI for Mindflow.
 import argparse
 import sys
 
-from mindflow.utils.login_credentials import get_login_credentials
-
-try:
-    from mindflow.models.chat_gpt import get_chat_gpt
-except ImportError:
-    pass
 from mindflow.prompt_generator import generate_diff_prompt
-from mindflow.prompt_generator import generate_prompt_from_files
-from mindflow.utils.git import check_is_git_repo
-from mindflow.utils.response import get_response
+from mindflow.requests.query import QueryRequestHandler
 
 
 COPY_TO_CLIPBOARD = True
@@ -40,6 +32,9 @@ def _add_reference_args(parser):
     """
     Add arguments for commands that require references to text.
     """
+    parser.add_argument(
+        "query", type=str, help="The query you want to make on some data."
+    )
     parser.add_argument(
         "references",
         nargs="+",
@@ -88,9 +83,6 @@ class MindFlow:
     """
 
     def __init__(self):
-        self.login_credentials = get_login_credentials()
-        check_is_git_repo()
-
         parser = argparse.ArgumentParser(
             description=MF_DESCRIPTION,
             usage=MF_USAGE,
@@ -123,7 +115,6 @@ class MindFlow:
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
         """
-        self.model = get_chat_gpt(self.login_credentials)
         parser = argparse.ArgumentParser(
             description="Summarize a git diff.",
         )
@@ -138,26 +129,13 @@ class MindFlow:
         """
         This function is used to ask a custom question about any number of files, folders, and websites.
         """
-        self.model = get_chat_gpt(self.login_credentials)
         parser = argparse.ArgumentParser(
             description="This command is use to query files, folders, and websites.",
         )
-
-        parser.add_argument(
-            "query", type=str, help="The query you want to make on some data."
-        )
-
         _add_reference_args(parser)
-
         args = parser.parse_args(sys.argv[2:])
-        prompt = generate_prompt_from_files(args, self.model, args.query)
-        self._handle_prompt(args, prompt)
+        response = QueryRequestHandler(args.query, args.references).query()
     
-    def config(self):
-        """
-        This function is used to ask a custom question about any number of files, folders, and websites.
-        """
-        get_login_credentials(create_new=True)
 
     # Alias for query
     def q(self):
