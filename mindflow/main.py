@@ -6,6 +6,7 @@ import sys
 
 from mindflow.prompt_generator import generate_diff_prompt
 from mindflow.requests.query import QueryRequestHandler
+from mindflow.requests.response import get_response
 from mindflow.utils.token import set_token
 
 
@@ -24,7 +25,8 @@ The commands available in this CLI are:
 
 diff       `mf diff [<git diff args>]`                   Runs a `git diff` and summarizes the changes.
 query      `mf query "<YOUR QUERY>" [<Files + Folders>]` Ask a query using all or a subset of your notes as a reference.
-config     Configure your Mindflow credentials.
+auth       Authorize Mindflow with JWT.
+
 
 """
 
@@ -89,6 +91,26 @@ def _add_auth_args(parser):
         help="JWT token used to authorize usage.",
     )
 
+def _add_ask_args(parser):
+    """
+    Add arguments for commands that require references to text.
+    """
+    parser.add_argument(
+        "prompt", type=str, help="Prompt for GPT model."
+    )
+    parser.add_argument(
+        "-s",
+        "--skip-response",
+        action="store_true",
+        help="Generate prompt only.",
+    )
+    parser.add_argument(
+        "-t",
+        "--skip-clipboard",
+        action="store_true",
+        help="Do not copy to clipboard (testing).",
+    )
+
 class MindFlow:
     """
     This class is the CLI for Mindflow.
@@ -112,17 +134,6 @@ class MindFlow:
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
-    def _handle_prompt(self, args, prompt: str):
-        if args.skip_response:
-            print(prompt)
-        else:
-            response = get_response(self.model, prompt)
-            print("\n\n\n\n")
-            print("----------------RESPONSE FROM MODEL----------------")
-            print(response)
-            print("---------------------------------------------------")
-            print("\n")
-
     def auth(self):
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
@@ -133,6 +144,18 @@ class MindFlow:
         _add_auth_args(parser)
         args = parser.parse_args(sys.argv[2:])
         set_token(args.token)
+    
+    def ask(self):
+        """
+        This function is used to generate a git diff and then use it as a prompt for GPT bot.
+        """
+        parser = argparse.ArgumentParser(
+            description="Prompt GPT model with basic request.",
+        )
+        _add_ask_args(parser)
+        args = parser.parse_args(sys.argv[2:])
+        response = get_response(args.prompt)
+        print(response)
 
     def diff(self):
         """
@@ -141,12 +164,11 @@ class MindFlow:
         parser = argparse.ArgumentParser(
             description="Summarize a git diff.",
         )
-
         _add_diff_args(parser)
-
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_diff_prompt(args)
-        self._handle_prompt(args, prompt)
+        response = get_response(prompt)
+        print(response)
 
     def query(self):
         """
