@@ -6,6 +6,7 @@ import sys
 
 from mindflow.prompt_generator import generate_diff_prompt
 from mindflow.requests.query import QueryRequestHandler
+from mindflow.utils.token import set_token
 
 
 COPY_TO_CLIPBOARD = True
@@ -76,6 +77,17 @@ def _add_diff_args(parser):
         help="Do not copy to clipboard (testing).",
     )
 
+def _add_auth_args(parser):
+    """
+    Add arguments for the diff command.
+    """
+    # Argument for JWT token (optional)
+    parser.add_argument(
+        "token",
+        type=str,
+        nargs='?',
+        help="JWT token used to authorize usage.",
+    )
 
 class MindFlow:
     """
@@ -110,6 +122,17 @@ class MindFlow:
             print(response)
             print("---------------------------------------------------")
             print("\n")
+
+    def auth(self):
+        """
+        This function is used to generate a git diff and then use it as a prompt for GPT bot.
+        """
+        parser = argparse.ArgumentParser(
+            description="Authorize User.",
+        )
+        _add_auth_args(parser)
+        args = parser.parse_args(sys.argv[2:])
+        set_token(args.token)
 
     def diff(self):
         """
