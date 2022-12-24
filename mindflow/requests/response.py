@@ -1,5 +1,5 @@
 import requests
-from config import API_LOCATION
+from mindflow.config import API_LOCATION
 
 def get_response(prompt: str):
         """
