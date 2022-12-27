@@ -61,9 +61,9 @@ class QueryRequestHandler():
         resolved_references = self._resolve(self.references)
         unindexed_hashes = self._request_unindexed_references(resolved_references)
         self._request_index_references(resolved_references, unindexed_hashes)
-        response = requests.post(f"{API_LOCATION}/query", json={"query": self.query_text, "reference_hashes": list(resolved_references.keys())})
+        response = requests.post(f"{API_LOCATION}/query", json={"query_text": self.query_text, "reference_hashes": list(resolved_references.keys())})
         if response.status_code == 200:
-            return response.json()['answer']
+            return response.json()['text']
         else:
             raise ValueError(f"Error: {response.status_code} {response.text}")
             
