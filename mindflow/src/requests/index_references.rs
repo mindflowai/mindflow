@@ -31,7 +31,7 @@ pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<
     let res = client.post(&url).json(&index_reference_request).send().await;
     match res {
         Ok(_) => {
-            dbg!("Indexed references");
+            log::debug!("Indexed references");
         },
         Err(e) => {
             println!("Could not index packet of unindexed references: {}", e);

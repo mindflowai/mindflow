@@ -89,7 +89,7 @@ impl PathResolver {
                                 Some(reference)
                             },
                             Err(e) => {
-                                dbg!("Could not convert bytes to utf8: {}", file_path);
+                                log::debug!("Could not convert bytes to utf8: {}", file_path);
                                 None
                             }
                         }
@@ -118,6 +118,7 @@ impl PathResolver {
 
             processed_hashes.extend(hashes);
         }
+        println!("Total content size: MB {}\n", format!("{:.2}", total_size as f64 / 1024.0 / 1024.0));
         processed_hashes
     }
 }

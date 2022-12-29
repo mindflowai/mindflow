@@ -24,7 +24,8 @@ impl Query {
         let request_query_response = request_query(&client, self.query.clone(), processed_hashes).await;
         match request_query_response {
             Ok(response) => {
-                println!("{}", response.text);
+                let output = response.text.chars().take(15).collect::<String>();
+                println!("{}", output);
             },
             Err(e) => {
                 panic!("Error: {}", e);
