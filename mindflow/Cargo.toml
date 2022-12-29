@@ -1,0 +1,26 @@
+[package]
+name = "mindflow"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.0.15", features = ["derive"] }
+clipboard = "0.5.0"
+reqwest = { version = "0.10", features = ["blocking", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.91"
+sha2 = "0.10.6"
+chardet = "0.2"
+tokio = { version = "0.2", features = ["full"] } 
+dialoguer = "0.10.2"
+futures = "0.3.25"
+rayon = "1.6.1"
+async-trait = "0.1.60"
+simdutf8 = "0.1.4"
+log = { version = "0.4", features = ["release_max_level_off"] }
+
+[[bin]]
+name = "mindflow"
+path = "src/main.rs"
