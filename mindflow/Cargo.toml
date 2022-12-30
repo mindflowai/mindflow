@@ -20,6 +20,7 @@ rayon = "1.6.1"
 async-trait = "0.1.60"
 simdutf8 = "0.1.4"
 log = { version = "0.4", features = ["release_max_level_off"] }
+lazy_static = "1.4.0"
 
 [[bin]]
 name = "mindflow"

@@ -9,6 +9,8 @@ pub(crate) struct Query {
     pub(crate) query: String,
     #[arg(index = 2)]
     pub(crate) references: Vec<String>,
+    #[arg(short = 'i', long = "index", action = ArgAction::SetTrue, value_name = "Specifies whether you want to create an index for the files you query on.")]
+    pub(crate) index: bool,
     #[arg(short = 's', long = "skip-response", action = ArgAction::SetTrue, value_name = "Skip response from GPT model.")]
     pub(crate) skip_response: bool,
     #[arg(short = 't', long = "clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
@@ -20,7 +22,7 @@ impl Query {
         // create query request handler
         let client = reqwest::Client::new();
 
-        let processed_hashes = resolve(&self.references).await;
+        let processed_hashes = resolve(&self.references, self.index).await;
         let request_query_response = request_query(&client, self.query.clone(), processed_hashes).await;
         match request_query_response {
             Ok(response) => {

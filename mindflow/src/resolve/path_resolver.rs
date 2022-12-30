@@ -39,6 +39,21 @@ impl PathResolver {
     }
 
     pub async fn resolve(&self, path: &str) -> Vec<String> {
+        let file_paths = self.extract_files(Path::new(path));
+        
+        let hashes: Vec<String> = file_paths
+            .par_iter()
+            .map(|file_path| {
+                let mut hasher = Sha256::new();
+                hasher.update(fs::read(file_path.clone()).unwrap());
+                let file_hash = format!("{:x}", hasher.finalize());
+                file_hash
+            })
+            .collect();
+        hashes
+    }
+
+    pub async fn index_and_resolve(&self, path: &str) -> Vec<String> {
         let client = Client::new();
         let mut processed_hashes: Vec<String> = Vec::new();
 

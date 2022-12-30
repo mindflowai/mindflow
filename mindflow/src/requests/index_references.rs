@@ -2,14 +2,22 @@ use serde::{Serialize};
 use reqwest::{Client};
 use std::collections::{HashMap};
 
-use crate::utils::config::API_LOCATION;
+use crate::utils::config::{CONFIG};
 use crate::utils::reference::Reference;
-
-const INDEX_BATCH_SIZE: usize = 10;
-
+       
 #[derive(Serialize)]
 pub(crate) struct IndexReferencesRequest {
     pub(crate) references: String,
+    pub(crate) auth: String
+}
+
+impl IndexReferencesRequest {
+    pub fn new(references: &Vec<&Reference>) -> IndexReferencesRequest {
+        IndexReferencesRequest {
+            references: serde_json::to_string(references).unwrap(),
+            auth: CONFIG.get_auth_token()
+        }
+    }
 }
 
 pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<String, Reference>, unindexed_hashes: Vec<String>) {
@@ -24,10 +32,9 @@ pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<
         })
         .collect();
     
-    let index_reference_request: IndexReferencesRequest = IndexReferencesRequest {
-        references: serde_json::to_string(&references_to_index).unwrap(),
-    };
-    let url = format!("{}/index", API_LOCATION);
+    let index_reference_request = IndexReferencesRequest::new(&references_to_index);
+
+    let url = format!("{}/index", CONFIG.get_api_location());
     let res = client.post(&url).json(&index_reference_request).send().await;
     match res {
         Ok(_) => {

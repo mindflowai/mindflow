@@ -741,6 +741,7 @@ dependencies = [
  "clipboard",
  "dialoguer",
  "futures",
+ "lazy_static",
  "log",
  "rayon",
  "reqwest",
