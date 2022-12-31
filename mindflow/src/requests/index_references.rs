@@ -1,6 +1,7 @@
 use serde::{Serialize};
 use reqwest::{Client};
 use std::collections::{HashMap};
+use std::process;
 
 use crate::utils::config::{CONFIG};
 use crate::utils::reference::Reference;
@@ -38,10 +39,18 @@ pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<
     let res = client.post(&url).json(&index_reference_request).send().await;
     match res {
         Ok(_) => {
-            log::debug!("Indexed references");
+            match res.unwrap().status().as_u16() {
+                400 => {
+                    println!("Invalid authorization token.");
+                    process::exit(1);
+                }
+                _ => {
+                    log::info!("Successfully indexed references.");
+                }
+            }
         },
         Err(e) => {
-            println!("Could not index packet of unindexed references: {}", e);
+            log::error!("Error indexing references: {}", e);
         }
     }
 }

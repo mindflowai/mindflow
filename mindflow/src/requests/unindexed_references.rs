@@ -1,3 +1,5 @@
+use std::process;
+
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 
@@ -29,9 +31,22 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: &Vec<S
     let res = client.post(&url)
         .json(&unindexed_references_payload)
         .send()
-        .await?
-        .json::<UnindexedReferencesResponse>()
-        .await?;
+        .await;
 
-    Ok(res)
+    // Through error if 400 status
+    match res {
+        Ok(res) => {
+            match res.status().as_u16() {
+                400 => {
+                    println!("Invalid authorization token.");
+                    process::exit(1);
+                }
+                _ => {
+                    let unindexed_references_response: UnindexedReferencesResponse = res.json().await.unwrap();
+                    Ok(unindexed_references_response)
+                }
+            }
+        },
+        Err(err) => Err(err)
+    }
 }

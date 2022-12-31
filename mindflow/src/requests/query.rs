@@ -1,3 +1,5 @@
+use std::process;
+
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 
@@ -31,9 +33,13 @@ pub(crate) async fn request_query(client:&Client, query_text: String, processed_
         .post(&format!("{}/query", CONFIG.get_api_location()))
         .json(&query)
         .send()
-        .await?
-        .json::<QueryResponse>()
         .await?;
     
-    Ok(res)
+    match res.status().as_u16() {
+        400 => {
+            println!("Invalid authorization token.");
+            process::exit(1);
+        }
+        _ => Ok(res.json::<QueryResponse>().await?)
+    }
 }

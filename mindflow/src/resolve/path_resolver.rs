@@ -124,8 +124,8 @@ impl PathResolver {
             let unindexed_reference_response = request_unindexed_references(&client, &hashes).await;
             let unindexed_hashes = match unindexed_reference_response {
                 Ok(unindexed_reference_response) => unindexed_reference_response.unindexed_hashes,
-                Err(_) => {
-                    println!("Error: Could not get unindexed hashes");
+                Err(e) => {
+                    println!("Error: Could not get unindexed hashes: {}", e);
                     Vec::new()
                 }
             };
