@@ -58,7 +58,7 @@ class PathResolver(BaseResolver):
     def _get_resolved_file(self, file: str) -> dict[str, Reference]:
         file_bytes = open(file, "rb").read()
         file_hash = hashlib.sha256(file_bytes).hexdigest()
-        return {file_hash: Reference(file_hash, file_bytes.decode(), "path", file)}
+        return {file_hash: Reference(file_hash, file_bytes.decode(), len(file_bytes), "path", file)}
     
 
     def should_resolve(self) -> bool:

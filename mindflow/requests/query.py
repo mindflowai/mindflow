@@ -3,6 +3,7 @@ import requests
 from mindflow.config import API_LOCATION
 from mindflow.resolve.resolvers.path_resolver import PathResolver
 from mindflow.utils.reference import Reference
+from mindflow.config import config
 
 
 class QueryRequestHandler():
@@ -33,13 +34,11 @@ class QueryRequestHandler():
         
         return resolved_references
 
-    def _request_unindexed_references(self, resolved_references: list[dict[str, Reference]]):
+    def _request_unindexed_references(self, hashes: list[str]):
         """
         This function makes a get request with resolved reference hashes to the backend to check if they are indexed.
         """
-        unindexed_references_payload = []
-        [unindexed_references_payload.append({"hash": hash, "reference_type": resolved_references[hash].get_type()}) for hash in resolved_references.keys()]
-        response = requests.post(f"{API_LOCATION}/unindexed", json={"references": json.dumps(unindexed_references_payload)})
+        response = requests.post(f"{API_LOCATION}/unindexed", json={"hashes": json.dumps(hashes), "auth": config.AUTH})
         if response.status_code == 200:
             return response.json()['unindexed_hashes']
         else:
@@ -52,7 +51,7 @@ class QueryRequestHandler():
         if len(unindexed_hashes) == 0:
             return
         unindexed_references = [resolved_references[unindexed_reference].__dict__ for unindexed_reference in unindexed_hashes]
-        response = requests.post(f"{API_LOCATION}/index", json={"references": json.dumps(unindexed_references)})
+        response = requests.post(f"{API_LOCATION}/index", json={"references": json.dumps(unindexed_references), "auth": config.AUTH})
         if response.status_code != 200:
             raise ValueError(f"Error: {response.status_code} {response.text}")
     
@@ -61,9 +60,9 @@ class QueryRequestHandler():
         This function handles the prompt generation and copying to clipboard.
         """
         resolved_references = self._resolve(self.references)
-        unindexed_hashes = self._request_unindexed_references(resolved_references)
+        unindexed_hashes = self._request_unindexed_references(list(resolved_references.keys()))
         self._request_index_references(resolved_references, unindexed_hashes)
-        response = requests.post(f"{API_LOCATION}/query", json={"query_text": self.query_text, "reference_hashes": list(resolved_references.keys())})
+        response = requests.post(f"{API_LOCATION}/query", json={"query_text": self.query_text, "reference_hashes": list(resolved_references.keys()), "auth": config.AUTH})
         if response.status_code == 200:
             return response.json()['text']
         else:
