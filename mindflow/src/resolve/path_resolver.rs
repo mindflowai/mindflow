@@ -2,6 +2,8 @@ use std::collections::{HashMap};
 use std::fs;
 use std::path::Path;
 use std::str::from_utf8;
+use indicatif::{ProgressBar, ProgressStyle};
+
 use rayon::prelude::*;
 
 use reqwest::Client;
@@ -14,17 +16,30 @@ use crate::utils::git::{get_git_files, is_within_git_repo};
 use crate::utils::reference::Reference;
 
 
+
 const PACKET_SIZE: u64 = 2 * 1024 * 1024; // 2 MB
 
 pub(crate) struct PathResolver {}
 
 impl PathResolver {
     pub fn extract_files(&self, path: &Path) -> Vec<String> {
+        // println!("Extracting files from: {}", path.to_string_lossy());
         if path.is_dir() {
             if is_within_git_repo(path) {
-                return get_git_files(path)
-            } else {
-                panic!("Path is not within a git repository")
+                get_git_files(path)
+            } 
+            else {
+                let mut file_paths: Vec<String> = Vec::new();
+                for entry in fs::read_dir(path).unwrap() {
+                    let entry = entry.unwrap();
+                    let path = entry.path();
+                    if path.is_dir() {
+                        file_paths.extend(self.extract_files(&path));
+                    } else {
+                        file_paths.push(path.to_string_lossy().to_string());
+                    }
+                }
+                file_paths
             }
         } else {
             vec![path.to_string_lossy().to_string()] 
@@ -57,11 +72,21 @@ impl PathResolver {
         let client = Client::new();
         let mut processed_hashes: Vec<String> = Vec::new();
 
-        let file_paths = self.extract_files(Path::new(path));
+        let mut file_paths = self.extract_files(Path::new(path));
+        
+        // Filter out files that cannot be read
+        file_paths.retain(|file_path| {
+            let file_path = Path::new(file_path);
+            if file_path.is_file() {
+                return true;
+            }
+            false
+        });
         
         let sizes: Vec<u64> = file_paths
             .par_iter()
             .map(|file_path| {
+                //println!("FIle Path: {}", file_path);
                 fs::metadata(file_path).unwrap().len()
             })
             .collect();
@@ -73,6 +98,10 @@ impl PathResolver {
         let mut total_size = 0;
 
         for (file_path, file_size) in file_paths.iter().zip(sizes) {
+            if file_size > PACKET_SIZE {
+                println!("LARGE FILE: {}", file_path);
+                continue
+            }
             if size + file_size <= PACKET_SIZE {
                 packet.push(file_path.to_owned());
                 size += file_size;
@@ -88,6 +117,11 @@ impl PathResolver {
             total_size += size;
             packets.push(packet);
         }
+
+        let pb = ProgressBar::new(packets.len() as u64);
+        pb.set_style(ProgressStyle::default_bar());
+        pb.set_message("Indexing files");
+        let mut packet_index = 0;
 
         for packet in packets {
             let result = spawn_blocking( move || {
@@ -129,7 +163,13 @@ impl PathResolver {
                     Vec::new()
                 }
             };
-            request_index_references(&client, data_map, unindexed_hashes).await;
+            if unindexed_hashes.len() != 0 {
+                request_index_references(&client, data_map, unindexed_hashes).await;
+            }
+
+            packet_index += 1;
+            pb.set_position(packet_index);
+
 
             processed_hashes.extend(hashes);
         }
