@@ -12,7 +12,7 @@ pub struct Config {
 impl Config {
     pub fn new() -> Config {
         Config {
-            api_location: "http://127.0.0.1:5000/api/users".to_string(),
+            api_location: "http://127.0.0.1:5000/api/mindflow".to_string(),
             auth_token: fs::read_to_string(Path::new(&env::var("HOME").unwrap()).join(".mindflow")).expect("Failed to read .mindflow file")
         }
     }
