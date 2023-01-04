@@ -1,6 +1,6 @@
 import json
 import requests
-from mindflow.config import API_LOCATION
+from mindflow.config import Config
 from mindflow.resolve.resolvers.path_resolver import PathResolver
 from mindflow.utils.reference import Reference
 from mindflow.config import config
@@ -38,7 +38,7 @@ class QueryRequestHandler():
         """
         This function makes a get request with resolved reference hashes to the backend to check if they are indexed.
         """
-        response = requests.post(f"{API_LOCATION}/unindexed", json={"hashes": json.dumps(hashes), "auth": config.AUTH})
+        response = requests.post(f"{Config.API_LOCATION}/unindexed", json={"hashes": json.dumps(hashes), "auth": config.AUTH})
         if response.status_code == 200:
             return response.json()['unindexed_hashes']
         else:
@@ -51,7 +51,7 @@ class QueryRequestHandler():
         if len(unindexed_hashes) == 0:
             return
         unindexed_references = [resolved_references[unindexed_reference].__dict__ for unindexed_reference in unindexed_hashes]
-        response = requests.post(f"{API_LOCATION}/index", json={"references": json.dumps(unindexed_references), "auth": config.AUTH})
+        response = requests.post(f"{Config.API_LOCATION}/index", json={"references": json.dumps(unindexed_references), "auth": config.AUTH})
         if response.status_code != 200:
             raise ValueError(f"Error: {response.status_code} {response.text}")
     
@@ -62,7 +62,7 @@ class QueryRequestHandler():
         resolved_references = self._resolve(self.references)
         unindexed_hashes = self._request_unindexed_references(list(resolved_references.keys()))
         self._request_index_references(resolved_references, unindexed_hashes)
-        response = requests.post(f"{API_LOCATION}/query", json={"query_text": self.query_text, "reference_hashes": list(resolved_references.keys()), "auth": config.AUTH})
+        response = requests.post(f"{Config.API_LOCATION}/query", json={"query_text": self.query_text, "reference_hashes": list(resolved_references.keys()), "auth": config.AUTH})
         if response.status_code == 200:
             return response.json()['text']
         else:
