@@ -14,7 +14,14 @@ class ResolvedPath(Resolved):
     """
     def __init__(self, path: str):
         self.path = path
-        self.type = "file"
+    
+    @property
+    def type(self) -> str:
+        """
+        File type.
+        """
+        return "file"
+
 
     @property
     def size_bytes(self) -> str:

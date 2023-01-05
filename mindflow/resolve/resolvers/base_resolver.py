@@ -18,12 +18,11 @@ class BaseResolver:
         Resolve a reference to text.
         """
 
-class Resolved: 
+class Resolved:
     """
     Base class for resolved references.
     """
     path: str
-    type: str
 
     def create_reference(self):
         """
@@ -31,13 +30,19 @@ class Resolved:
         """
     
     @property
+    def type(self) -> str:
+        """
+        Type.
+        """
+    
+    @property
     def size_bytes(self) -> str:
         """
-        File size in bytes.
+        Size in bytes.
         """
     
     @property
     def text_hash(self) -> str:
         """
-        File hash.
+        Text hash.
         """
