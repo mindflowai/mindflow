@@ -1,3 +1,6 @@
+"""
+This file contains the configuration class that is used to instantiate the API location and the Auth token
+"""
 import os
 
 from mindflow.utils.token import get_token
