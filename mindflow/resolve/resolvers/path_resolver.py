@@ -5,8 +5,6 @@ import hashlib
 import os
 import subprocess
 
-import chardet
-
 from mindflow.resolve.resolvers.base_resolver import BaseResolver, Resolved
 from mindflow.utils.reference import Reference
 
@@ -36,16 +34,19 @@ class ResolvedPath(Resolved):
         """
         Create a reference to a file or directory.
         """
-        text_bytes = open(self.path, "rb").read()
-        file_hash = hashlib.sha256(text_bytes).hexdigest()
-
-        return Reference(
-            file_hash,
-            text_bytes.decode(),
-            self.size_bytes,
-            self.type,
-            self.path,
-        )
+        try:
+            text_bytes = open(self.path, "rb").read()
+            file_hash = hashlib.sha256(text_bytes).hexdigest()
+            text = text_bytes.decode("utf-8")
+            return Reference(
+                file_hash,
+                text,
+                self.size_bytes,
+                self.type,
+                self.path,
+            )
+        except UnicodeDecodeError:
+            return None
 
 class PathResolver(BaseResolver):
     """
@@ -65,16 +66,7 @@ class PathResolver(BaseResolver):
                 subprocess.check_output(command).decode("utf-8").split("\n")[:-1]
             )
 
-            def criteria(file):
-                try:
-                    return chardet.detect(open(file, "rb").read())["encoding"] in [
-                        "utf-8",
-                        "ascii",
-                    ]
-                except:
-                    return False
-
-            return list(filter(criteria, git_files))
+            return git_files
                 
                 
         return [reference]

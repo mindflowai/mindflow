@@ -13,7 +13,9 @@ def process_packet(packet):
     result = []
     for resolved_path in packet:
         reference = resolved_path.create_reference()
-        result.append(reference)
+        if reference:
+            result.append(reference)
+            
     return result
 
 def generate_index(resolved_paths: list[Resolved]):
