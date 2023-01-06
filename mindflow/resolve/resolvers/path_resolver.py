@@ -5,75 +5,88 @@ import hashlib
 import os
 import subprocess
 
-import chardet
-
-from mindflow.resolve.resolvers.base_resolver import BaseResolver
+from mindflow.resolve.resolvers.base_resolver import BaseResolver, Resolved
 from mindflow.utils.reference import Reference
 
-MAX_LENGTH = 10_000
-FILES_RETURNED_IF_OVER_MAX = 5
-SLEEP_SECONDS = 5
+class ResolvedPath(Resolved):
+    """
+    Reference to a file or directory.
+    """
+    def __init__(self, path: str):
+        self.path = path
+    
+    @property
+    def type(self) -> str:
+        """
+        File type.
+        """
+        return "file"
 
 
-def preprocess_file_text(text):
-    return text.strip().replace("\n", " ").replace("\t", " ")
+    @property
+    def size_bytes(self) -> str:
+        """
+        File size in bytes.
+        """
+        return os.stat(self.path).st_size
+    
+    @property
+    def text_hash(self) -> str:
+        """
+        File hash.
+        """
+        return hashlib.sha256(open(self.path, "rb").read()).hexdigest()
 
+    def create_reference(self) -> Reference:
+        """
+        Create a reference to a file or directory.
+        """
+        try:
+            text_bytes = open(self.path, "rb").read()
+            file_hash = hashlib.sha256(text_bytes).hexdigest()
+            text = text_bytes.decode("utf-8")
+            return Reference(
+                file_hash,
+                text,
+                self.size_bytes,
+                self.type,
+                self.path,
+            )
+        except UnicodeDecodeError:
+            return None
 
 class PathResolver(BaseResolver):
     """
     Resolver for file or directory paths to text.
     """
-
-    def __init__(self, reference):
-        self.reference = reference
-
-    def _get_files(self) -> list:
+    def _get_files(self, reference) -> list:
         """
         Get all files in a directory or a single file.
         """
-        command = ["git", "ls-files", self.reference]
+        command = ["git", "ls-files", reference]
 
         # Execute the git diff command and retrieve the output as a string
-        if os.path.isdir(self.reference):
+        if os.path.isdir(reference):
             # print(subprocess.check_output(command).decode("utf-8").split("\n"))
 
             git_files = (
                 subprocess.check_output(command).decode("utf-8").split("\n")[:-1]
             )
 
-            def criteria(file):
-                try:
-                    return chardet.detect(open(file, "rb").read())["encoding"] in [
-                        "utf-8",
-                        "ascii",
-                    ]
-                except:
-                    return False
-
-            return list(filter(criteria, git_files))
+            return git_files
                 
                 
-        return [self.reference]
-    
-    def _get_resolved_file(self, file: str) -> dict[str, Reference]:
-        file_bytes = open(file, "rb").read()
-        file_hash = hashlib.sha256(file_bytes).hexdigest()
-        return {file_hash: Reference(file_hash, file_bytes.decode(), len(file_bytes), "path", file)}
-    
+        return [reference]
 
-    def should_resolve(self) -> bool:
+    def should_resolve(self, reference) -> bool:
         """
         Check if a path is a file or directory.
         """
-        return os.path.isfile(self.reference) or os.path.isdir(self.reference)
+        return os.path.isfile(reference) or os.path.isdir(reference)
 
-    
-    def resolve(self) -> list[dict[str, Reference]]:
+    def resolve(self, reference) -> list[dict[str, Reference]]:
         """
         Extract text from files.
         """
-        resolved_files = {}
-        [resolved_files.update(self._get_resolved_file(file)) for file in self._get_files()]
-        return resolved_files
-    
-
+        files = self._get_files(reference)
+        return [ResolvedPath(file) for file in files]

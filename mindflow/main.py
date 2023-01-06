@@ -5,9 +5,11 @@ import argparse
 import sys
 
 from mindflow.prompt_generator import generate_diff_prompt
-from mindflow.requests.query import QueryRequestHandler
-from mindflow.requests.response import get_response
+from mindflow.requests.prompt import request_prompt
+from mindflow.resolve.resolve import resolve
 from mindflow.utils.token import set_token
+from mindflow.generate_index import generate_index
+from mindflow.requests.query import request_query
 
 
 COPY_TO_CLIPBOARD = True
@@ -30,32 +32,34 @@ auth       Authorize Mindflow with JWT.
 
 """
 
+def _add_generate_args(parser):
+    """
+    Add arguments for the generate command.
+    """
+    parser.add_argument(
+        "-i",
+        "--index",
+        action="store_true",
+        help="Generate an index the references.",
+    )
 
 def _add_reference_args(parser):
     """
     Add arguments for commands that require references to text.
     """
     parser.add_argument(
-        "query", type=str, help="The query you want to make on some data."
-    )
-    parser.add_argument(
         "references",
         nargs="+",
         help="A list of references to summarize (file path, API, web address).",
     )
-    parser.add_argument(
-        "-s",
-        "--skip-response",
-        action="store_true",
-        help="Generate prompt only.",
-    )
-    parser.add_argument(
-        "-t",
-        "--skip-clipboard",
-        action="store_true",
-        help="Do not copy to clipboard (testing).",
-    )
 
+def _add_query_args(parser):
+    """
+    Add arguments for commands that require references to text.
+    """
+    parser.add_argument(
+        "query", type=str, help="The query you want to make on some data."
+    )
 
 def _add_diff_args(parser):
     """
@@ -64,19 +68,7 @@ def _add_diff_args(parser):
     parser.add_argument(
         "diffargs",
         nargs="*",
-        help="This argument is used to pass to git diff.",
-    )
-    parser.add_argument(
-        "-s",
-        "--skip-response",
-        action="store_true",
-        help="Generate prompt only.",
-    )
-    parser.add_argument(
-        "-t",
-        "--skip-clipboard",
-        action="store_true",
-        help="Do not copy to clipboard (testing).",
+        help="Contains all of the git diff args.",
     )
 
 def _add_auth_args(parser):
@@ -98,6 +90,8 @@ def _add_ask_args(parser):
     parser.add_argument(
         "prompt", type=str, help="Prompt for GPT model."
     )
+
+def _add_response_args(parser):
     parser.add_argument(
         "-s",
         "--skip-response",
@@ -153,8 +147,10 @@ class MindFlow:
             description="Prompt GPT model with basic request.",
         )
         _add_ask_args(parser)
+        _add_response_args(parser)
+
         args = parser.parse_args(sys.argv[2:])
-        response = get_response(args.prompt)
+        response = request_prompt(args.prompt)
         print(response)
 
     def diff(self):
@@ -165,23 +161,56 @@ class MindFlow:
             description="Summarize a git diff.",
         )
         _add_diff_args(parser)
+        _add_response_args(parser)
+
         args = parser.parse_args(sys.argv[2:])
         prompt = generate_diff_prompt(args)
-        response = get_response(prompt)
+        response = request_prompt(prompt)
         print(response)
+
+    def generate(self):
+        """
+        This function is used to generate an index and/or embeddings for files
+        """
+        parser = argparse.ArgumentParser(
+            description="Generate an index and/or embeddings for files.",
+        )
+        _add_reference_args(parser)
+        _add_generate_args(parser)
+        _add_response_args(parser)
+
+        args = parser.parse_args(sys.argv[2:])
+        resolved_references = []
+        for reference in args.references:   
+            resolved_references.extend(resolve(reference))
+
+        generate_index(resolved_references)
 
     def query(self):
         """
-        This function is used to ask a custom question about any number of files, folders, and websites.
+        This function is used to ask a custom question about files, folders, and websites.
         """
         parser = argparse.ArgumentParser(
             description="This command is use to query files, folders, and websites.",
         )
+        _add_query_args(parser)
         _add_reference_args(parser)
+        _add_generate_args(parser)
+        _add_response_args(parser)
+
         args = parser.parse_args(sys.argv[2:])
-        response = QueryRequestHandler(args.query, args.references).query()
+        resolved_references = []
+        for reference in args.references:   
+            resolved_references.extend(resolve(reference))
+        
+        if args.index:
+            reference_hashes = generate_index(resolved_references)
+        else:
+            reference_hashes = [reference.text_hash for reference in resolved_references]
+            
+        response = request_query(args.query, reference_hashes)
         print(response)
-    
+
     # Alias for query
     def q(self):
         return self.query()

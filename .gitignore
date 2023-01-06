@@ -7,3 +7,5 @@ config.json
 *config.ini
 build/*
 dist/*
+
+hello

@@ -5,9 +5,9 @@ def resolve(reference):
     Resolves a reference to text.
     """
     
-    resolvers = [PathResolver(reference)]
+    resolvers = [PathResolver()]
     for resolver in resolvers:
-        if resolver.should_resolve():
-            return resolver.resolve()
+        if resolver.should_resolve(reference):
+            return resolver.resolve(reference)
 
     raise ValueError(f"Cannot resolve reference: {reference}")
