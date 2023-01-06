@@ -17,11 +17,6 @@ pub fn is_within_git_repo(path: &Path) -> bool {
     }
 }
 
-pub fn is_git_repo_head(path: &Path) -> bool {
-    let git_dir = path.join(".git");
-    git_dir.exists() && git_dir.is_dir()
-}
-
 pub fn get_git_files(path: &Path) -> Vec<String> {
     let output = Command::new("git")
                 .arg("-C")

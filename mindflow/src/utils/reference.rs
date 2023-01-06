@@ -21,16 +21,4 @@ impl Reference {
             path,
         }
     }
-
-    pub fn get_text(&self) -> &String {
-        &self.text
-    }
-
-    pub fn get_type(&self) -> &String {
-        &self.r#type
-    }
-
-    pub fn get_path(&self) -> &String {
-        &self.path
-    }
 }
