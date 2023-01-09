@@ -26,6 +26,7 @@ pub(crate) struct PromptResponse {
     pub(crate) text: String,
 }
 
+// Sends a basic completion prompt to the Mindflow server to get a response from GPT model.
 pub(crate) async fn request_prompt(client: &Client, prompt: String) -> PromptResponse {
     let prompt_request: PromptRequest = PromptRequest::new(prompt);
     let res = client

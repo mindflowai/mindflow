@@ -17,12 +17,16 @@ pub(crate) struct IndexReferencesRequest {
 impl IndexReferencesRequest {
     pub fn new(references: &Vec<&Reference>) -> IndexReferencesRequest {
         IndexReferencesRequest {
-            references: serde_json::to_string(references).unwrap(),
+            references: serde_json::to_string(references).unwrap_or_else(|_| {
+                println!("Error: Could not serialize hashes to JSON.");
+                process::exit(1);
+            }),
             auth: CONFIG.get_auth_token()
         }
     }
 }
 
+// Send a request to the Mindflow server to index references.
 pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<String, Reference>, unindexed_hashes: Vec<String>) {
     // Create a vector of size resolved_references.keys() and fill it with None
     let references_to_index: Vec<&Reference> = unindexed_hashes

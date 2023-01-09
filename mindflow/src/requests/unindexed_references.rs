@@ -16,7 +16,10 @@ pub(crate) struct UnindexedReferenceRequest {
 impl UnindexedReferenceRequest {
     pub fn new(hashes: Vec<&String>) -> UnindexedReferenceRequest {
         UnindexedReferenceRequest {
-            hashes: serde_json::to_string(&hashes).unwrap(),
+            hashes: serde_json::to_string(&hashes).unwrap_or_else(|_| {
+                println!("Error: Could not serialize hashes to JSON.");
+                process::exit(1);
+            }),
             auth: CONFIG.get_auth_token()
         }
     }
@@ -27,6 +30,7 @@ pub(crate) struct UnindexedReferencesResponse {
     pub(crate) unindexed_hashes: Vec<String>,
 }
 
+// Send a request to the Mindflow server to get a list of hashes that are not yet indexed.
 pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&String>) -> UnindexedReferencesResponse {
     let unindexed_references_payload: UnindexedReferenceRequest  = UnindexedReferenceRequest::new(hashes);
     let url = format!("{}/unindexed", CONFIG.get_api_location());

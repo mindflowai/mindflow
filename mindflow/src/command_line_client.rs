@@ -6,7 +6,6 @@ use crate::commands::auth::Auth;
 use crate::commands::diff::Diff;
 use crate::commands::ask::Ask;
 
-
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub(crate) enum CommandLineClient {

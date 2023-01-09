@@ -30,6 +30,7 @@ pub(crate) struct QueryResponse {
     pub(crate) text: String,
 }
 
+// Send a query request off to the Mindflow server to get a response.
 pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>) -> QueryResponse {
     let query = QueryRequest::new(query_text, processed_hashes);
     let res = client

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 use dialoguer::{theme::ColorfulTheme ,Input};
 
-// Set authorization token used to authenticate with the Mindflow server
+// Set authorization token used to authenticate with the Mindflow server.
 pub async fn set_token(auth_key: Option<String>) {
     let token = match auth_key {
         Some(token) => {
@@ -21,17 +21,14 @@ pub async fn set_token(auth_key: Option<String>) {
         }
     };
 
-    let home_dir = match env::var("HOME") {
-        Ok(home_dir) => home_dir,
+    let auth_path = match env::var("HOME") {
+        Ok(home_dir) => Path::new(&home_dir).join(".mindflow"),
         Err(e) => {
             println!("Unable to find home directory in ENV: {}", e);
             std::process::exit(1);
         }
     };
-
-    let path = Path::new(&home_dir).join(".mindflow");
-
-    let result = fs::write(path, token).map_err(|e| e.to_string());
+    let result = fs::write(auth_path, token).map_err(|e| e.to_string());
 
     match result {
         Ok(_) => {

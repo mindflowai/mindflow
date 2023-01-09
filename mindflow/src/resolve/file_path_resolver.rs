@@ -17,6 +17,7 @@ pub struct ResolvedFilePath {
     pub path: String,
 }
 
+// ResolvedFilePath implements the Resolved trait create a reference and extract other data about the file. 
 impl Resolved for ResolvedFilePath {
     fn create_reference(&self) -> Option<Reference> {
         let text_bytes = match fs::read(self.path.clone()) {
@@ -69,6 +70,7 @@ impl Resolved for ResolvedFilePath {
     }
 }
 
+// ResolvedFilePath implements the Resolved trait to resolve references in the PathResolved type.
 pub(crate) struct PathResolver {}
 
 impl PathResolver {
