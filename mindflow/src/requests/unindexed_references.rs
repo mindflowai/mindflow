@@ -1,3 +1,5 @@
+// Send a request to the Mindflow server to get a list of hashes that are not yet indexed.
+
 use std::process;
 
 use serde::{Deserialize, Serialize};

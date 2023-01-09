@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 #[derive(Clone)]
 #[derive(Debug)]
+
+// This is a struct that represents a reference. It is used to store references in the database.
 pub(crate) struct Reference {
     pub(crate) r#type: String,
     pub(crate) hash: String,

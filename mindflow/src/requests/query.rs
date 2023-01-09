@@ -1,3 +1,6 @@
+// Send a query request off to the Mindflow server to get a response 
+// from GPT model using a prompt and set of reference hashes.
+
 use std::process;
 
 use serde::{Deserialize, Serialize};

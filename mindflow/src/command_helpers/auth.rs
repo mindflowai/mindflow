@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 use dialoguer::{theme::ColorfulTheme ,Input};
 
+// Set authorization token used to authenticate with the Mindflow server
 pub async fn set_token(auth_key: Option<String>) {
     let token = match auth_key {
         Some(token) => {

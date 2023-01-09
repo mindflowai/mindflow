@@ -3,7 +3,7 @@ use clap::{Parser, ArgAction};
 use crate::resolve::resolve::{resolve};
 use crate::requests::query::{request_query};
 use crate::utils::generate_index::generate_index;
-use crate::resolve::resolver_trait::Resolved;
+use crate::resolve::resolve::Resolved;
 
 #[derive(Parser)]
 pub(crate) struct Query {

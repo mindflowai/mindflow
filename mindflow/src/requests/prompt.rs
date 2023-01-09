@@ -1,3 +1,5 @@
+// Sends a basic completion prompt to the Mindflow server to get a response from GPT model.
+
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 

@@ -1,3 +1,9 @@
+// Contains the implementation of the PathResolver struct and the ResolvedFilePath struct.
+// ResolvedFilePath:
+//    - Implements the Resolved trait.
+// PathResolver:
+//    - Implements the Resolver trait.
+
 use std::{fs};
 use std::path::Path;
 use std::str::from_utf8;
@@ -5,8 +11,7 @@ use std::str::from_utf8;
 use sha2::{Digest, Sha256};
 
 use crate::utils::{git::{get_git_files, is_within_git_repo}, reference::Reference};
-
-use crate::resolve::resolver_trait::Resolved;
+use crate::resolve::resolve::Resolved;
 
 pub struct ResolvedFilePath {
     pub path: String,

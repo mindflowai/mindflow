@@ -3,7 +3,6 @@ use std::fs;
 use std::path::Path;
 use lazy_static::lazy_static;
 
-
 pub struct Config {
     api_location: String,
     auth_token: String
@@ -26,6 +25,8 @@ impl Config {
     }
 }
 
+// Only one instance of Config is created and shared across the application
+// Initialized when first accessed. 
 lazy_static!{
     pub static ref CONFIG: Config = Config::new(); 
 }

@@ -1,3 +1,5 @@
+// This module contains the request to the Mindflow server to index references.
+
 use serde::{Serialize};
 use reqwest::{Client};
 use std::collections::{HashMap};

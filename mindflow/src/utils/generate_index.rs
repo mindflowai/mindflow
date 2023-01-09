@@ -9,11 +9,13 @@ use tokio::task::spawn_blocking;
 use crate::requests::unindexed_references::{request_unindexed_references};
 use crate::requests::index_references::{request_index_references};
 use crate::resolve::file_path_resolver::ResolvedFilePath;
-use crate::resolve::resolver_trait::Resolved;
+use crate::resolve::resolve::Resolved;
 use crate::utils::reference::Reference;
 
 const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
+// TODO: This function is too long. Break it up.
+// Checks if the references are indexed and if not, indexes them.
 pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) -> Vec<String> {
     let client = Client::new();
     let mut processed_hashes: Vec<String> = Vec::new();
@@ -58,6 +60,7 @@ pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) -> Vec<String
     let mut packet_index = 0;
 
     for packet in packets {
+        // Limits the number of packets whose text is loaded into memory at once.
         let result = spawn_blocking( move || {
             let reference_vec: Vec<Reference> = packet
                 .par_iter()
