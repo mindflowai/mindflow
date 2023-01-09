@@ -16,14 +16,6 @@ impl Ask {
         let client = reqwest::Client::new();        
 
         let request_prompt_response = request_prompt(&client, self.prompt.join(" ")).await;  
-        
-        match request_prompt_response {
-            Ok(response) => {
-                println!("{}", response.text);
-            },
-            Err(e) => {
-                panic!("Error: {}", e);
-            }
-        };
+        println!("{}", request_prompt_response.text);
     }
 }

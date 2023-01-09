@@ -24,26 +24,26 @@ impl Query {
         // create query request handler
         let client = reqwest::Client::new();
 
+        // Get resolved references and their hashes
         let resolved = resolve(&self.references).await;
-        let processed_hashes: Vec<String> = match self.index {
-            true => generate_index(resolved).await,
-            false => resolved.into_iter().filter_map(|resolved_path| 
-                match resolved_path.text_hash() {
-                    Some(hash) => Some(hash),
-                    None => None
-                }
-            ).collect()
-        };
-        let request_query_response = request_query(&client, self.query.clone(), processed_hashes).await;
-        match request_query_response {
-            Ok(response) => {
-                let output = response.text.chars().take(15).collect::<String>();
-                println!("{}", output);
-            },
-            Err(e) => {
-                panic!("Error: {}", e);
+        let resolved_hashes = resolved.iter().filter_map(|resolved_path| 
+            match resolved_path.text_hash() {
+                Some(hash) => Some(hash),
+                None => None
             }
-        };
+        ).collect::<Vec<String>>();
+
+        // Generate index in Mindflow server if specified.
+        if self.index {
+            println!("Generating index...");
+            generate_index(resolved).await;
+        }
+
+        // Send query to Mindflow server.
+        let request_query_response = request_query(&client, self.query.clone(), resolved_hashes).await;
+        println!("{}", request_query_response.text);
+
+        // Implement response skip and copy to clipboard later
         if !self.skip_response {
             //println!("{}", query_response.text);
         }

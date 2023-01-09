@@ -16,10 +16,32 @@ const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
 // TODO: This function is too long. Break it up.
 // Checks if the references are indexed and if not, indexes them.
-pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) -> Vec<String> {
+pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) {
     let client = Client::new();
-    let mut processed_hashes: Vec<String> = Vec::new();
-    
+
+    let packets = create_packets(resolved_paths);
+    let pb = create_progress_bar(packets.len() as u64);
+    let mut packet_index = 0;
+
+    for packet in packets {
+        // Limits the number of packets whose text is loaded into memory at once.
+        let references = resolve_packet_to_references(packet).await;
+        let references_hash_map: HashMap<String, Reference> = references.into_iter().map(|reference| {
+            (reference.hash.clone(), reference)
+        }).collect();
+
+        let unindexed_hashes = request_unindexed_references(&client, references_hash_map.keys().collect()).await.unindexed_hashes;
+        if !unindexed_hashes.is_empty() {
+            request_index_references(&client, references_hash_map, unindexed_hashes).await;
+        }
+
+        pb.set_position(packet_index);
+        packet_index += 1;
+    }
+}
+
+// Break references into packets of size PACKET_SIZE and send them to the server.
+fn create_packets(resolved_paths: Vec<ResolvedFilePath>) -> Vec<Vec<ResolvedFilePath>> {
     let sizes: Vec<u64> = resolved_paths
         .par_iter()
         .filter_map(|resolved_path| {
@@ -54,49 +76,29 @@ pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) -> Vec<String
         packets.push(packet);
     }
 
-    let pb = ProgressBar::new(packets.len() as u64);
+    println!("Total content size: MB {}\n", format!("{:.2}", total_size as f64 / 1024.0 / 1024.0));
+    packets
+}
+
+// Create progress bar for processing packets.
+fn create_progress_bar(bar_size: u64) -> ProgressBar {
+    let pb = ProgressBar::new(bar_size);
     pb.set_style(ProgressStyle::default_bar());
     pb.set_message("Indexing files");
-    let mut packet_index = 0;
+    pb
+}
 
-    for packet in packets {
-        // Limits the number of packets whose text is loaded into memory at once.
-        let result = spawn_blocking( move || {
-            let reference_vec: Vec<Reference> = packet
-                .par_iter()
-                .filter_map(|resolved_path| {
-                    resolved_path.create_reference()
-                })
-                .collect();
-            reference_vec
-        }).await.unwrap();
-
-        let mut hashes: Vec<String> = Vec::new();
-        let mut data_map: HashMap<String, Reference> = HashMap::new();
-
-        for reference in result {
-            hashes.push(reference.hash.clone());
-            data_map.insert(reference.hash.clone(), reference);
-        }
-
-        let unindexed_reference_response = request_unindexed_references(&client, &hashes).await;
-        let unindexed_hashes = match unindexed_reference_response {
-            Ok(unindexed_reference_response) => unindexed_reference_response.unindexed_hashes,
-            Err(e) => {
-                println!("Error: Could not get unindexed hashes: {}", e);
-                Vec::new()
-            }
-        };
-        if unindexed_hashes.len() != 0 {
-            request_index_references(&client, data_map, unindexed_hashes).await;
-        }
-
-        packet_index += 1;
-        pb.set_position(packet_index);
-
-
-        processed_hashes.extend(hashes);
-    }
-    println!("Total content size: MB {}\n", format!("{:.2}", total_size as f64 / 1024.0 / 1024.0));
-    processed_hashes
+// Convert packet of ResolvedFilePaths to packet of References.
+// Blocks the current thread while the packet is being processed.
+async fn resolve_packet_to_references(packet: Vec<ResolvedFilePath>) -> Vec<Reference> {
+    let result = spawn_blocking( move || {
+        let reference_vec: Vec<Reference> = packet
+            .par_iter()
+            .filter_map(|resolved_path| {
+                resolved_path.create_reference()
+            })
+            .collect();
+        reference_vec
+    }).await.unwrap();
+    result
 }

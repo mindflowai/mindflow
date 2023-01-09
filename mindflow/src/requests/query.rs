@@ -30,19 +30,31 @@ pub(crate) struct QueryResponse {
     pub(crate) text: String,
 }
 
-pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>) -> Result<QueryResponse, reqwest::Error> {
+pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>) -> QueryResponse {
     let query = QueryRequest::new(query_text, processed_hashes);
     let res = client
         .post(&format!("{}/query", CONFIG.get_api_location()))
         .json(&query)
         .send()
-        .await?;
-    
-    match res.status().as_u16() {
-        400 => {
-            println!("Invalid authorization token.");
+        .await;
+
+    match res {
+        Ok(res) => {
+            match res.status().as_u16() {
+                400 => {
+                    println!("Invalid authorization token.");
+                    process::exit(1);
+                }
+                _ => {
+                    let query_response: QueryResponse = res.json().await.unwrap();
+                    return query_response
+                }
+            }
+        },
+        Err(e) => {
+            // Throw error
+            println!("Error: Could not get query response: {}", e);
             process::exit(1);
         }
-        _ => Ok(res.json::<QueryResponse>().await?)
     }
 }

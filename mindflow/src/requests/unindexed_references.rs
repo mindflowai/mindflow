@@ -14,9 +14,9 @@ pub(crate) struct UnindexedReferenceRequest {
 }
 
 impl UnindexedReferenceRequest {
-    pub fn new(hashes: &Vec<String>) -> UnindexedReferenceRequest {
+    pub fn new(hashes: Vec<&String>) -> UnindexedReferenceRequest {
         UnindexedReferenceRequest {
-            hashes: serde_json::to_string(hashes).unwrap(),
+            hashes: serde_json::to_string(&hashes).unwrap(),
             auth: CONFIG.get_auth_token()
         }
     }
@@ -27,7 +27,7 @@ pub(crate) struct UnindexedReferencesResponse {
     pub(crate) unindexed_hashes: Vec<String>,
 }
 
-pub(crate) async fn request_unindexed_references(client: &Client, hashes: &Vec<String>) -> Result<UnindexedReferencesResponse, reqwest::Error> {
+pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&String>) -> UnindexedReferencesResponse {
     let unindexed_references_payload: UnindexedReferenceRequest  = UnindexedReferenceRequest::new(hashes);
     let url = format!("{}/unindexed", CONFIG.get_api_location());
     let res = client.post(&url)
@@ -45,10 +45,13 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: &Vec<S
                 }
                 _ => {
                     let unindexed_references_response: UnindexedReferencesResponse = res.json().await.unwrap();
-                    Ok(unindexed_references_response)
+                    unindexed_references_response
                 }
             }
         },
-        Err(err) => Err(err)
+        Err(e) => {
+            println!("Error: Could not get unindexed hashes: {}", e);
+            UnindexedReferencesResponse{ unindexed_hashes: Vec::new() }
+        }
     }
 }

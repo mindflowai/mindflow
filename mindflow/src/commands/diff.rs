@@ -18,14 +18,6 @@ impl Diff {
 
         let prompt = generate_diff_prompt(&self.diff_args).await;
         let request_prompt_response = request_prompt(&client, prompt).await;   
-        
-        match request_prompt_response {
-            Ok(response) => {
-                println!("{}", response.text);
-            },
-            Err(e) => {
-                panic!("Error: {}", e);
-            }
-        };
+        println!("{}", request_prompt_response.text);
     }
 }
