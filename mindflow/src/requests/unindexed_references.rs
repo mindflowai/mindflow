@@ -35,17 +35,25 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&S
         .send()
         .await;
 
-    // Through error if 400 status
+    // match server response
     match res {
         Ok(res) => {
+            // match status code
             match res.status().as_u16() {
                 400 => {
                     println!("Invalid authorization token.");
                     process::exit(1);
                 }
                 _ => {
-                    let unindexed_references_response: UnindexedReferencesResponse = res.json().await.unwrap();
-                    unindexed_references_response
+                    match res.json().await {
+                        Ok(unindexed_references_response) => {
+                            return unindexed_references_response
+                        }
+                        Err(e) => {
+                            println!("Error: Could not get unindexed hashes: {}", e);
+                            process::exit(1);
+                        }
+                    }
                 }
             }
         },

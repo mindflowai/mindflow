@@ -34,16 +34,23 @@ pub(crate) async fn request_prompt(client: &Client, prompt: String) -> PromptRes
         .send()
         .await;
 
+    // match server response
     match res {
         Ok(res) => {
+            // match status code
             match res.status().as_u16() {
                 400 => {
                     println!("Invalid authorization token.");
                     process::exit(1);
                 }
                 _ => {
-                    let prompt_response: PromptResponse = res.json().await.unwrap();
-                    return prompt_response
+                    match res.json().await {
+                        Ok(prompt_response) => { return prompt_response },
+                        Err(e) => {
+                            println!("Error: Could not get prompt response: {}", e);
+                            process::exit(1);
+                        }
+                    }
                 }
             }
         },

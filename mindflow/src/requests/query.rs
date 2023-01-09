@@ -38,16 +38,23 @@ pub(crate) async fn request_query(client:&Client, query_text: String, processed_
         .send()
         .await;
 
+    // match server response
     match res {
         Ok(res) => {
+            // match status code
             match res.status().as_u16() {
                 400 => {
                     println!("Invalid authorization token.");
                     process::exit(1);
                 }
                 _ => {
-                    let query_response: QueryResponse = res.json().await.unwrap();
-                    return query_response
+                    match res.json().await {
+                        Ok(query_response) => { return query_response },
+                        Err(e) => {
+                            println!("Error: Could not get query response: {}", e);
+                            process::exit(1);
+                        }
+                    }
                 }
             }
         },

@@ -39,9 +39,12 @@ pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<
 
     let url = format!("{}/index", CONFIG.get_api_location());
     let res = client.post(&url).json(&index_reference_request).send().await;
+    
+    // match server response
     match res {
-        Ok(_) => {
-            match res.unwrap().status().as_u16() {
+        Ok(res) => {
+            // match status code
+            match res.status().as_u16() {
                 400 => {
                     println!("Invalid authorization token.");
                     process::exit(1);

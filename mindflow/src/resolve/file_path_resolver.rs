@@ -65,8 +65,7 @@ impl Resolved for ResolvedFilePath {
         };
         let mut hasher = Sha256::new();
         hasher.update(text_bytes);
-        let file_hash = format!("{:x}", hasher.finalize());
-        Some(file_hash)
+        Some(format!("{:x}", hasher.finalize()))
     }
 }
 
@@ -81,16 +80,30 @@ impl PathResolver {
             } 
             else {
                 let mut file_paths: Vec<String> = Vec::new();
-                for entry in fs::read_dir(path).unwrap() {
-                    let entry = entry.unwrap();
-                    let path = entry.path();
-                    if path.is_dir() {
-                        file_paths.extend(self.extract_files(&path));
-                    } else {
-                        file_paths.push(path.to_string_lossy().to_string());
+                match fs::read_dir(path) {
+                    Ok(entries) => {
+                        entries.for_each(|entry| {
+                            match entry {
+                                Ok(entry) => {
+                                    let path = entry.path();
+                                    if path.is_dir() {
+                                        file_paths.extend(self.extract_files(&path));
+                                    } else {
+                                        file_paths.push(path.to_string_lossy().to_string());
+                                    }
+                                },
+                                Err(_e) => {
+                                    log::debug!("Could not read directory: {}", path.to_string_lossy());
+                                }
+                            }
+                        });
+                        return file_paths
+                    },
+                    Err(_e) => {
+                        log::debug!("Could not read directory: {}", path.to_string_lossy());
+                        return file_paths
                     }
                 }
-                file_paths
             }
         } else {
             vec![path.to_string_lossy().to_string()] 
