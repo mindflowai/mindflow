@@ -7,6 +7,8 @@ use reqwest::{Client};
 
 use crate::utils::config::{CONFIG};
 
+use super::status::http_status::HttpStatus;
+
 #[derive(Serialize)]
 pub(crate) struct UnindexedReferenceRequest {
     pub(crate) hashes: String,
@@ -34,36 +36,49 @@ pub(crate) struct UnindexedReferencesResponse {
 pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&str>) -> UnindexedReferencesResponse {
     let unindexed_references_payload: UnindexedReferenceRequest  = UnindexedReferenceRequest::new(hashes);
     let url = format!("{}/unindexed", CONFIG.get_api_location());
-    let res = client.post(&url)
+    let res = match client.post(&url)
         .json(&unindexed_references_payload)
         .send()
-        .await;
+        .await {
+            Ok(res) => res,
+            Err(_e) => { 
+                println!("Error: Could not get unindexed hashes");
+                process::exit(1) 
+            },
+        };
 
-    // match server response
-    match res {
-        Ok(res) => {
-            // match status code
-            match res.status().as_u16() {
-                400 => {
-                    println!("Invalid authorization token.");
+    // match status code
+    let status = match res.status().as_u16() {
+        200 => HttpStatus::Ok,
+        400 => HttpStatus::BadRequest,
+        401 => HttpStatus::Unauthorized,
+        _   => HttpStatus::InternalServerError
+    };
+
+    // match response
+    match status {
+        HttpStatus::Ok => {
+            match res.json().await {
+                Ok(unindexed_references_response) => {
+                    unindexed_references_response
+                }
+                Err(e) => {
+                    println!("Error: Could not get unindexed hashes: {}", e);
                     process::exit(1);
                 }
-                _ => {
-                    match res.json().await {
-                        Ok(unindexed_references_response) => {
-                            unindexed_references_response
-                        }
-                        Err(e) => {
-                            println!("Error: Could not get unindexed hashes: {}", e);
-                            process::exit(1);
-                        }
-                    }
-                }
             }
-        },
-        Err(e) => {
-            println!("Error: Could not get unindexed hashes: {}", e);
-            UnindexedReferencesResponse{ unindexed_hashes: Vec::new() }
+        }
+        HttpStatus::BadRequest => {
+            println!("Error: Bad Request.");
+            process::exit(1);
+        }
+        HttpStatus::Unauthorized => {
+            println!("Invalid authorization token.");
+            process::exit(1);
+        }
+        HttpStatus::InternalServerError => {
+            println!("Error: Could not get unindexed hashes");
+            process::exit(1);
         }
     }
 }

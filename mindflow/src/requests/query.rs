@@ -8,6 +8,8 @@ use reqwest::{Client};
 
 use crate::utils::config::{CONFIG};
 
+use super::status::http_status::HttpStatus;
+
 #[derive(Serialize)]
 pub(crate) struct QueryRequest {
     pub(crate) query_text: String,
@@ -33,35 +35,47 @@ pub(crate) struct QueryResponse {
 // Send a query request off to the Mindflow server to get a response.
 pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>) -> QueryResponse {
     let query = QueryRequest::new(query_text, processed_hashes);
-    let res = client
+    let res = match client
         .post(&format!("{}/query", CONFIG.get_api_location()))
         .json(&query)
         .send()
-        .await;
+        .await {
+            Ok(res) => res,
+            Err(e) => {
+                println!("Error: Could not send query request: {}", e);
+                process::exit(1);
+            }
+        };
+    
+    // match status code
+    let status = match res.status().as_u16() {
+        200 => HttpStatus::Ok,
+        400 => HttpStatus::BadRequest,
+        401 => HttpStatus::Unauthorized,
+        _   => HttpStatus::InternalServerError
+    };
 
-    // match server response
-    match res {
-        Ok(res) => {
-            // match status code
-            match res.status().as_u16() {
-                400 => {
-                    println!("Invalid authorization token.");
+    // match response
+    match status {
+        HttpStatus::Ok => {
+            match res.json().await {
+                Ok(query_response) => query_response,
+                Err(e) => {
+                    println!("Error: Could not get query response: {}", e);
                     process::exit(1);
                 }
-                _ => {
-                    match res.json().await {
-                        Ok(query_response) => query_response,
-                        Err(e) => {
-                            println!("Error: Could not get query response: {}", e);
-                            process::exit(1);
-                        }
-                    }
-                }
             }
-        },
-        Err(e) => {
-            // Throw error
-            println!("Error: Could not get query response: {}", e);
+        }
+        HttpStatus::BadRequest => {
+            println!("Error: Bad Request.");
+            process::exit(1);
+        }
+        HttpStatus::Unauthorized => {
+            println!("Invalid authorization token.");
+            process::exit(1);
+        }
+        HttpStatus::InternalServerError => {
+            println!("Error: Could not get query response");
             process::exit(1);
         }
     }

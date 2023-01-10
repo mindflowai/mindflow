@@ -6,6 +6,7 @@ use std::process;
 
 use crate::utils::config::{CONFIG};
 use crate::utils::reference::Reference;
+use crate::requests::status::http_status::HttpStatus;
        
 #[derive(Serialize)]
 pub(crate) struct IndexReferencesRequest {
@@ -30,24 +31,35 @@ pub(crate) async fn request_index_references(client: &Client, unindexed_referenc
     let index_reference_request = IndexReferencesRequest::new(unindexed_references);
 
     let url = format!("{}/index", CONFIG.get_api_location());
-    let res = client.post(&url).json(&index_reference_request).send().await;
+    let res = match client.post(&url).json(&index_reference_request).send().await {
+        Ok(res) => res,
+        Err(_e) => { process::exit(1) },
+    };
     
-    // match server response
-    match res {
-        Ok(res) => {
-            // match status code
-            match res.status().as_u16() {
-                400 => {
-                    println!("Invalid authorization token.");
-                    process::exit(1);
-                }
-                _ => {
-                    log::info!("Successfully indexed references.");
-                }
-            }
-        },
-        Err(e) => {
-            log::error!("Error indexing references: {}", e);
+    // match status code
+    let status = match res.status().as_u16() {
+        200 => HttpStatus::Ok,
+        400 => HttpStatus::BadRequest,
+        401 => HttpStatus::Unauthorized,
+        _   => HttpStatus::InternalServerError
+    };
+
+    // match response
+    match status {
+        HttpStatus::Ok => {
+            println!("References indexed.");
+        }
+        HttpStatus::BadRequest => {
+            println!("Error: Bad Request.");
+            process::exit(1);
+        }
+        HttpStatus::Unauthorized => {
+            println!("Invalid authorization token.");
+            process::exit(1);
+        }
+        HttpStatus::InternalServerError => {
+            println!("Error: Could not index references.");
+            process::exit(1);
         }
     }
 }

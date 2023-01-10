@@ -22,8 +22,8 @@ impl ResolvedFilePath {
     pub fn create_reference(&self) -> Option<Reference> {
         let text_bytes = match fs::read(self.path.clone()) {
             Ok(bytes) => bytes,
-            Err(_e) => {
-                log::debug!("Could not read file: {}", self.path);
+            Err(e) => {
+                log::debug!("Could not read file: {}. error {:?}", self.path, e);
                 return None
             }
         };
@@ -32,8 +32,7 @@ impl ResolvedFilePath {
                 let mut hasher = Sha256::new();
                 hasher.update(&text_bytes);
                 let file_hash = format!("{:x}", hasher.finalize());
-                let reference = Reference::new("file".to_string(), file_hash, text.to_string(), text_bytes.len(), self.path.clone());
-                Some(reference)
+                Some(Reference::new("file".to_string(), file_hash, text.to_string(), self.path.clone()))
             },
             Err(_e) => {
                 log::debug!("Could not convert bytes to utf8: {}", self.path);
@@ -49,8 +48,8 @@ impl ResolvedFilePath {
     pub fn size_bytes(&self) -> Option<u64> {
         match fs::metadata(self.path.clone()) {
             Ok(meta_data) => Some(meta_data.len()),
-            Err(_e) => {
-                log::debug!("Could not read file: {}", self.path);
+            Err(e) => {
+                log::debug!("Could not read file: {}. Error: {:?}", self.path, e);
                 None
             }
         }
@@ -59,13 +58,17 @@ impl ResolvedFilePath {
     pub fn text_hash(&self) -> Option<String> {
         let text_bytes = match fs::read(self.path.clone()) {
             Ok(bytes) => bytes,
-            Err(_e) => {
-                log::debug!("Could not read file: {}", self.path);
+            Err(e) => {
+                log::debug!("Could not read file: {}. Error: {:?}", self.path, e);
                 return None
             }
         };
+        
+        // Create a Sha256 hasher
         let mut hasher = Sha256::new();
         hasher.update(text_bytes);
+
+        // Create and return the sha256 hash of the file
         Some(format!("{:x}", hasher.finalize()))
     }
 }
@@ -75,40 +78,46 @@ pub struct PathResolver {}
 
 impl PathResolver {
     pub fn extract_files(&self, path: &Path) -> Vec<String> {
-        // println!("Extracting files from: {}", path.to_string_lossy());
-        if path.is_dir() {
-            if is_within_git_repo(path) {
-                get_git_files(path)
-            } 
-            else {
-                let mut file_paths: Vec<String> = Vec::new();
-                match fs::read_dir(path) {
-                    Ok(entries) => {
-                        entries.for_each(|entry| {
-                            match entry {
-                                Ok(entry) => {
-                                    let path = entry.path();
-                                    if path.is_dir() {
-                                        file_paths.extend(self.extract_files(&path));
-                                    } else {
-                                        file_paths.push(path.to_string_lossy().to_string());
-                                    }
+        // If the path is a file, return it as the only item in a vector
+        if path.is_file() {
+            return vec![path.to_string_lossy().to_string()];
+        }
+
+        // Check if the path is within a git repository
+        if is_within_git_repo(path) {
+            return get_git_files(path);
+        } 
+
+        // Read all the files and directories in the path, and recursively extract files from directories
+        let mut file_paths = Vec::new();
+        match fs::read_dir(path) {
+            Ok(entries) => {
+                for entry in entries {
+                    match entry {
+                        Ok(entry) => {
+                            let path = entry.path();
+                            match path.is_dir() {
+                                true => {
+                                    file_paths.extend(self.extract_files(&path));
                                 },
-                                Err(_e) => {
-                                    log::debug!("Could not read directory: {}", path.to_string_lossy());
+                                false => {
+                                    file_paths.push(path.to_string_lossy().to_string());
                                 }
                             }
-                        });
-                        file_paths
-                    },
-                    Err(_e) => {
-                        log::debug!("Could not read directory: {}", path.to_string_lossy());
-                        file_paths
+                        },
+                        // If the directory could not be read, log the error
+                        Err(e) => {
+                            log::debug!("Could not read directory: {}. Error: {:?}", path.to_string_lossy(), e);
+                        }
                     }
                 }
+                file_paths
+            },
+            // If the directory could not be read, log the error
+            Err(e) => {
+                log::debug!("Could not read directory: {}. Error: {:?}", path.to_string_lossy(), e);
+                file_paths
             }
-        } else {
-            vec![path.to_string_lossy().to_string()] 
         }
     }
 
@@ -118,9 +127,10 @@ impl PathResolver {
     }
 
     pub async fn resolve(&self, path: &str) -> Vec<Resolved> {
-        let file_paths = self.extract_files(Path::new(path));
         // Create a ResolvedPath for each file path and return it as a vec
-        let resolved_paths: Vec<Resolved> = file_paths.iter().map(|file_path| Resolved::ResolvedFilePath(ResolvedFilePath { path: file_path.to_string() })).collect();
-        resolved_paths
+        self.extract_files(Path::new(path))
+            .into_iter()
+            .map(|file_path| Resolved::ResolvedFilePath(ResolvedFilePath { path: file_path }))
+            .collect()
     }
 }

@@ -6,6 +6,8 @@ use reqwest::{Client};
 
 use crate::utils::config::{CONFIG};
 
+use super::status::http_status::HttpStatus;
+
 #[derive(Serialize)]
 pub(crate) struct PromptRequest {
     pub(crate) prompt: String,
@@ -29,34 +31,47 @@ pub(crate) struct PromptResponse {
 // Sends a basic completion prompt to the Mindflow server to get a response from GPT model.
 pub(crate) async fn request_prompt(client: &Client, prompt: String) -> PromptResponse {
     let prompt_request: PromptRequest = PromptRequest::new(prompt);
-    let res = client
+    let res = match client
         .post(&format!("{}/prompt", CONFIG.get_api_location()))
         .json(&prompt_request)
         .send()
-        .await;
+        .await {
+            Ok(res) => res,
+            Err(e) => {
+                println!("Error: Could not send prompt request: {}", e);
+                process::exit(1);
+            }
+        };
+    
+    // match status code
+    let status = match res.status().as_u16() {
+        200 => HttpStatus::Ok,
+        400 => HttpStatus::BadRequest,
+        401 => HttpStatus::Unauthorized,
+        _   => HttpStatus::InternalServerError
+    };
 
-    // match server response
-    match res {
-        Ok(res) => {
-            // match status code
-            match res.status().as_u16() {
-                400 => {
-                    println!("Invalid authorization token.");
+    // match response
+    match status {
+        HttpStatus::Ok => {
+            match res.json().await {
+                Ok(prompt_response) => prompt_response,
+                Err(e) => {
+                    println!("Error: Could not get prompt response: {}", e);
                     process::exit(1);
                 }
-                _ => {
-                    match res.json().await {
-                        Ok(prompt_response) => prompt_response,
-                        Err(e) => {
-                            println!("Error: Could not get prompt response: {}", e);
-                            process::exit(1);
-                        }
-                    }
-                }
             }
-        },
-        Err(e) => {
-            println!("Error: Could not get prompt response: {}", e);
+        }
+        HttpStatus::BadRequest => {
+            println!("Error: Bad Request.");
+            process::exit(1);
+        }
+        HttpStatus::Unauthorized => {
+            println!("Invalid authorization token.");
+            process::exit(1);
+        }
+        HttpStatus::InternalServerError => {
+            println!("Error: Could not index references.");
             process::exit(1);
         }
     }

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::mem;
 
 #[derive(Deserialize, Serialize)]
 #[derive(Clone)]
@@ -14,12 +15,12 @@ pub struct Reference {
 }
 
 impl Reference {
-    pub fn new(r#type: String, hash: String, text: String, size: usize, path: String) -> Reference {
+    pub fn new(r#type: String, hash: String, text: String, path: String) -> Reference {
         Reference {
             r#type,
             hash,
+            size: mem::size_of_val(&text),
             text,
-            size,
             path,
         }
     }
