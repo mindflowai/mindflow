@@ -55,7 +55,7 @@ impl Resolved {
 
 // If more resolvers are added, the program must handle the returned resolved types using dynamic dispatch.
 // Or better, I could use enums to represent the different types of resolvers which would be more efficient.
-pub(crate) async fn resolve(references: &Vec<String>) -> Vec<Resolved> {
+pub(crate) async fn resolve(references: &[String]) -> Vec<Resolved> {
     let resolvers = [Resolver::PathResolver(PathResolver{})];
     let mut resolved_references: Vec<Resolved> = Vec::new();
     for reference in references {
