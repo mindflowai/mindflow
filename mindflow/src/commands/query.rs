@@ -1,8 +1,10 @@
 use clap::{Parser, ArgAction};
 
-use crate::resolve::resolve::{resolve};
-use crate::requests::query::{request_query};
+use crate::resolve::resolve::resolve;
+use crate::requests::query::request_query;
 use crate::resolve::generate_index::generate_index;
+use crate::utils::response::handle_response_text;
+
 
 #[derive(Parser)]
 pub(crate) struct Query {
@@ -12,9 +14,7 @@ pub(crate) struct Query {
     pub(crate) references: Vec<String>,
     #[arg(short = 'i', long = "index", action = ArgAction::SetTrue, value_name = "Specifies whether you want to create an index for the files you query on.")]
     pub(crate) index: bool,
-    #[arg(short = 's', long = "skip-response", action = ArgAction::SetTrue, value_name = "Skip response from GPT model.")]
-    pub(crate) skip_response: bool,
-    #[arg(short = 't', long = "clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
+    #[arg(short = 'c', long = "clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
     pub(crate) clipboard: bool,
 }
 
@@ -40,11 +40,6 @@ impl Query {
 
         // Send query to Mindflow server.
         let request_query_response = request_query(&client, self.query.clone(), resolved_hashes).await;
-        println!("{}", request_query_response.text);
-
-        // Implement response skip and copy to clipboard later
-        if !self.skip_response {
-            //println!("{}", query_response.text);
-        }
+        handle_response_text(request_query_response.text, self.clipboard);
     }
 }
