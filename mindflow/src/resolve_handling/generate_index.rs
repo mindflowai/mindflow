@@ -32,20 +32,23 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
         let reference_hash_map_keys =references_hash_map.keys().map(|key| key.as_str()).collect();
         let unindexed_hashes = request_unindexed_references(&client, reference_hash_map_keys).await.unindexed_hashes;
         if !unindexed_hashes.is_empty() {
-            let unindexed_references: Vec<Reference> = unindexed_hashes
-                .into_iter()
-                .filter_map(|k| {
-                    references_hash_map.get(k.as_str()).map(|data| {
-                        data.to_owned()
-                    })
-
-                }).collect();
+            let unindexed_references = filter_unindexed_references(references_hash_map, unindexed_hashes);
             request_index_references(&client, unindexed_references).await;
         }
 
         // Update progress.
         pb.set_position(packet_index as u64);
     }
+}
+
+fn filter_unindexed_references(references_hash_map: HashMap<String, Reference>, unindexed_hashes: Vec<String>) -> Vec<Reference> {
+    unindexed_hashes.into_iter()
+        .filter_map(|k| {
+            references_hash_map.get(k.as_str()).map(|data| {
+                data.to_owned()
+            })
+
+        }).collect()
 }
 
 // Break references into packets of size PACKET_SIZE and send them to the server.

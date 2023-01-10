@@ -1,7 +1,7 @@
-use crate::resolve_handling::file_path_resolver::PathResolver;
 use crate::utils::reference::Reference;
 
-use super::{file_path_resolver::ResolvedFilePath};
+use super::resolvers::file_path_resolver::{PathResolver, ResolvedFilePath};
+
 
 // This code can be improved by using enums to represent the different types of resolvers and resolved types.
 pub enum Resolver {

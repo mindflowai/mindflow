@@ -10,9 +10,8 @@ use std::str::from_utf8;
 
 use sha2::{Digest, Sha256};
 
+use crate::resolve_handling::resolve::Resolved;
 use crate::utils::{git::{get_git_files, is_within_git_repo}, reference::Reference};
-
-use super::resolve::Resolved;
 
 pub struct ResolvedFilePath {
     pub path: String,
