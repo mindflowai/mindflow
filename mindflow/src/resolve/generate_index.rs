@@ -12,7 +12,7 @@ use crate::utils::reference::Reference;
 
 use super::resolve::Resolved;
 
-// The maximum number of bytes that can be sent in a single request - barr overflow.
+// The maximum number of bytes that can be sent in a single request.
 const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
 // Checks if the references are indexed and if not, indexes them.
@@ -33,7 +33,15 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
         let reference_hash_map_keys =references_hash_map.keys().map(|key| key.as_str()).collect();
         let unindexed_hashes = request_unindexed_references(&client, reference_hash_map_keys).await.unindexed_hashes;
         if !unindexed_hashes.is_empty() {
-            request_index_references(&client, references_hash_map, unindexed_hashes).await;
+            let unindexed_references: Vec<Reference> = unindexed_hashes
+                .into_iter()
+                .filter_map(|k| {
+                    references_hash_map.get(k.as_str()).map(|data| {
+                        data.to_owned()
+                    })
+
+                }).collect();
+            request_index_references(&client, unindexed_references).await;
         }
 
         // Update progress.

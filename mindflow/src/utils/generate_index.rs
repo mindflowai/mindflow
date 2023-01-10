@@ -31,7 +31,15 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
 
         let unindexed_hashes = request_unindexed_references(&client, references_hash_map.keys().collect()).await.unindexed_hashes;
         if !unindexed_hashes.is_empty() {
-            request_index_references(&client, references_hash_map, unindexed_hashes).await;
+            let unindexed_references: Vec<Reference> = unindexed_hashes
+                .into_iter()
+                .filter_map(|k| {
+                    references_hash_map.get(k.as_str()).map(|data| {
+                        data.to_owned()
+                    })
+
+                }).collect();
+            request_index_references(&client, unindexed_references).await;
         }
 
         pb.set_position(packet_index);
