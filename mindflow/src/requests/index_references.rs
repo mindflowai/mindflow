@@ -2,7 +2,6 @@
 
 use serde::{Serialize};
 use reqwest::{Client};
-use std::collections::{HashMap};
 use std::process;
 
 use crate::utils::config::{CONFIG};
