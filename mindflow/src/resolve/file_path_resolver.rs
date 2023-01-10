@@ -11,15 +11,16 @@ use std::str::from_utf8;
 use sha2::{Digest, Sha256};
 
 use crate::utils::{git::{get_git_files, is_within_git_repo}, reference::Reference};
-use crate::resolve::resolve::Resolved;
+
+use super::resolve::Resolved;
 
 pub struct ResolvedFilePath {
     pub path: String,
 }
 
 // ResolvedFilePath implements the Resolved trait create a reference and extract other data about the file. 
-impl Resolved for ResolvedFilePath {
-    fn create_reference(&self) -> Option<Reference> {
+impl ResolvedFilePath {
+    pub fn create_reference(&self) -> Option<Reference> {
         let text_bytes = match fs::read(self.path.clone()) {
             Ok(bytes) => bytes,
             Err(_e) => {
@@ -42,11 +43,11 @@ impl Resolved for ResolvedFilePath {
         }
     }
 
-    fn r#type(&self) -> String {
-        "file".to_string()  
+    pub fn get_path(&self) -> String {
+        self.path.clone()
     }
 
-    fn size_bytes(&self) -> Option<u64> {
+    pub fn size_bytes(&self) -> Option<u64> {
         match fs::metadata(self.path.clone()) {
             Ok(meta_data) => return Some(meta_data.len()),
             Err(_e) => {
@@ -56,7 +57,7 @@ impl Resolved for ResolvedFilePath {
         };
     }
 
-    fn text_hash(&self) -> Option<String> {
+    pub fn text_hash(&self) -> Option<String> {
         let text_bytes = match fs::read(self.path.clone()) {
             Ok(bytes) => bytes,
             Err(_e) => {
@@ -71,7 +72,7 @@ impl Resolved for ResolvedFilePath {
 }
 
 // ResolvedFilePath implements the Resolved trait to resolve references in the PathResolved type.
-pub(crate) struct PathResolver {}
+pub struct PathResolver {}
 
 impl PathResolver {
     pub fn extract_files(&self, path: &Path) -> Vec<String> {
@@ -117,10 +118,10 @@ impl PathResolver {
         path.is_dir() || path.is_file()
     }
 
-    pub async fn resolve(&self, path: &str) -> Vec<ResolvedFilePath> {
+    pub async fn resolve(&self, path: &str) -> Vec<Resolved> {
         let file_paths = self.extract_files(Path::new(path));
         // Create a ResolvedPath for each file path and return it as a vec
-        let resolved_paths: Vec<ResolvedFilePath> = file_paths.iter().map(|file_path| ResolvedFilePath { path: file_path.to_string() }).collect();
+        let resolved_paths: Vec<Resolved> = file_paths.iter().map(|file_path| Resolved::ResolvedFilePath(ResolvedFilePath { path: file_path.to_string() })).collect();
         resolved_paths
     }
 }

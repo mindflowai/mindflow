@@ -1,7 +1,7 @@
 use clap::{Parser};
 
 use crate::resolve::resolve::{resolve};
-use crate::utils::generate_index::generate_index;
+use crate::resolve::generate_index::generate_index;
 
 #[derive(Parser)]
 pub(crate) struct Generate {

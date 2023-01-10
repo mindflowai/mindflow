@@ -8,15 +8,14 @@ use tokio::task::spawn_blocking;
 
 use crate::requests::unindexed_references::{request_unindexed_references};
 use crate::requests::index_references::{request_index_references};
-use crate::resolve::file_path_resolver::ResolvedFilePath;
-use crate::resolve::resolve::Resolved;
 use crate::utils::reference::Reference;
+
+use super::resolve::Resolved;
 
 const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
-// TODO: This function is too long. Break it up.
 // Checks if the references are indexed and if not, indexes them.
-pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) {
+pub async fn generate_index(resolved_paths: Vec<Resolved>) {
     let client = Client::new();
 
     let packets = create_packets(resolved_paths);
@@ -41,31 +40,31 @@ pub async fn generate_index(resolved_paths: Vec<ResolvedFilePath>) {
 }
 
 // Break references into packets of size PACKET_SIZE and send them to the server.
-fn create_packets(resolved_paths: Vec<ResolvedFilePath>) -> Vec<Vec<ResolvedFilePath>> {
-    let sizes: Vec<u64> = resolved_paths
+fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
+    let sizes: Vec<u64> = all_resolved
         .par_iter()
-        .filter_map(|resolved_path| {
-            resolved_path.size_bytes()
+        .filter_map(|resolved| {
+            resolved.size_bytes()
         })
         .collect();
 
-    let mut packets: Vec<Vec<ResolvedFilePath>> = Vec::new();
-    let mut packet: Vec<ResolvedFilePath> = Vec::new();
+    let mut packets: Vec<Vec<Resolved>> = Vec::new();
+    let mut packet: Vec<Resolved> = Vec::new();
 
     let mut packet_size: u64 = 0;
     let mut total_size = 0;
 
-    for (resolved_path, resolved_size) in resolved_paths.into_iter().zip(sizes) {
+    for (resolved, resolved_size) in all_resolved.into_iter().zip(sizes) {
         if resolved_size > PACKET_SIZE {
-            println!("LARGE FILE: {}", resolved_path.path);
+            println!("LARGE FILE: {}", resolved.get_path());
             continue
         }
         if packet_size + resolved_size <= PACKET_SIZE {
-            packet.push(resolved_path);
+            packet.push(resolved);
             packet_size += resolved_size;
         } else {
             packets.push(packet);
-            packet = vec![resolved_path];
+            packet = vec![resolved];
             total_size += packet_size;
             packet_size = resolved_size;
         }
@@ -90,7 +89,7 @@ fn create_progress_bar(bar_size: u64) -> ProgressBar {
 
 // Convert packet of ResolvedFilePaths to packet of References.
 // Blocks the current thread while the packet is being processed.
-async fn resolve_packet_to_references(packet: Vec<ResolvedFilePath>) -> Vec<Reference> {
+async fn resolve_packet_to_references(packet: Vec<Resolved>) -> Vec<Reference> {
     let result = spawn_blocking( move || {
         let reference_vec: Vec<Reference> = packet
             .par_iter()

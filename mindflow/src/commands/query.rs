@@ -2,8 +2,7 @@ use clap::{Parser, ArgAction};
 
 use crate::resolve::resolve::{resolve};
 use crate::requests::query::{request_query};
-use crate::utils::generate_index::generate_index;
-use crate::resolve::resolve::Resolved;
+use crate::resolve::generate_index::generate_index;
 
 #[derive(Parser)]
 pub(crate) struct Query {
@@ -25,9 +24,9 @@ impl Query {
         let client = reqwest::Client::new();
 
         // Get resolved references and their hashes
-        let resolved = resolve(&self.references).await;
-        let resolved_hashes = resolved.iter().filter_map(|resolved_path| 
-            match resolved_path.text_hash() {
+        let all_resolved = resolve(&self.references).await;
+        let resolved_hashes = all_resolved.iter().filter_map(|resolved| 
+            match resolved.text_hash() {
                 Some(hash) => Some(hash),
                 None => None
             }
@@ -36,7 +35,7 @@ impl Query {
         // Generate index in Mindflow server if specified.
         if self.index {
             println!("Generating index...");
-            generate_index(resolved).await;
+            generate_index(all_resolved).await;
         }
 
         // Send query to Mindflow server.

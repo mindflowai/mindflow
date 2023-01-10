@@ -4,20 +4,60 @@ use crate::utils::reference::Reference;
 use super::{file_path_resolver::ResolvedFilePath};
 
 // This code can be improved by using enums to represent the different types of resolvers and resolved types.
-
-// Resolved is a trait that all resolved references must implement.
-pub(crate) trait Resolved {
-    fn create_reference(&self) -> Option<Reference>;
-    fn r#type(&self) -> String;
-    fn size_bytes(&self) -> Option<u64>;
-    fn text_hash(&self) -> Option<String>;
+pub enum Resolver {
+    PathResolver(PathResolver),
 }
+
+pub enum Resolved {
+    ResolvedFilePath(ResolvedFilePath),
+}
+
+impl Resolver {
+    pub fn should_resolve(&self, path: &String) -> bool {
+        match self {
+            Resolver::PathResolver(resolver) => resolver.should_resolve(path)
+        }
+    }
+    pub async fn resolve(&self, path: &str) -> Vec<Resolved> {
+        match self {
+            Resolver::PathResolver(resolver) => resolver.resolve(path).await
+        }
+    }
+}
+
+impl Resolved {
+    pub fn create_reference(&self) -> Option<Reference> {
+        match self {
+            Resolved::ResolvedFilePath(resolved_file_path) => resolved_file_path.create_reference(),
+        }
+    }
+
+    pub fn get_path(&self) -> String {
+        match self {
+            Resolved::ResolvedFilePath(resolved_file_path) => resolved_file_path.get_path(),
+        }
+    }
+
+    pub fn size_bytes(&self) -> Option<u64> {
+        match self {
+            Resolved::ResolvedFilePath(resolved_file_path) => resolved_file_path.size_bytes(),
+        }
+    }
+
+    pub fn text_hash(&self) -> Option<String> {
+        match self {
+            Resolved::ResolvedFilePath(resolved_file_path) => resolved_file_path.text_hash(),
+        }
+    }
+}
+
+
 
 // If more resolvers are added, the program must handle the returned resolved types using dynamic dispatch.
 // Or better, I could use enums to represent the different types of resolvers which would be more efficient.
-pub(crate) async fn resolve(references: &Vec<String>) -> Vec<ResolvedFilePath> {
-    let resolvers = [PathResolver{}];
-    let mut resolved_references: Vec<ResolvedFilePath> = Vec::new();
+pub(crate) async fn resolve(references: &Vec<String>) -> Vec<Resolved> {
+    let resolvers = [Resolver::PathResolver(PathResolver{})];
+    let mut resolved_references: Vec<Resolved> = Vec::new();
     for reference in references {
         let mut resolved = false;
         for resolver in resolvers.iter() {
@@ -33,26 +73,3 @@ pub(crate) async fn resolve(references: &Vec<String>) -> Vec<ResolvedFilePath> {
     }
     resolved_references
 }
-
-// // Enum to represent the different types of resolvers.
-// enum Resolver {
-//     Path(PathResolver),
-//     // Add other resolver types here
-// }
-
-// // Implement the `should_resolve` and `resolve` methods for each variant of the `Resolver` enum.
-// impl Resolver {
-//     fn should_resolve(&self, reference: &String) -> bool {
-//         match self {
-//             Resolver::Path(resolver) => resolver.should_resolve(reference),
-//             // Add other resolver types here
-//         }
-//     }
-
-//     async fn resolve(&self, reference: &String) -> Vec<ResolvedFilePath> {
-//         match self {
-//             Resolver::Path(resolver) => resolver.resolve(reference).await,
-//             // Add other resolver types here
-//         }
-//     }
-// }
