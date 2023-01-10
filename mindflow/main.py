@@ -4,11 +4,11 @@ This module contains the main CLI for Mindflow.
 import argparse
 import sys
 
-from mindflow.prompt_generator import generate_diff_prompt
+from mindflow.utils.prompt_generator import generate_diff_prompt
 from mindflow.requests.prompt import request_prompt
-from mindflow.resolve.resolve import resolve
+from mindflow.resolve_handling.resolve import resolve
 from mindflow.utils.token import set_token
-from mindflow.generate_index import generate_index
+from mindflow.resolve_handling.generate_index import generate_index
 from mindflow.requests.query import request_query
 
 
@@ -32,6 +32,7 @@ auth       Authorize Mindflow with JWT.
 
 """
 
+
 def _add_generate_args(parser):
     """
     Add arguments for the generate command.
@@ -43,6 +44,7 @@ def _add_generate_args(parser):
         help="Generate an index the references.",
     )
 
+
 def _add_reference_args(parser):
     """
     Add arguments for commands that require references to text.
@@ -53,6 +55,7 @@ def _add_reference_args(parser):
         help="A list of references to summarize (file path, API, web address).",
     )
 
+
 def _add_query_args(parser):
     """
     Add arguments for commands that require references to text.
@@ -60,6 +63,7 @@ def _add_query_args(parser):
     parser.add_argument(
         "query", type=str, help="The query you want to make on some data."
     )
+
 
 def _add_diff_args(parser):
     """
@@ -71,6 +75,7 @@ def _add_diff_args(parser):
         help="Contains all of the git diff args.",
     )
 
+
 def _add_auth_args(parser):
     """
     Add arguments for the diff command.
@@ -79,17 +84,17 @@ def _add_auth_args(parser):
     parser.add_argument(
         "token",
         type=str,
-        nargs='?',
+        nargs="?",
         help="JWT token used to authorize usage.",
     )
+
 
 def _add_ask_args(parser):
     """
     Add arguments for commands that require references to text.
     """
-    parser.add_argument(
-        "prompt", type=str, help="Prompt for GPT model."
-    )
+    parser.add_argument("prompt", type=str, help="Prompt for GPT model.")
+
 
 def _add_response_args(parser):
     parser.add_argument(
@@ -104,6 +109,7 @@ def _add_response_args(parser):
         action="store_true",
         help="Do not copy to clipboard (testing).",
     )
+
 
 class MindFlow:
     """
@@ -138,7 +144,7 @@ class MindFlow:
         _add_auth_args(parser)
         args = parser.parse_args(sys.argv[2:])
         set_token(args.token)
-    
+
     def ask(self):
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
@@ -181,7 +187,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         resolved_references = []
-        for reference in args.references:   
+        for reference in args.references:
             resolved_references.extend(resolve(reference))
 
         generate_index(resolved_references)
@@ -200,19 +206,23 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         resolved_references = []
-        for reference in args.references:   
+        for reference in args.references:
             resolved_references.extend(resolve(reference))
-        
+
         if args.index:
-            reference_hashes = generate_index(resolved_references)
-        else:
-            reference_hashes = [reference.text_hash for reference in resolved_references]
-            
+            generate_index(resolved_references)
+
+        reference_hashes = [
+            reference.text_hash for reference in resolved_references
+        ]
         response = request_query(args.query, reference_hashes)
         print(response)
 
     # Alias for query
     def q(self):
+        """
+        Query Alias
+        """
         return self.query()
 
 

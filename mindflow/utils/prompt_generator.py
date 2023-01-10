@@ -4,6 +4,7 @@ This module contains the logic for generating the prompt for the chatbot.
 import subprocess
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
+
 def generate_diff_prompt(args):
     """
     This function is used to generate a prompt for the chatbot based on the git diff.

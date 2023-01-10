@@ -1,10 +1,15 @@
-from mindflow.resolve.resolvers.path_resolver import PathResolver
+"""
+Module for resolving references to text.
+"""
+
+from mindflow.resolve_handling.resolvers.path_resolver import PathResolver
+
 
 def resolve(reference):
     """
     Resolves a reference to text.
     """
-    
+
     resolvers = [PathResolver()]
     for resolver in resolvers:
         if resolver.should_resolve(reference):

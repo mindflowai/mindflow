@@ -5,16 +5,18 @@ import hashlib
 import os
 import subprocess
 
-from mindflow.resolve.resolvers.base_resolver import BaseResolver, Resolved
+from mindflow.resolve_handling.resolvers.base_resolver import BaseResolver, Resolved
 from mindflow.utils.reference import Reference
+
 
 class ResolvedPath(Resolved):
     """
     Reference to a file or directory.
     """
+
     def __init__(self, path: str):
         self.path = path
-    
+
     @property
     def type(self) -> str:
         """
@@ -22,14 +24,13 @@ class ResolvedPath(Resolved):
         """
         return "file"
 
-
     @property
     def size_bytes(self) -> str:
         """
         File size in bytes.
         """
         return os.stat(self.path).st_size
-    
+
     @property
     def text_hash(self) -> str:
         """
@@ -42,7 +43,8 @@ class ResolvedPath(Resolved):
         Create a reference to a file or directory.
         """
         try:
-            text_bytes = open(self.path, "rb").read()
+            with open(self.path, "rb", encoding='utf-8') as file:
+                text_bytes = file.read()
             file_hash = hashlib.sha256(text_bytes).hexdigest()
             text = text_bytes.decode("utf-8")
             return Reference(
@@ -55,10 +57,12 @@ class ResolvedPath(Resolved):
         except UnicodeDecodeError:
             return None
 
+
 class PathResolver(BaseResolver):
     """
     Resolver for file or directory paths to text.
     """
+
     def _get_files(self, reference) -> list:
         """
         Get all files in a directory or a single file.
@@ -74,8 +78,7 @@ class PathResolver(BaseResolver):
             )
 
             return git_files
-                
-                
+
         return [reference]
 
     def should_resolve(self, reference) -> bool:
