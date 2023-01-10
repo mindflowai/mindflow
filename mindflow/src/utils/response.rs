@@ -9,7 +9,7 @@ pub fn handle_response_text(text: String, clipboard: bool) {
             panic!("Failed to copy to clipboard: {}", e);
         });
         println!("Response copied to clipboard!!!");
-        return ()
+        return
     }
     println!("{}", text);
 }

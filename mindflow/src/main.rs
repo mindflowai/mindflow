@@ -1,5 +1,5 @@
 pub mod utils;
-pub mod resolve;
+pub mod resolve_handling;
 pub mod commands;
 pub mod requests;
 pub mod command_helpers;

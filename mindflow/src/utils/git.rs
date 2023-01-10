@@ -10,11 +10,7 @@ pub fn is_within_git_repo(path: &Path) -> bool {
                 .arg("--git-dir")
                 .output()
                 .expect("failed to execute process");
-    if output.status.success() {
-        true
-    } else {
-        false
-    }
+    output.status.success()
 }
 
 pub fn get_git_files(path: &Path) -> Vec<String> {
@@ -26,5 +22,5 @@ pub fn get_git_files(path: &Path) -> Vec<String> {
                 .expect("failed to execute process");
 
     let git_files = String::from_utf8(output.stdout).expect("invalid utf8");
-    return git_files.lines().map(|s| format!("{}/{}", path.to_string_lossy(), s.to_string())).collect();
+    return git_files.lines().map(|s| format!("{}/{}", path.to_string_lossy(), s)).collect();
 }

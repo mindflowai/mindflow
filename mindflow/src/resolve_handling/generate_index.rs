@@ -8,28 +8,29 @@ use tokio::task::spawn_blocking;
 
 use crate::requests::unindexed_references::{request_unindexed_references};
 use crate::requests::index_references::{request_index_references};
-use crate::resolve::resolve::Resolved;
 use crate::utils::reference::Reference;
 
+use super::resolve::Resolved;
+
+// The maximum number of bytes that can be sent in a single request.
 const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
-// TODO: This function is too long. Break it up.
 // Checks if the references are indexed and if not, indexes them.
 pub async fn generate_index(resolved_paths: Vec<Resolved>) {
     let client = Client::new();
 
     let packets = create_packets(resolved_paths);
     let pb = create_progress_bar(packets.len() as u64);
-    let mut packet_index = 0;
 
-    for packet in packets {
+    for (packet_index, packet) in packets.into_iter().enumerate() {
         // Limits the number of packets whose text is loaded into memory at once.
-        let references = resolve_packet_to_references(packet).await;
-        let references_hash_map: HashMap<String, Reference> = references.into_iter().map(|reference| {
+        let references_hash_map: HashMap<String, Reference> = resolve_packet_to_references(packet).await.into_iter().map(|reference| {
             (reference.hash.clone(), reference)
         }).collect();
 
-        let unindexed_hashes = request_unindexed_references(&client, references_hash_map.keys().collect()).await.unindexed_hashes;
+        // Get the hashes of the references that are not indexed and index them.
+        let reference_hash_map_keys =references_hash_map.keys().map(|key| key.as_str()).collect();
+        let unindexed_hashes = request_unindexed_references(&client, reference_hash_map_keys).await.unindexed_hashes;
         if !unindexed_hashes.is_empty() {
             let unindexed_references: Vec<Reference> = unindexed_hashes
                 .into_iter()
@@ -42,8 +43,8 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
             request_index_references(&client, unindexed_references).await;
         }
 
-        pb.set_position(packet_index);
-        packet_index += 1;
+        // Update progress.
+        pb.set_position(packet_index as u64);
     }
 }
 
@@ -83,7 +84,7 @@ fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
         packets.push(packet);
     }
 
-    println!("Total content size: MB {}\n", format!("{:.2}", total_size as f64 / 1024.0 / 1024.0));
+    println!("Total content size: MB {}\n", formatted_content_size(total_size));
     packets
 }
 
@@ -98,7 +99,7 @@ fn create_progress_bar(bar_size: u64) -> ProgressBar {
 // Convert packet of ResolvedFilePaths to packet of References.
 // Blocks the current thread while the packet is being processed.
 async fn resolve_packet_to_references(packet: Vec<Resolved>) -> Vec<Reference> {
-    let result = spawn_blocking( move || {
+    spawn_blocking( move || {
         let reference_vec: Vec<Reference> = packet
             .par_iter()
             .filter_map(|resolved_path| {
@@ -106,6 +107,9 @@ async fn resolve_packet_to_references(packet: Vec<Resolved>) -> Vec<Reference> {
             })
             .collect();
         reference_vec
-    }).await.unwrap();
-    result
+    }).await.unwrap()
+}
+
+fn formatted_content_size(size: u64) -> String {
+    format!("{:.2}", size as f64 / 1024.0 / 1024.0)
 }

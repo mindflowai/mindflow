@@ -1,4 +1,4 @@
-use crate::resolve::file_path_resolver::PathResolver;
+use crate::resolve_handling::file_path_resolver::PathResolver;
 use crate::utils::reference::Reference;
 
 use super::{file_path_resolver::ResolvedFilePath};

@@ -18,8 +18,8 @@ pub(crate) struct QueryRequest {
 impl QueryRequest {
     pub fn new(query_text: String, reference_hashes: Vec<String>) -> QueryRequest {
         QueryRequest {
-            query_text: query_text,
-            reference_hashes: reference_hashes,
+            query_text,
+            reference_hashes,
             auth: CONFIG.get_auth_token()
         }
     }
@@ -50,7 +50,7 @@ pub(crate) async fn request_query(client:&Client, query_text: String, processed_
                 }
                 _ => {
                     match res.json().await {
-                        Ok(query_response) => { return query_response },
+                        Ok(query_response) => query_response,
                         Err(e) => {
                             println!("Error: Could not get query response: {}", e);
                             process::exit(1);

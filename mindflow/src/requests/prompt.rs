@@ -15,7 +15,7 @@ pub(crate) struct PromptRequest {
 impl PromptRequest {
     pub fn new(prompt: String) -> PromptRequest {
         PromptRequest {
-            prompt: prompt,
+            prompt,
             auth: CONFIG.get_auth_token()
         }
     }
@@ -46,7 +46,7 @@ pub(crate) async fn request_prompt(client: &Client, prompt: String) -> PromptRes
                 }
                 _ => {
                     match res.json().await {
-                        Ok(prompt_response) => { return prompt_response },
+                        Ok(prompt_response) => prompt_response,
                         Err(e) => {
                             println!("Error: Could not get prompt response: {}", e);
                             process::exit(1);

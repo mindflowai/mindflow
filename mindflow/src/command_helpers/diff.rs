@@ -2,7 +2,7 @@ use std::process::Command;
 use crate::utils::prompts::GIT_DIFF_PROMPT_PREFIX;
 
 // Generate a git diff prompt by executing the git diff command and appending the result to the GIT_DIFF_PROMPT_PREFIX
-pub async fn generate_diff_prompt(diffargs: &Vec<String>) -> String {
+pub async fn generate_diff_prompt(diffargs: &[String]) -> String {
     let command = ["git", "diff"]
         .iter()
         .map(|s| s.to_string())

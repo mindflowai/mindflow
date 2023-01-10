@@ -51,7 +51,7 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&s
                 _ => {
                     match res.json().await {
                         Ok(unindexed_references_response) => {
-                            return unindexed_references_response
+                            unindexed_references_response
                         }
                         Err(e) => {
                             println!("Error: Could not get unindexed hashes: {}", e);

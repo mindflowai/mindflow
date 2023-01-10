@@ -49,12 +49,12 @@ impl ResolvedFilePath {
 
     pub fn size_bytes(&self) -> Option<u64> {
         match fs::metadata(self.path.clone()) {
-            Ok(meta_data) => return Some(meta_data.len()),
+            Ok(meta_data) => Some(meta_data.len()),
             Err(_e) => {
                 log::debug!("Could not read file: {}", self.path);
-                return None
+                None
             }
-        };
+        }
     }
 
     pub fn text_hash(&self) -> Option<String> {
@@ -100,11 +100,11 @@ impl PathResolver {
                                 }
                             }
                         });
-                        return file_paths
+                        file_paths
                     },
                     Err(_e) => {
                         log::debug!("Could not read directory: {}", path.to_string_lossy());
-                        return file_paths
+                        file_paths
                     }
                 }
             }
