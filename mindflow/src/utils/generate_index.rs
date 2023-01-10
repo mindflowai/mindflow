@@ -8,13 +8,12 @@ use tokio::task::spawn_blocking;
 
 use crate::requests::unindexed_references::{request_unindexed_references};
 use crate::requests::index_references::{request_index_references};
+use crate::resolve::resolve::Resolved;
 use crate::utils::reference::Reference;
 
-use super::resolve::Resolved;
-
-// The maximum number of bytes that can be sent in a single request - barr overflow.
 const PACKET_SIZE: u64 = 2 * 1024 * 1024;
 
+// TODO: This function is too long. Break it up.
 // Checks if the references are indexed and if not, indexes them.
 pub async fn generate_index(resolved_paths: Vec<Resolved>) {
     let client = Client::new();
@@ -25,18 +24,16 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
 
     for packet in packets {
         // Limits the number of packets whose text is loaded into memory at once.
-        let references_hash_map: HashMap<String, Reference> = resolve_packet_to_references(packet).await.into_iter().map(|reference| {
+        let references = resolve_packet_to_references(packet).await;
+        let references_hash_map: HashMap<String, Reference> = references.into_iter().map(|reference| {
             (reference.hash.clone(), reference)
         }).collect();
 
-        // Get the hashes of the references that are not indexed and index them.
-        let reference_hash_map_keys =references_hash_map.keys().map(|key| key.as_str()).collect();
-        let unindexed_hashes = request_unindexed_references(&client, reference_hash_map_keys).await.unindexed_hashes;
+        let unindexed_hashes = request_unindexed_references(&client, references_hash_map.keys().collect()).await.unindexed_hashes;
         if !unindexed_hashes.is_empty() {
             request_index_references(&client, references_hash_map, unindexed_hashes).await;
         }
 
-        // Update progress.
         pb.set_position(packet_index);
         packet_index += 1;
     }

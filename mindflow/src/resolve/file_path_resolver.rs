@@ -43,8 +43,8 @@ impl ResolvedFilePath {
         }
     }
 
-    pub fn get_path(&self) -> String {
-        self.path.clone()
+    pub fn get_path(&self) -> &str {
+        &self.path
     }
 
     pub fn size_bytes(&self) -> Option<u64> {
@@ -113,7 +113,7 @@ impl PathResolver {
         }
     }
 
-    pub fn should_resolve(&self, path_string: &String) -> bool {
+    pub fn should_resolve(&self, path_string: &str) -> bool {
         let path = Path::new(path_string);
         path.is_dir() || path.is_file()
     }

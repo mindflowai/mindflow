@@ -13,7 +13,7 @@ pub enum Resolved {
 }
 
 impl Resolver {
-    pub fn should_resolve(&self, path: &String) -> bool {
+    pub fn should_resolve(&self, path: &str) -> bool {
         match self {
             Resolver::PathResolver(resolver) => resolver.should_resolve(path)
         }
@@ -32,7 +32,7 @@ impl Resolved {
         }
     }
 
-    pub fn get_path(&self) -> String {
+    pub fn get_path(&self) -> &str {
         match self {
             Resolved::ResolvedFilePath(resolved_file_path) => resolved_file_path.get_path(),
         }

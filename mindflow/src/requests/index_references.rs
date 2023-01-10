@@ -32,7 +32,7 @@ pub(crate) async fn request_index_references(client: &Client, data_map: HashMap<
     let references_to_index: Vec<&Reference> = unindexed_hashes
         .into_iter()
         .filter_map(|k| {
-            data_map.get(&k).map(|data| {
+            data_map.get(k.as_str()).map(|data| {
                 data
             })
 
