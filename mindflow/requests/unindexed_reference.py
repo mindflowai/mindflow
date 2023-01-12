@@ -18,4 +18,6 @@ def request_unindexed_references(hashes: list[str]):
     )
     if response.status_code == 200:
         return response.json()["unindexed_hashes"]
-    raise ValueError(f"Error: {response.status_code} {response.text}")
+    
+    # Write a debug warning log here
+    print(f"Error: {response.status_code} {response.text}")       
