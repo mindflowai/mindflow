@@ -27,4 +27,4 @@ def request_index_references(
         timeout=10,
     )
     if response.status_code != 200:
-        raise ValueError(f"Error: {response.status_code} {response.text}")
+        print(f"Error: {response.status_code} {response.text}")
