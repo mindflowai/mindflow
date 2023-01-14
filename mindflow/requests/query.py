@@ -5,7 +5,7 @@ import requests
 
 from mindflow.utils.config import Config
 
-def request_query(query_text: str, hashes: list[str]):
+def request_query(query_text: str, hashes: list[str], return_prompt: bool = False):
     """
     This function handles the prompt generation and copying to clipboard.
     """
@@ -14,6 +14,7 @@ def request_query(query_text: str, hashes: list[str]):
         json={
             "query_text": query_text,
             "reference_hashes": hashes,
+            "return_prompt": return_prompt,
             "auth": Config.AUTH,
         },
         timeout=10,
