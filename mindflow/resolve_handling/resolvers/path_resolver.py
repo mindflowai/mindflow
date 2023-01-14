@@ -43,7 +43,7 @@ class ResolvedPath(Resolved):
         Create a reference to a file or directory.
         """
         try:
-            with open(self.path, "rb", encoding='utf-8') as file:
+            with open(self.path, "rb") as file:
                 text_bytes = file.read()
             file_hash = hashlib.sha256(text_bytes).hexdigest()
             text = text_bytes.decode("utf-8")
