@@ -16,8 +16,8 @@ pub(crate) struct Query {
     pub(crate) index: bool,
     #[arg(short = 'p', long = "prompt", action = ArgAction::SetTrue, value_name = "Get prompt to enter into ChatGPT.")]
     pub(crate) return_prompt: bool,
-    #[arg(short = 'c', long = "clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
-    pub(crate) clipboard: bool,
+    #[arg(short = 's', long = "skip-clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
+    pub(crate) skip_clipboard: bool,
 }
 
 impl Query {
@@ -39,6 +39,6 @@ impl Query {
 
         // Send query to Mindflow server.
         let request_query_response = request_query(&client, self.query.clone(), resolved_hashes, self.return_prompt).await;
-        handle_response_text(request_query_response.text, self.clipboard);
+        handle_response_text(request_query_response.text, self.skip_clipboard);
     }
 }
