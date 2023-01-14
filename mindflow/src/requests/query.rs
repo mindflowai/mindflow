@@ -14,14 +14,16 @@ use super::status::http_status::HttpStatus;
 pub(crate) struct QueryRequest {
     pub(crate) query_text: String,
     pub(crate) reference_hashes: Vec<String>,
+    pub(crate) return_prompt: bool,
     pub(crate) auth: String
 }
 
 impl QueryRequest {
-    pub fn new(query_text: String, reference_hashes: Vec<String>) -> QueryRequest {
+    pub fn new(query_text: String, reference_hashes: Vec<String>, return_prompt: bool) -> QueryRequest {
         QueryRequest {
             query_text,
             reference_hashes,
+            return_prompt,
             auth: CONFIG.get_auth_token()
         }
     }
@@ -33,8 +35,8 @@ pub(crate) struct QueryResponse {
 }
 
 // Send a query request off to the Mindflow server to get a response.
-pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>) -> QueryResponse {
-    let query = QueryRequest::new(query_text, processed_hashes);
+pub(crate) async fn request_query(client:&Client, query_text: String, processed_hashes: Vec<String>, return_prompt: bool) -> QueryResponse {
+    let query = QueryRequest::new(query_text, processed_hashes, return_prompt);
     let res = match client
         .post(&format!("{}/query", CONFIG.get_api_location()))
         .json(&query)

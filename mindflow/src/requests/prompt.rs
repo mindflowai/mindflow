@@ -11,13 +11,15 @@ use super::status::http_status::HttpStatus;
 #[derive(Serialize)]
 pub(crate) struct PromptRequest {
     pub(crate) prompt: String,
+    pub(crate) return_prompt: bool,
     pub(crate) auth: String
 }
 
 impl PromptRequest {
-    pub fn new(prompt: String) -> PromptRequest {
+    pub fn new(prompt: String, return_prompt: bool) -> PromptRequest {
         PromptRequest {
             prompt,
+            return_prompt,
             auth: CONFIG.get_auth_token()
         }
     }
@@ -29,8 +31,8 @@ pub(crate) struct PromptResponse {
 }
 
 // Sends a basic completion prompt to the Mindflow server to get a response from GPT model.
-pub(crate) async fn request_prompt(client: &Client, prompt: String) -> PromptResponse {
-    let prompt_request: PromptRequest = PromptRequest::new(prompt);
+pub(crate) async fn request_prompt(client: &Client, prompt: String, return_prompt: bool) -> PromptResponse {
+    let prompt_request: PromptRequest = PromptRequest::new(prompt, return_prompt);
     let res = match client
         .post(&format!("{}/prompt", CONFIG.get_api_location()))
         .json(&prompt_request)

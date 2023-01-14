@@ -14,6 +14,8 @@ pub(crate) struct Query {
     pub(crate) references: Vec<String>,
     #[arg(short = 'i', long = "index", action = ArgAction::SetTrue, value_name = "Specifies whether you want to create an index for the files you query on.")]
     pub(crate) index: bool,
+    #[arg(short = 'p', long = "prompt", action = ArgAction::SetTrue, value_name = "Get prompt to enter into ChatGPT.")]
+    pub(crate) return_prompt: bool,
     #[arg(short = 'c', long = "clipboard", action = ArgAction::SetTrue, value_name = "Copy response to clipboard.")]
     pub(crate) clipboard: bool,
 }
@@ -36,7 +38,7 @@ impl Query {
         }
 
         // Send query to Mindflow server.
-        let request_query_response = request_query(&client, self.query.clone(), resolved_hashes).await;
+        let request_query_response = request_query(&client, self.query.clone(), resolved_hashes, self.return_prompt).await;
         handle_response_text(request_query_response.text, self.clipboard);
     }
 }
