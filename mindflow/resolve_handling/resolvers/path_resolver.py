@@ -94,8 +94,9 @@ class PathResolver(BaseResolver):
         Check if a file is valid utf8.
         """
         try:
-            with codecs.open(file_path, "r", "utf-8") as file:
-                file.read()
+            file = codecs.open(file_path, encoding='utf-8', errors='strict')
+            for _ in file:
+                pass
             return True
         except UnicodeDecodeError:
             return False
