@@ -55,7 +55,10 @@ pub(crate) async fn request_prompt(client: &Client, prompt: String, return_promp
             }
         }
         status   => {
-            let error: ErrorResponse = res.json().await.unwrap();
+            let error: ErrorResponse = res.json().await.unwrap_or_else(|_| {
+                println!("Error: Could not parse error response.");
+                process::exit(1);
+            });
             println!("Error: {} - {}", status, error.msg);
             process::exit(1);
         }
