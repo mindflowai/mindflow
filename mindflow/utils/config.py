@@ -9,8 +9,8 @@ class Config:
     Configuration class
     """
 
-    API_LOCATION = "http://127.0.0.1:5000/api/mindflow"
-    AUTH = get_token()
+    API_LOCATION: str = "http://127.0.0.1:5000/api/mindflow"
+    AUTH: str = get_token()
 
 
 # instantiates the configurations
