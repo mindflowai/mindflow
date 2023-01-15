@@ -7,6 +7,14 @@ import subprocess
 from typing import List
 
 
+class NotInGit(BaseException):
+    pass
+
+
+class GitError(BaseException):
+    pass
+
+
 def is_within_git_repo(path: os.PathLike) -> bool:
     """
     Checks if the given path is within a git repository.
@@ -19,7 +27,7 @@ def is_within_git_repo(path: os.PathLike) -> bool:
             check=True,
         )
         return output.returncode == 0
-    except Exception:
+    except NotInGit:
         return False
 
 
@@ -36,6 +44,6 @@ def get_git_files(path: os.PathLike) -> List[str]:
         )
         git_files = output.stdout.decode().strip().split("\n")
         return [os.path.join(os.fspath(path), f) for f in git_files]
-    except Exception as error:
+    except GitError as error:
         logging.debug("Failed extract git files with 'git ls-files': %s", error)
         return []

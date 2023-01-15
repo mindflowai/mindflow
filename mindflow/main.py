@@ -156,7 +156,7 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        response: str = request_prompt(args.prompt, args.return_prompt)
+        response: str = request_prompt(args.prompt, args.return_prompt).text
         handle_response_text(response, args.skip_clipboard)
 
     def diff(self):
@@ -171,7 +171,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         prompt: str = generate_diff_prompt(args.diffargs)
-        response: str = request_prompt(prompt, args.return_prompt)
+        response: str = request_prompt(prompt, args.return_prompt).text
         handle_response_text(response, args.skip_clipboard)
 
     def generate(self):
@@ -215,7 +215,9 @@ class MindFlow:
         reference_hashes: List[str] = [
             reference.text_hash for reference in resolved_references
         ]
-        response: str = request_query(args.query, reference_hashes, args.return_prompt)
+        response: str = request_query(
+            args.query, reference_hashes, args.return_prompt
+        ).text
         handle_response_text(response, args.skip_clipboard)
 
     # Alias for query
