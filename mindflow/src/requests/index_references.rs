@@ -47,7 +47,7 @@ pub(crate) async fn request_index_references(client: &Client, unindexed_referenc
     // match response
     match status {
         HttpStatus::Ok => {
-            println!("References indexed.");
+            log::debug!("References indexed.");
         }
         HttpStatus::BadRequest => {
             println!("Error: Bad Request.");

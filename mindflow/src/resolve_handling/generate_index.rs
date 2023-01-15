@@ -13,16 +13,17 @@ use crate::utils::reference::Reference;
 use super::resolve::Resolved;
 
 // The maximum number of bytes that can be sent in a single request.
-const PACKET_SIZE: u64 = 2 * 1024 * 1024;
+const PACKET_SIZE_BYTES: u64 = 2 * 1024 * 1024;
 
 // Checks if the references are indexed and if not, indexes them.
 pub async fn generate_index(resolved_paths: Vec<Resolved>) {
     let client = Client::new();
 
     let packets = create_packets(resolved_paths);
-    let pb = create_progress_bar(packets.len() as u64);
+    let pb = create_progress_bar(packets.iter().flatten().count() as u64);
 
-    for (packet_index, packet) in packets.into_iter().enumerate() {
+    for packet in packets.into_iter() {
+        let packet_size = packet.len() as u64;
         // Limits the number of packets whose text is loaded into memory at once.
         let references_hash_map: HashMap<String, Reference> = resolve_packet_to_references(packet).await.into_iter().map(|reference| {
             (reference.hash.clone(), reference)
@@ -37,8 +38,9 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
         }
 
         // Update progress.
-        pb.set_position(packet_index as u64);
+        pb.inc(packet_size);
     }
+    pb.finish_with_message("Complete!");
 }
 
 fn filter_unindexed_references(references_hash_map: HashMap<String, Reference>, unindexed_hashes: Vec<String>) -> Vec<Reference> {
@@ -67,11 +69,11 @@ fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
     let mut total_size = 0;
 
     for (resolved, resolved_size) in all_resolved.into_iter().zip(sizes) {
-        if resolved_size > PACKET_SIZE {
+        if resolved_size > PACKET_SIZE_BYTES {
             println!("LARGE FILE: {}", resolved.get_path());
             continue
         }
-        if packet_size + resolved_size <= PACKET_SIZE {
+        if packet_size + resolved_size <= PACKET_SIZE_BYTES {
             packet.push(resolved);
             packet_size += resolved_size;
         } else {
@@ -94,7 +96,11 @@ fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
 // Create progress bar for processing packets.
 fn create_progress_bar(bar_size: u64) -> ProgressBar {
     let pb = ProgressBar::new(bar_size);
-    pb.set_style(ProgressStyle::default_bar());
+    pb.set_style(ProgressStyle::default_bar()
+        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {msg}")
+        .unwrap()
+        .progress_chars("#>-")
+    );
     pb.set_message("Indexing files");
     pb
 }
