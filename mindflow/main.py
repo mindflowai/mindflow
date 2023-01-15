@@ -23,11 +23,12 @@ Welcome to Mindflow. A command line tool for intelligent development and collabo
 MF_USAGE = """
 
 mf <command> [<args>]
-The commands available in this CLI are:
 
-diff       `mf diff [<git diff args>]`                   Runs a `git diff` and summarizes the changes.
-query      `mf query "<YOUR QUERY>" [<Files + Folders>]` Ask a query using all or a subset of your notes as a reference.
-auth       Authorize Mindflow with JWT.
+ask        `mf ask <PROMPT>`                           Ask a question and get a prompt.
+diff       `mf diff [<git diff args>]`                 Runs a `git diff` and summarizes the changes.
+generate   `mf generate [<Files + Folders>]`           Generate index of files/folders in Mindflow Server.
+query      `mf query <YOUR QUERY> [<Files + Folders>]` Query your files/folders.
+auth       `mf auth <AUTH TOKEN>`                      Authorize Mindflow with JWT.
 
 
 """
@@ -156,7 +157,7 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        response: str = request_prompt(args.prompt, args.return_prompt).text
+        response: str = request_prompt(args.prompt, True).text
         handle_response_text(response, args.skip_clipboard)
 
     def diff(self):
@@ -171,7 +172,7 @@ class MindFlow:
 
         args = parser.parse_args(sys.argv[2:])
         prompt: str = generate_diff_prompt(args.diffargs)
-        response: str = request_prompt(prompt, args.return_prompt).text
+        response: str = request_prompt(prompt, True).text
         handle_response_text(response, args.skip_clipboard)
 
     def generate(self):
@@ -216,7 +217,7 @@ class MindFlow:
             reference.text_hash for reference in resolved_references
         ]
         response: str = request_query(
-            args.query, reference_hashes, args.return_prompt
+            args.query, reference_hashes, True
         ).text
         handle_response_text(response, args.skip_clipboard)
 
