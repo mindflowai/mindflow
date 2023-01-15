@@ -40,7 +40,7 @@ pub async fn generate_index(resolved_paths: Vec<Resolved>) {
         // Update progress.
         pb.inc(packet_size);
     }
-    pb.finish_with_message("Complete!");
+    pb.finish_with_message("Complete!\n");
 }
 
 fn filter_unindexed_references(references_hash_map: HashMap<String, Reference>, unindexed_hashes: Vec<String>) -> Vec<Reference> {
@@ -70,7 +70,7 @@ fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
 
     for (resolved, resolved_size) in all_resolved.into_iter().zip(sizes) {
         if resolved_size > PACKET_SIZE_BYTES {
-            println!("LARGE FILE: {}", resolved.get_path());
+            log::debug!("LARGE FILE: {}", resolved.get_path());
             continue
         }
         if packet_size + resolved_size <= PACKET_SIZE_BYTES {
@@ -89,7 +89,7 @@ fn create_packets(all_resolved: Vec<Resolved>) -> Vec<Vec<Resolved>> {
         packets.push(packet);
     }
 
-    println!("Total content size: MB {}\n", formatted_content_size(total_size));
+    println!("Total content size: MB {}", formatted_content_size(total_size));
     packets
 }
 
@@ -116,7 +116,12 @@ async fn resolve_packet_to_references(packet: Vec<Resolved>) -> Vec<Reference> {
             })
             .collect();
         reference_vec
-    }).await.unwrap()
+    }).await.unwrap_or_else(
+        |e| {
+            log::debug!("Error resolving packet: {}", e);
+            vec![]
+        }
+    )
 }
 
 fn formatted_content_size(size: u64) -> String {

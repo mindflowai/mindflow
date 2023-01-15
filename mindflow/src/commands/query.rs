@@ -33,7 +33,6 @@ impl Query {
 
         // Generate index in Mindflow server if specified.
         if self.index {
-            println!("Generating index...");
             generate_index(all_resolved).await;
         }
 
