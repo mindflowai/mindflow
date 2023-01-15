@@ -15,7 +15,7 @@ impl Ask {
     pub(crate) async fn execute(&mut self) {
         let client = reqwest::Client::new();        
 
-        let request_prompt_response = request_prompt(&client, self.prompt.join(" "), self.return_prompt).await;  
+        let request_prompt_response = request_prompt(&client, self.prompt.join(" "), true).await;  
         handle_response_text(request_prompt_response.text, self.skip_clipboard);
     }
 }

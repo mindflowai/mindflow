@@ -37,7 +37,7 @@ impl Query {
         }
 
         // Send query to Mindflow server.
-        let request_query_response = request_query(&client, self.query.clone(), resolved_hashes, self.return_prompt).await;
+        let request_query_response = request_query(&client, self.query.clone(), resolved_hashes, true).await;
         handle_response_text(request_query_response.text, self.skip_clipboard);
     }
 }

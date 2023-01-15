@@ -18,7 +18,7 @@ impl Diff {
         let client = reqwest::Client::new();
 
         let prompt = generate_diff_prompt(&self.diff_args).await;
-        let request_prompt_response = request_prompt(&client, prompt, self.return_prompt).await;   
+        let request_prompt_response = request_prompt(&client, prompt, true).await;   
         handle_response_text(request_prompt_response.text, self.skip_clipboard);
     }
 }
