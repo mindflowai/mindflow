@@ -4,7 +4,6 @@ Handle response text from Mindflow API.
 
 import pyperclip
 
-
 def handle_response_text(text: str, skip_clipboard: bool):
     """
     Copy to clipboard or print response text.

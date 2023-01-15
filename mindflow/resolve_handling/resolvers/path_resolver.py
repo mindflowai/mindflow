@@ -84,8 +84,8 @@ class PathResolver(BaseResolver):
                     elif entry.is_dir():
                         file_paths.extend(self.extract_files(entry.path))
             return file_paths
-        except Exception as error:
-            logging.debug("Could not read directory: %s", path)
+        except IsADirectoryError as error:
+            logging.debug("Could not read directory/file: %s", path)
             logging.debug(error)
             return file_paths
 
@@ -94,7 +94,7 @@ class PathResolver(BaseResolver):
         Check if a file is valid utf8.
         """
         try:
-            file = codecs.open(file_path, encoding='utf-8', errors='strict')
+            file = codecs.open(file_path, encoding="utf-8", errors="strict")
             for _ in file:
                 pass
             return True

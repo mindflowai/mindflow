@@ -10,6 +10,19 @@ from mindflow.utils.config import Config
 from mindflow.utils.reference import Reference
 
 
+class IndexReferenceRequest:
+    """
+    Index request object.
+    """
+
+    references: str = None
+    auth: str = None
+
+    def __init__(self, unindexed_references: List[Reference], auth: str):
+        self.references = json.dumps(unindexed_references)
+        self.auth = auth
+
+
 def request_index_references(
     resolved_references: dict[str, Reference], unindexed_hashes: List[str]
 ):
@@ -24,7 +37,7 @@ def request_index_references(
     ]
     response = requests.post(
         f"{Config.API_LOCATION}/index",
-        json={"references": json.dumps(unindexed_references), "auth": Config.AUTH},
+        json=vars(IndexReferenceRequest(unindexed_references, Config.AUTH)),
         timeout=10,
     )
     if response.status_code != 200:

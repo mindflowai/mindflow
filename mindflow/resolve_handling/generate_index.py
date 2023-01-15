@@ -38,7 +38,9 @@ def generate_index(all_resolved: List[Resolved]):
                 references: List[Reference] = complete.result()
                 hashes: List[str] = [reference.hash for reference in references]
 
-                unindexed_hashes: List[str] = request_unindexed_references(hashes)
+                unindexed_hashes: List[str] = request_unindexed_references(
+                    hashes
+                ).unindexed_hashes
                 if unindexed_hashes:
                     request_index_references(
                         {r.hash: r for r in references}, unindexed_hashes
