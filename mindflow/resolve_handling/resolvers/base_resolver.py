@@ -8,12 +8,12 @@ class BaseResolver:
     Base class for resolvers
     """
 
-    def should_resolve(self, reference):
+    def should_resolve(self, reference: str):
         """
         Checks if a string is a valid reference for this resolver.
         """
 
-    def resolve(self, reference):
+    def resolve(self, reference: str):
         """
         Resolve a reference to text.
         """
@@ -38,7 +38,7 @@ class Resolved:
         """
 
     @property
-    def size_bytes(self) -> str:
+    def size_bytes(self) -> int:
         """
         Size in bytes.
         """

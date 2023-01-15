@@ -7,5 +7,5 @@ config.json
 *config.ini
 build/*
 dist/*
-
+target/
 hello

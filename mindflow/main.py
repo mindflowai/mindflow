@@ -3,11 +3,13 @@ This module contains the main CLI for Mindflow.
 """
 import argparse
 import sys
+from typing import List
 
 from mindflow.utils.prompt_generator import generate_diff_prompt
 from mindflow.utils.response import handle_response_text
 from mindflow.requests.prompt import request_prompt
 from mindflow.resolve_handling.resolve import resolve
+from mindflow.resolve_handling.resolvers.base_resolver import Resolved
 from mindflow.utils.token import set_token
 from mindflow.resolve_handling.generate_index import generate_index
 from mindflow.requests.query import request_query
@@ -154,7 +156,7 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        response = request_prompt(args.prompt, args.return_prompt)
+        response: str = request_prompt(args.prompt, args.return_prompt)
         handle_response_text(response, args.skip_clipboard)
 
     def diff(self):
@@ -168,8 +170,8 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        prompt = generate_diff_prompt(args)
-        response = request_prompt(prompt, args.return_prompt)
+        prompt: str = generate_diff_prompt(args.diffargs)
+        response: str = request_prompt(prompt, args.return_prompt)
         handle_response_text(response, args.skip_clipboard)
 
     def generate(self):
@@ -184,7 +186,7 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        resolved_references = []
+        resolved_references: List[Resolved] = []
         for reference in args.references:
             resolved_references.extend(resolve(reference))
 
@@ -203,17 +205,17 @@ class MindFlow:
         _add_response_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
-        resolved_references = []
+        resolved_references: List[Resolved] = []
         for reference in args.references:
             resolved_references.extend(resolve(reference))
 
         if args.index:
             generate_index(resolved_references)
 
-        reference_hashes = [
+        reference_hashes: List[str] = [
             reference.text_hash for reference in resolved_references
         ]
-        response = request_query(args.query, reference_hashes, args.return_prompt)
+        response: str = request_query(args.query, reference_hashes, args.return_prompt)
         handle_response_text(response, args.skip_clipboard)
 
     # Alias for query

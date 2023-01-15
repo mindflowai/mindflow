@@ -1,11 +1,13 @@
 """
 Make a get request to the backend to check if the references are indexed.
 """
+from typing import List
 import requests
 
 from mindflow.utils.config import Config
 
-def request_query(query_text: str, hashes: list[str], return_prompt: bool = False):
+
+def request_query(query_text: str, hashes: List[str], return_prompt: bool = False):
     """
     This function handles the prompt generation and copying to clipboard.
     """
