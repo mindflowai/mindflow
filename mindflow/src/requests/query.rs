@@ -6,9 +6,7 @@ use std::process;
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 
-use crate::utils::config::{CONFIG};
-
-use super::status::http_status::HttpStatus;
+use crate::{utils::config::{CONFIG}, requests::status::error::ErrorResponse};
 
 #[derive(Serialize)]
 pub(crate) struct QueryRequest {
@@ -50,16 +48,8 @@ pub(crate) async fn request_query(client:&Client, query_text: String, processed_
         };
     
     // match status code
-    let status = match res.status().as_u16() {
-        200 => HttpStatus::Ok,
-        400 => HttpStatus::BadRequest,
-        401 => HttpStatus::Unauthorized,
-        _   => HttpStatus::InternalServerError
-    };
-
-    // match response
-    match status {
-        HttpStatus::Ok => {
+    match res.status().as_u16() {
+        200 => {
             match res.json().await {
                 Ok(query_response) => query_response,
                 Err(e) => {
@@ -68,16 +58,9 @@ pub(crate) async fn request_query(client:&Client, query_text: String, processed_
                 }
             }
         }
-        HttpStatus::BadRequest => {
-            println!("Error: Bad Request.");
-            process::exit(1);
-        }
-        HttpStatus::Unauthorized => {
-            println!("Invalid authorization token.");
-            process::exit(1);
-        }
-        HttpStatus::InternalServerError => {
-            println!("Error: Could not get query response");
+        status   => {
+            let error: ErrorResponse = res.json().await.unwrap();
+            println!("Error: {} - {}", status, error.msg);
             process::exit(1);
         }
     }

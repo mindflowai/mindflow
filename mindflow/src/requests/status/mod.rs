@@ -1,1 +1,1 @@
-pub(crate) mod http_status;
+pub(crate) mod error;

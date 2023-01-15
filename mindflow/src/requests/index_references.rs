@@ -4,9 +4,9 @@ use serde::{Serialize};
 use reqwest::{Client};
 use std::process;
 
+use crate::requests::status::error::ErrorResponse;
 use crate::utils::config::{CONFIG};
 use crate::utils::reference::Reference;
-use crate::requests::status::http_status::HttpStatus;
        
 #[derive(Serialize)]
 pub(crate) struct IndexReferencesRequest {
@@ -37,29 +37,14 @@ pub(crate) async fn request_index_references(client: &Client, unindexed_referenc
     };
     
     // match status code
-    let status = match res.status().as_u16() {
-        200 => HttpStatus::Ok,
-        400 => HttpStatus::BadRequest,
-        401 => HttpStatus::Unauthorized,
-        _   => HttpStatus::InternalServerError
-    };
-
-    // match response
-    match status {
-        HttpStatus::Ok => {
+    match res.status().as_u16() {
+        200 => {
             log::debug!("References indexed.");
         }
-        HttpStatus::BadRequest => {
-            println!("Error: Bad Request.");
+        status   => {
+            let error: ErrorResponse = res.json().await.unwrap();
+            println!("Error: {} - {}", status, error.msg);
             process::exit(1);
         }
-        HttpStatus::Unauthorized => {
-            println!("Invalid authorization token.");
-            process::exit(1);
-        }
-        HttpStatus::InternalServerError => {
-            println!("Error: Could not index references.");
-            process::exit(1);
-        }
-    }
+    };
 }

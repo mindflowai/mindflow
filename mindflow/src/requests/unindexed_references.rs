@@ -5,9 +5,7 @@ use std::process;
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 
-use crate::utils::config::{CONFIG};
-
-use super::status::http_status::HttpStatus;
+use crate::{utils::config::{CONFIG}, requests::status::error::ErrorResponse};
 
 #[derive(Serialize)]
 pub(crate) struct UnindexedReferenceRequest {
@@ -48,16 +46,8 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&s
         };
 
     // match status code
-    let status = match res.status().as_u16() {
-        200 => HttpStatus::Ok,
-        400 => HttpStatus::BadRequest,
-        401 => HttpStatus::Unauthorized,
-        _   => HttpStatus::InternalServerError
-    };
-
-    // match response
-    match status {
-        HttpStatus::Ok => {
+    match res.status().as_u16() {
+        200 => {
             match res.json().await {
                 Ok(unindexed_references_response) => {
                     unindexed_references_response
@@ -68,16 +58,9 @@ pub(crate) async fn request_unindexed_references(client: &Client, hashes: Vec<&s
                 }
             }
         }
-        HttpStatus::BadRequest => {
-            println!("Error: Bad Request.");
-            process::exit(1);
-        }
-        HttpStatus::Unauthorized => {
-            println!("Invalid authorization token.");
-            process::exit(1);
-        }
-        HttpStatus::InternalServerError => {
-            println!("Error: Could not get unindexed hashes");
+        status   => {
+            let error: ErrorResponse = res.json().await.unwrap();
+            println!("Error: {} - {}", status, error.msg);
             process::exit(1);
         }
     }

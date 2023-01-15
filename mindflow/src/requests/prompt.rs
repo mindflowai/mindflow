@@ -4,9 +4,7 @@ use std::process;
 use serde::{Deserialize, Serialize};
 use reqwest::{Client};
 
-use crate::utils::config::{CONFIG};
-
-use super::status::http_status::HttpStatus;
+use crate::{utils::config::{CONFIG}, requests::status::error::ErrorResponse};
 
 #[derive(Serialize)]
 pub(crate) struct PromptRequest {
@@ -46,16 +44,8 @@ pub(crate) async fn request_prompt(client: &Client, prompt: String, return_promp
         };
     
     // match status code
-    let status = match res.status().as_u16() {
-        200 => HttpStatus::Ok,
-        400 => HttpStatus::BadRequest,
-        401 => HttpStatus::Unauthorized,
-        _   => HttpStatus::InternalServerError
-    };
-
-    // match response
-    match status {
-        HttpStatus::Ok => {
+    match res.status().as_u16() {
+        200 => {
             match res.json().await {
                 Ok(prompt_response) => prompt_response,
                 Err(e) => {
@@ -64,16 +54,9 @@ pub(crate) async fn request_prompt(client: &Client, prompt: String, return_promp
                 }
             }
         }
-        HttpStatus::BadRequest => {
-            println!("Error: Bad Request.");
-            process::exit(1);
-        }
-        HttpStatus::Unauthorized => {
-            println!("Invalid authorization token.");
-            process::exit(1);
-        }
-        HttpStatus::InternalServerError => {
-            println!("Error: Could not index references.");
+        status   => {
+            let error: ErrorResponse = res.json().await.unwrap();
+            println!("Error: {} - {}", status, error.msg);
             process::exit(1);
         }
     }
