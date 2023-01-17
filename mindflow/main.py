@@ -5,7 +5,7 @@ import argparse
 import sys
 from typing import List
 
-from mindflow.utils.prompt_generator import generate_diff_prompt
+from mindflow.utils.prompting.prompt_generator import generate_diff_prompt
 from mindflow.utils.response import handle_response_text
 from mindflow.requests.prompt import request_prompt
 from mindflow.resolve_handling.resolve import resolve

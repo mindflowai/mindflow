@@ -8,12 +8,14 @@ class BaseResolver:
     Base class for resolvers
     """
 
-    def should_resolve(self, reference: str):
+    @staticmethod
+    def should_resolve(reference: str):
         """
         Checks if a string is a valid reference for this resolver.
         """
-
-    def resolve(self, reference: str):
+        
+    @staticmethod
+    def resolve(reference: str):
         """
         Resolve a reference to text.
         """
