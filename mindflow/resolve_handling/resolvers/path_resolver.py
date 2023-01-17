@@ -49,11 +49,9 @@ class ResolvedPath(Resolved):
         try:
             with open(self.path, "rb") as file:
                 text_bytes: bytes = file.read()
-            file_hash = hashlib.sha256(text_bytes).hexdigest()
-            text = text_bytes.decode("utf-8")
             return Reference(
-                file_hash,
-                text,
+                hashlib.sha256(text_bytes).hexdigest(),
+                text_bytes.decode("utf-8"),
                 self.size_bytes,
                 self.type,
                 self.path,
@@ -89,13 +87,12 @@ class PathResolver(BaseResolver):
             logging.debug(error)
             return file_paths
 
-    def validate_utf8(self, file_path: os.PathLike) -> bool:
+    def is_valid_utf8(self, file_path: os.PathLike) -> bool:
         """
         Check if a file is valid utf8.
         """
         try:
-            file = codecs.open(file_path, encoding="utf-8", errors="strict")
-            for _ in file:
+            for _ in codecs.open(file_path, encoding="utf-8", errors="strict"):
                 pass
             return True
         except UnicodeDecodeError:
@@ -111,6 +108,4 @@ class PathResolver(BaseResolver):
         """
         Extract text from files.
         """
-        files: List[os.PathLike] = self.extract_files(reference)
-        files = [file for file in files if self.validate_utf8(file)]
-        return [ResolvedPath(file) for file in files]
+        return [ResolvedPath(file) for file in self.extract_files(reference) if self.is_valid_utf8(file)]
