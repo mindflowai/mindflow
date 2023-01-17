@@ -69,12 +69,12 @@ def create_packets(all_resolved: List[Resolved]) -> List[List[Resolved]]:
         else:
             packets.append(packet)
             packet = [resolved]
-            total_size += packet_size
             packet_size = size
+            total_size += packet_size
 
     if packet:
-        total_size += packet_size
         packets.append(packet)
+        total_size += packet_size
 
     print(f"Total content size: MB {total_size / 1024 / 1024:.2f}")
     return packets
