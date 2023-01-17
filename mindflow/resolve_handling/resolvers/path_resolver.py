@@ -87,7 +87,7 @@ class PathResolver(BaseResolver):
             logging.debug(error)
             return file_paths
 
-    def validate_utf8(self, file_path: os.PathLike) -> bool:
+    def is_valid_utf8(self, file_path: os.PathLike) -> bool:
         """
         Check if a file is valid utf8.
         """
@@ -108,4 +108,4 @@ class PathResolver(BaseResolver):
         """
         Extract text from files.
         """
-        return [ResolvedPath(file) for file in self.extract_files(reference) if self.validate_utf8(file)]
+        return [ResolvedPath(file) for file in self.extract_files(reference) if self.is_valid_utf8(file)]
