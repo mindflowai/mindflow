@@ -4,7 +4,7 @@ authors = ["Chris Steege"]
 description = "A command line client for Mindflow"
 repository = "https://github.com/nollied/mindflow-cli"
 license = "MIT"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -6,12 +6,14 @@
 
 use std::{fs};
 use std::path::Path;
-use std::str::from_utf8;
+use simdutf8::basic::from_utf8;
 
 use sha2::{Digest, Sha256};
 
 use crate::resolve_handling::resolve::Resolved;
-use crate::utils::{git::{get_git_files, is_within_git_repo}, reference::Reference};
+use crate::utils::files::extract::extract_files;
+use crate::utils::files::utf8::is_valid_utf8;
+use crate::utils::reference::Reference;
 
 pub struct ResolvedFilePath {
     pub path: String,
@@ -77,60 +79,26 @@ impl ResolvedFilePath {
 pub struct PathResolver {}
 
 impl PathResolver {
-    pub fn extract_files(&self, path: &Path) -> Vec<String> {
-        // If the path is a file, return it as the only item in a vector
-        if path.is_file() {
-            return vec![path.to_string_lossy().to_string()];
-        }
-
-        // Check if the path is within a git repository
-        if is_within_git_repo(path) {
-            return get_git_files(path);
-        } 
-
-        // Read all the files and directories in the path, and recursively extract files from directories
-        let mut file_paths = Vec::new();
-        match fs::read_dir(path) {
-            Ok(entries) => {
-                for entry in entries {
-                    match entry {
-                        Ok(entry) => {
-                            let path = entry.path();
-                            match path.is_dir() {
-                                true => {
-                                    file_paths.extend(self.extract_files(&path));
-                                },
-                                false => {
-                                    file_paths.push(path.to_string_lossy().to_string());
-                                }
-                            }
-                        },
-                        // If the directory could not be read, log the error
-                        Err(e) => {
-                            log::debug!("Could not read directory: {}. Error: {:?}", path.to_string_lossy(), e);
-                        }
-                    }
-                }
-                file_paths
-            },
-            // If the directory could not be read, log the error
-            Err(e) => {
-                log::debug!("Could not read directory: {}. Error: {:?}", path.to_string_lossy(), e);
-                file_paths
-            }
-        }
-    }
-
     pub fn should_resolve(&self, path_string: &str) -> bool {
-        let path = Path::new(path_string);
-        path.is_dir() || path.is_file()
+        match Path::new(path_string) {
+            path if path.is_dir() => true,
+            path if path.is_file() => true,
+            _ => false
+        }
     }
 
     pub async fn resolve(&self, path: &str) -> Vec<Resolved> {
         // Create a ResolvedPath for each file path and return it as a vec
-        self.extract_files(Path::new(path))
+        extract_files(Path::new(path))
             .into_iter()
-            .map(|file_path| Resolved::ResolvedFilePath(ResolvedFilePath { path: file_path }))
+            .filter_map(|file_path| 
+                if is_valid_utf8(&file_path) {
+                    Some(Resolved::ResolvedFilePath(ResolvedFilePath { path: file_path }))
+                }
+                else {
+                    None
+                }
+            )
             .collect()
     }
 }
