@@ -16,11 +16,12 @@ from mindflow.client.mindflow.index_references import (
 )
 from mindflow.index.resolvers.base_resolver import Resolved
 from mindflow.utils.reference import Reference
+from mindflow.index.model import index as Index
 
 PACKET_SIZE = 2 * 1024 * 1024
 
 
-def generate_index(all_resolved: List[Resolved]):
+def generate_index(all_resolved: List[Resolved], remote: bool = False):
     """
     Generate an index for a list of resolved paths.
     """
@@ -42,7 +43,10 @@ def generate_index(all_resolved: List[Resolved]):
                 references: List[Reference] = complete.result()
                 hashes: List[str] = [reference.hash for reference in references]
 
-                create_remote_index(references, hashes)
+                if remote:
+                    create_remote_index(references, hashes)
+                else:
+                    create_local_index(references, hashes)
 
                 progress_bar(len(references))
 
@@ -109,3 +113,16 @@ def create_remote_index(references: List[Reference], hashes: List[str]):
 
     if references_to_index:
         remote_index_references(references_to_index)
+
+
+def create_local_index(references: List[Reference], hashes: List[str]):
+    """
+    Create an index for a list of references.
+    """
+    missing_hashes: Set[str] = Index.get_missing_hashes(hashes)
+    references_to_index: List[Reference] = [
+        reference for reference in references if reference.hash in missing_hashes
+    ]
+
+    if references_to_index:
+        Index.create_entries(references_to_index)

@@ -14,6 +14,7 @@ from mindflow import DOT_MINDFLOW
 
 class AuthType(Enum):
     Mindflow = "Mindflow"
+    OpenAI = "OpenAI"
 
 
 def set_token(token):

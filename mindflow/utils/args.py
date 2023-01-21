@@ -1,6 +1,18 @@
 import argparse
 
 
+def _add_remote_args(parser: argparse.ArgumentParser):
+    """
+    Add arguments for commands that require a remote Mindflow server.
+    """
+    parser.add_argument(
+        "-r",
+        "--remote",
+        action="store_true",
+        help="Use the remote Mindflow server.",
+    )
+
+
 def _add_generate_args(parser: argparse.ArgumentParser):
     """
     Add arguments for the generate command.
