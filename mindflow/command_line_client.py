@@ -51,18 +51,7 @@ class CommandLineClient:
 
     def __init__(self):
         parser = argparse.ArgumentParser(description=MF_DESCRIPTION, usage=MF_USAGE)
-        parser.add_argument(
-            "-a", "--author", help="The author of the command line client"
-        )
-        parser.add_argument(
-            "-v", "--version", help="The version of the command line client"
-        )
-        parser.add_argument("-ab", "--about", help="About the command line client")
-        parser.add_argument(
-            "-lab",
-            "--long_about",
-            help="Long version of the about the command line client",
-        )
+
         parser.add_argument(
             "command",
             choices=[c.name for c in CommandLineClient.Command],
