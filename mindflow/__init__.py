@@ -1,5 +1,8 @@
-import os
+"""
+Initialize the mindflow package.
+"""
 
+import os
 
 DOT_MINDFLOW = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mindflow")
 

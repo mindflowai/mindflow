@@ -1,4 +1,6 @@
-# Description: This is the main file of the program.
+"""
+Main
+"""
 
 from mindflow.command_line_client import CommandLineClient
 

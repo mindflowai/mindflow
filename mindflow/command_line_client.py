@@ -1,3 +1,7 @@
+"""
+Command Line Client for Mindflow
+"""
+
 import argparse
 from enum import Enum
 import sys
@@ -30,12 +34,20 @@ auth       `mf auth <AUTH TOKEN>`                      Authorize Mindflow with J
 
 
 class CommandLineClient:
+    """
+    Command Line Client for Mindflow
+    """
+
     class Command(Enum):
-        generate = Generate
-        query = Query
-        auth = Auth
-        diff = Diff
-        ask = Ask
+        """
+        Arguments for the command line client
+        """
+
+        GENERATE = Generate
+        QUERY = Query
+        AUTH = Auth
+        DIFF = Diff
+        ASK = Ask
 
     def __init__(self):
         parser = argparse.ArgumentParser(description=MF_DESCRIPTION, usage=MF_USAGE)
@@ -57,8 +69,11 @@ class CommandLineClient:
             help="The command to execute",
         )
 
-        args = parser.parse_args(sys.argv[1:2])
+        args = parser.parse_args(arg.upper() for arg in sys.argv[1:2])
         self.cmd = CommandLineClient.Command[args.command].value()
 
     def execute(self):
+        """
+        Execute command (Polymorphic)
+        """
         self.cmd.execute()
