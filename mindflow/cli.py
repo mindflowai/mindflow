@@ -33,12 +33,12 @@ auth       `mf auth <AUTH TOKEN>`                      Authorize Mindflow with J
 """
 
 
-class CommandLineClient:
+class CommandLineInterface:
     """
     Command Line Client for Mindflow
     """
 
-    class Command(Enum):
+    class Commands(Enum):
         """
         Arguments for the command line client
         """
@@ -54,12 +54,12 @@ class CommandLineClient:
 
         parser.add_argument(
             "command",
-            choices=[c.name for c in CommandLineClient.Command],
+            choices=[c.name for c in CommandLineInterface.Commands],
             help="The command to execute",
         )
 
         args = parser.parse_args(arg.upper() for arg in sys.argv[1:2])
-        self.cmd = CommandLineClient.Command[args.command].value()
+        self.cmd = CommandLineInterface.Commands[args.command].value()
 
     def execute(self):
         """

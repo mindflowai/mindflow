@@ -2,12 +2,12 @@
 Main
 """
 
-from mindflow.command_line_client import CommandLineClient
+from mindflow.cli import CommandLineInterface
 
 
 def main():
     """
     This is the main function.
     """
-    client = CommandLineClient()
+    client = CommandLineInterface()
     client.execute()
