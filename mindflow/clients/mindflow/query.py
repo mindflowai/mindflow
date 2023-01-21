@@ -4,7 +4,7 @@ Make a get request to the backend to check if the references are indexed.
 from typing import List
 import requests
 
-from mindflow.utils.config import Config
+from mindflow.utils.config import config as Config
 
 
 class QueryRequest:
@@ -41,7 +41,7 @@ class QueryResponse:
         self.text = response["text"]
 
 
-def request_query(
+def query(
     query_text: str, hashes: List[str], return_prompt: bool = False
 ) -> QueryResponse:
     """
@@ -49,7 +49,9 @@ def request_query(
     """
     response = requests.post(
         f"{Config.API_LOCATION}/query",
-        json=vars(QueryRequest(query_text, hashes, return_prompt, Config.AUTH)),
+        json=vars(
+            QueryRequest(query_text, hashes, return_prompt, Config.mindflow_auth())
+        ),
         timeout=10,
     )
     if response.status_code == 200:

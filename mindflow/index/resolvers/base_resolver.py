@@ -13,7 +13,7 @@ class BaseResolver:
         """
         Checks if a string is a valid reference for this resolver.
         """
-        
+
     @staticmethod
     def resolve(reference: str):
         """

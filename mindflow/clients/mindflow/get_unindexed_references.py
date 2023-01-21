@@ -2,13 +2,13 @@
 Make a get request to the backend to check if the references are indexed.
 """
 import json
-from typing import List
+from typing import List, Set
 import requests
 
-from mindflow.utils.config import Config
+from mindflow.utils.config import config as Config
 
 
-class UnindexedReferenceRequest:
+class GetUnindexedReferencesRequest:
     """
     Unindexed reference request object.
     """
@@ -21,28 +21,28 @@ class UnindexedReferenceRequest:
         self.auth = auth
 
 
-class UnindexedReferenceResponse:
+class GetUnindexedReferencesResponse:
     """
     Unindexed reference response object.
     """
 
-    unindexed_hashes: List[str] = None
+    unindexed_hashes: Set[str] = None
 
     def __init__(self, response: dict):
-        self.unindexed_hashes = response["unindexed_hashes"]
+        self.unindexed_hashes = set(response["unindexed_hashes"])
 
 
-def request_unindexed_references(hashes: List[str]) -> UnindexedReferenceResponse:
+def get_unindexed_references(hashes: List[str]) -> GetUnindexedReferencesResponse:
     """
     get request with resolved reference hashes to the backend to check if they are indexed.
     """
     response = requests.post(
         f"{Config.API_LOCATION}/unindexed",
-        json=vars(UnindexedReferenceRequest(hashes, Config.AUTH)),
+        json=vars(GetUnindexedReferencesRequest(hashes, Config.mindflow_auth())),
         timeout=10,
     )
     if response.status_code == 200:
-        return UnindexedReferenceResponse(response.json())
+        return GetUnindexedReferencesResponse(response.json())
 
     # Write a debug warning log here
     print(f"Error: {response.status_code} {response.text}")
