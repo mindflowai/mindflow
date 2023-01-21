@@ -6,7 +6,7 @@ import os
 
 from typing import List, Union
 
-from mindflow.resolve_handling.resolvers.base_resolver import BaseResolver, Resolved
+from mindflow.index.resolvers.base_resolver import BaseResolver, Resolved
 from mindflow.utils.reference import Reference
 from mindflow.utils.files.utf8 import is_valid_utf8
 from mindflow.utils.files.extract import extract_files
@@ -58,10 +58,12 @@ class ResolvedPath(Resolved):
         except UnicodeDecodeError:
             return None
 
+
 class PathResolver(BaseResolver):
     """
     Resolver for file or directory paths to text.
     """
+
     @staticmethod
     def should_resolve(reference: Union[str, os.PathLike]) -> bool:
         """
@@ -74,4 +76,8 @@ class PathResolver(BaseResolver):
         """
         Extract text from files.
         """
-        return [ResolvedPath(file) for file in extract_files(reference) if is_valid_utf8(file)]
+        return [
+            ResolvedPath(file)
+            for file in extract_files(reference)
+            if is_valid_utf8(file)
+        ]

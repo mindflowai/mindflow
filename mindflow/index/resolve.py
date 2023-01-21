@@ -3,8 +3,8 @@ Module for resolving references to text.
 """
 
 from typing import List
-from mindflow.resolve_handling.resolvers.path_resolver import PathResolver
-from mindflow.resolve_handling.resolvers.base_resolver import Resolved
+from mindflow.index.resolvers.path_resolver import PathResolver
+from mindflow.index.resolvers.base_resolver import Resolved
 
 
 def resolve(reference: str) -> List[Resolved]:

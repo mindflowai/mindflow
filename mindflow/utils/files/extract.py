@@ -5,6 +5,7 @@ from typing import List
 
 from mindflow.utils.files.git import is_within_git_repo, get_git_files
 
+
 def extract_files(path: os.PathLike) -> List[os.PathLike]:
     """
     Extract all files from a directory.

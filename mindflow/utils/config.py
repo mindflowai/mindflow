@@ -1,7 +1,8 @@
 """
 Configurations
 """
-from mindflow.utils.token import get_token
+import os
+from mindflow.utils.token import get_token, AuthType
 
 # Create and instantiate a configuration class that gives you the API location and the Auth
 class Config:
@@ -10,7 +11,9 @@ class Config:
     """
 
     API_LOCATION: str = "http://127.0.0.1:5000/api/mindflow"
-    AUTH: str = get_token()
+
+    def mindflow_auth(self) -> str:
+        return get_token(AuthType.Mindflow)
 
 
 # instantiates the configurations
