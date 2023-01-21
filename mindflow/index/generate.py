@@ -3,14 +3,18 @@ Generate an index for a list of resolved paths.
 """
 
 from asyncio import Future
-from typing import List
+from typing import List, Set
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from alive_progress import alive_bar
 
-from mindflow.requests.unindexed_reference import request_unindexed_references
-from mindflow.requests.index_references import request_index_references
-from mindflow.resolve_handling.resolvers.base_resolver import Resolved
+from mindflow.client.mindflow.get_unindexed_references import (
+    get_unindexed_references as remote_get_unindexed_references,
+)
+from mindflow.client.mindflow.index_references import (
+    index_references as remote_index_references,
+)
+from mindflow.index.resolvers.base_resolver import Resolved
 from mindflow.utils.reference import Reference
 
 PACKET_SIZE = 2 * 1024 * 1024
@@ -24,7 +28,7 @@ def generate_index(all_resolved: List[Resolved]):
     packets: List[Resolved] = create_packets(all_resolved)
 
     # Create a thread pool with 4 worker threads
-    with ThreadPoolExecutor(max_workers=500) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         # Submit the tasks to the thread pool
         results: List[Future[List[Reference]]] = [
             executor.submit(process_packet, packet) for packet in packets
@@ -38,13 +42,7 @@ def generate_index(all_resolved: List[Resolved]):
                 references: List[Reference] = complete.result()
                 hashes: List[str] = [reference.hash for reference in references]
 
-                unindexed_hashes: List[str] = request_unindexed_references(
-                    hashes
-                ).unindexed_hashes
-                if unindexed_hashes:
-                    request_index_references(
-                        {r.hash: r for r in references}, unindexed_hashes
-                    )
+                create_remote_index(references, hashes)
 
                 progress_bar(len(references))
 
@@ -53,7 +51,7 @@ def create_packets(all_resolved: List[Resolved]) -> List[List[Resolved]]:
     """
     Creates small packets of files to process.
     """
-    with ProcessPoolExecutor(max_workers=50) as executor:
+    with ProcessPoolExecutor(max_workers=4) as executor:
         sizes = list(executor.map(get_size, all_resolved))
 
     packets: List[List[Reference]] = []
@@ -98,3 +96,16 @@ def process_packet(packet: List[Resolved]) -> List[Reference]:
             result.append(reference)
 
     return result
+
+
+def create_remote_index(references: List[Reference], hashes: List[str]):
+    """
+    Create an index for a list of references.
+    """
+    missing_hashes: Set[str] = remote_get_unindexed_references(hashes).unindexed_hashes
+    references_to_index: List[Reference] = [
+        reference for reference in references if reference.hash in missing_hashes
+    ]
+
+    if references_to_index:
+        remote_index_references(references_to_index)

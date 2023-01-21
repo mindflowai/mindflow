@@ -1,33 +1,68 @@
 """
 Authentication token helpers.
 """
+import json
+import sys
+from simple_term_menu import TerminalMenu
+
 import os
 import getpass
 
+from enum import Enum
+from mindflow import DOT_MINDFLOW
 
-def set_token(token: str):
-    """
-    This function is used to set the token for the user.
-    """
+
+class AuthType(Enum):
+    Mindflow = "Mindflow"
+
+
+def set_token(token):
+    AUTH_FILE_PATH = os.path.join(DOT_MINDFLOW, "authentication.json")
+
+    # Ask user to select type of token
+    options = list(AuthType.__members__.keys())
+    print("Select the type of token you want to set:")
+    menu = TerminalMenu(options)
+    choice = menu.show()
+
+    # Get the selected token type
+    selected_token_type = options[choice]
+
+    # Prompt user to set token if it is None
     if token is None:
         token = getpass.getpass("Authorization Key: ")
 
-    with open(
-        os.path.join(os.path.expanduser("~"), ".mindflow"), "w", encoding="utf-8"
-    ) as file:
-        file.write(token)
-        file.close()
+    if os.path.isfile(AUTH_FILE_PATH):
+        # Open the authentication file in read and write mode
+        with open(AUTH_FILE_PATH, "r+") as auth_file:
+            # Read the existing authentication data
+            authentication = json.load(auth_file)
+    else:
+        authentication = {}
 
-    print("Token set successfully.")
+    # Write the token to authentication file
+    authentication[selected_token_type] = token
+
+    # Write the updated authentication data to the file
+    with open(AUTH_FILE_PATH, "w") as auth_file:
+        json.dump(authentication, auth_file)
+
+    print(f"{selected_token_type} token has been saved.")
 
 
-def get_token() -> str:
+def get_token(auth_type: AuthType) -> str:
     """
     This function is used to get the token for the user.
     """
-    with open(
-        os.path.join(os.path.expanduser("~"), ".mindflow"), "r", encoding="utf-8"
-    ) as file:
-        token = file.read()
-        file.close()
-    return token
+
+    AUTH_FILE_PATH = os.path.join(DOT_MINDFLOW, "authentication.json")
+    if os.path.isfile(AUTH_FILE_PATH):
+        with open(AUTH_FILE_PATH, "r+") as auth_file:
+            authentication = json.load(auth_file)
+    else:
+        print(
+            f"Please set authentication token first for {auth_type.value} using 'mindflow auth' command."
+        )
+        sys.exit(1)
+
+    return authentication[auth_type.value]
