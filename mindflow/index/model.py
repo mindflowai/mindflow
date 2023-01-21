@@ -12,7 +12,7 @@ from typing import List, Dict
 import numpy as np
 
 from mindflow.utils.reference import Reference
-from mindflow.client.gpt.openai import GPT
+from mindflow.client.openai.gpt import GPT
 from mindflow.utils.config import config as Config
 from mindflow import DOT_MINDFLOW
 

@@ -4,7 +4,7 @@ import sys
 
 from typing import List
 
-from mindflow.client.gpt.openai import GPT
+from mindflow.client.openai.gpt import GPT
 from mindflow.client.mindflow.query import query as remote_query
 
 from mindflow.utils.response import handle_response_text

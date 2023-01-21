@@ -8,7 +8,7 @@ import numpy as np
 from typing import List, Tuple
 
 from mindflow.index.model import index as Index, Entry
-from mindflow.client.gpt.openai import GPT
+from mindflow.client.openai.gpt import GPT
 from mindflow.utils.config import config as Config
 
 from sklearn.metrics.pairwise import cosine_similarity

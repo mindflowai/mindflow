@@ -61,6 +61,9 @@ def get_token(auth_type: AuthType) -> str:
         with open(AUTH_FILE_PATH, "r+") as auth_file:
             authentication = json.load(auth_file)
     else:
+        authentication = {}
+
+    if not authentication.get(auth_type.value):
         print(
             f"Please set authentication token first for {auth_type.value} using 'mindflow auth' command."
         )

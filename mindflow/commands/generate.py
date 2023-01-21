@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from typing import List
-from mindflow.client.gpt.openai import GPT
+from mindflow.client.openai.gpt import GPT
 
 from mindflow.index.generate import generate_index
 from mindflow.utils.args import (

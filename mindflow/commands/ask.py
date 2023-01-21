@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from mindflow.client.gpt.openai import GPT
+from mindflow.client.openai.gpt import GPT
 from mindflow.client.mindflow.completion import completion as remote_completion
 from mindflow.utils.args import _add_ask_args, _add_remote_args, _add_response_args
 from mindflow.utils.response import handle_response_text
