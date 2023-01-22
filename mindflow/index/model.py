@@ -18,56 +18,54 @@ from mindflow import DOT_MINDFLOW
 
 INDEX_PATH = os.path.join(DOT_MINDFLOW, "index.json")
 
-
-class Entry:
-    """
-    Index model
-    """
-
-    path: str = None
-    type: str = None
-    hash: str = None
-    summary: str = None
-    embedding: List[float] = None
-    size: int = None
-
-    def __init__(self, index_data):
-        if index_data is not None:
-            self.path: str = index_data.get("path")
-            self.type: str = index_data.get("type")
-            self.hash: str = index_data.get("hash")
-            self.summary: str = index_data.get("summary")
-            self.embedding: List[float] = index_data.get("embedding")
-            self.size: int = index_data.get("size")
-            self.last_updated: datetime = index_data.get("last_updated")
-            self.created_at: datetime = index_data.get("created_at")
-
-    def read(self) -> str:
-        """
-        Read file
-        """
-        with open(self.path, "r") as file:
-            return file.read()
-
-    def get_summary(self) -> str:
-        """
-        Get index
-        """
-        return self.summary
-
-    def get_embedding(self) -> List[float]:
-        """
-        Get embedding as numpy array
-        """
-        return np.array(self.embedding)
-
-
 class Index:
     """
     Index model
     """
 
-    index: Dict[str, Entry]
+    class Document:
+        """
+        Index model
+        """
+
+        path: str = None
+        type: str = None
+        hash: str = None
+        summary: str = None
+        embedding: List[float] = None
+        size: int = None
+
+        def __init__(self, index_data):
+            if index_data is not None:
+                self.path: str = index_data.get("path")
+                self.type: str = index_data.get("type")
+                self.hash: str = index_data.get("hash")
+                self.embedding: List[float] = index_data.get("embedding")
+                self.size: int = index_data.get("size")
+                self.last_updated: datetime = index_data.get("last_updated")
+                self.created_at: datetime = index_data.get("created_at")
+
+        def read(self) -> str:
+            """
+            Read file
+            """
+            with open(self.path, "r") as file:
+                return file.read()
+
+        def get_summary(self) -> str:
+            """
+            Get index
+            """
+            return self.summary
+
+        def get_embedding(self) -> List[float]:
+            """
+            Get embedding as numpy array
+            """
+            return np.array(self.embedding)
+
+
+    index: Dict[str, Document]
 
     def __init__(self):
         self.index_json = self.load()
@@ -82,11 +80,11 @@ class Index:
         else:
             return {}
 
-    def save(self, entries: List[Entry]):
+    def save(self, documents: List[Document]):
         """
         Add index entries to database
         """
-        update = {entry.hash: vars(entry) for entry in entries}
+        update = {document.hash: vars(document) for document in documents}
         self.index_json.update(update)
         with open(INDEX_PATH, "w") as auth_file:
             json.dump(self.index_json, auth_file)
@@ -114,29 +112,29 @@ class Index:
                 try:
                     index: "Index" = future.result()
                 except Exception as error:
-                    print(f"Error creating entry for reference {error}")
+                    print(f"Error creating document for reference {error}")
                 else:
                     entries.append(index)
         if len(entries) != 0:
             self.save(entries)
 
-    def get_entry_by_hash(self, hashes: List[str]) -> List["Index"]:
+    def get_document_by_hash(self, hashes: List[str]) -> List["Index"]:
         """
-        Get index entry by hash
+        Get index document by hash
         """
         # Find all documents with a hash that is in the given list of hashes
         entries: dict = [
             self.index_json[hash] for hash in hashes if hash in self.index_json
         ]
         # Return a list of cls objects constructed from the found documents
-        return [Entry(index) for index in entries]
+        return [Index.Document(index) for index in entries]
 
     @staticmethod
-    def _create_index(reference: Reference) -> Entry:
+    def _create_index(reference: Reference) -> Document:
         """
-        Create index entry
+        Create index document
         """
-        return Entry(
+        return Index.Document(
             {
                 "path": reference.path,
                 "type": reference.type,

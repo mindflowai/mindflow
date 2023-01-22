@@ -7,7 +7,7 @@ import numpy as np
 
 from typing import List, Tuple
 
-from mindflow.index.model import index as Index, Entry
+from mindflow.index.model import Index, index
 from mindflow.client.openai.gpt import GPT
 from mindflow.utils.config import config as Config
 
@@ -42,7 +42,7 @@ def select_content(ranked_hashes: List[Tuple[str, float]]) -> str:
     selected_content: str = ""
     char_limit: int = Config.CHATGPT_TOKEN_LIMIT * 3
     for ranked_hash, _ in ranked_hashes:
-        content: Entry = Index.get_entry_by_hash([ranked_hash])
+        content: Index.Document = index.get_document_by_hash([ranked_hash])
         if content:
             text = content[0].read()
             if len(selected_content + text) > char_limit:
@@ -62,13 +62,13 @@ def rank_by_embedding(query: str, hashes: List[str]) -> List[Tuple[str, float]]:
     ).reshape(1, -1)
 
     batch_hashes: List[str]
-    batch_index: List[Entry]
+    batch_index: List[Index.Document]
     batch_size: int = 100
     ranked_hashes: List[Tuple[str, float]] = []
 
     for i in range(0, len(hashes), batch_size):
         batch_hashes = hashes[i : i + batch_size]
-        batch_index = Index.get_entry_by_hash(batch_hashes)
+        batch_index = index.get_document_by_hash(batch_hashes)
         if len(batch_index) == 0:
             continue
 
