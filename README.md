@@ -7,7 +7,7 @@ MindFlow is a command-line tool and Visual Studio Code Extension (Currently unde
 
 ## Features
 - **Note:** MindFlow is currently in beta. How do you want MindFlow to work? Let us know! We are working on adding more features and improving the user experience. If you have any feedback, please leave an issue on the GitHub repo or join our Discord server (https://discord.gg/kfVxeNET). 
-- **Note:** Currently, we are awaiting reliable API access to ChatGPT. In the meantime, the responses are not prompts that will be copied to your clipboard which you must then paste into ChatGPT (https://chat.openai.com/chat).
+- **Note:** Currently, we are awaiting reliable API access to ChatGPT. In the meantime, the responses are poor, but there are you can add `-p` to just get the prompt and copy into ChatGPT (https://chat.openai.com/chat).
 
 - `mf(r) ask <PROMPT>`:                            
     - ChatGPT in the command line. Use as normal!
