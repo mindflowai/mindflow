@@ -19,14 +19,14 @@ MindFlow is a command-line tool and Visual Studio Code Extension (Currently unde
     - Queries files and folders using generated index. Can generate index with [-i] flag.
 
 ## Setup
-**Python:**
-- `pip install mindflow`
-- Binding: mf
+- **Python:**
+    - `pip install mindflow`
+    - Binding: mf
 
-**Rust:**
-- `cargo install mindflow`
-- Binding: mfr
-- (Faster, but requires Rust to be installed (https://www.rust-lang.org/tools/install))  
+- **Rust:**
+    - `cargo install mindflow`
+    - Binding: mfr
+    - (Faster, but requires Rust to be installed (https://www.rust-lang.org/tools/install))  
 
 **Authenticating with MindFlow:**
 
