@@ -29,6 +29,7 @@ MindFlow is a command-line tool and Visual Studio Code Extension (Currently unde
 - (Faster, but requires Rust to be installed (https://www.rust-lang.org/tools/install))  
 
 **Authenticating with MindFlow:**
+
 2 Types of JWT Authentication - Only one is required:
 
 - **OpenAI Auth**
