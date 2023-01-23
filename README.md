@@ -29,7 +29,14 @@ MindFlow is a command-line tool and Visual Studio Code Extension (Currently unde
 - (Faster, but requires Rust to be installed (https://www.rust-lang.org/tools/install))  
 
 **Authenticating with MindFlow:**
-- You must have a JWT token to use MindFlow. While our server is currently in beta, you can request a token in our Discord server (https://discord.gg/kfVxeNET) or by leaving an issue on the GitHub repo.
+2 Types of JWT Authentication - Only one is required:
+- **OpenAI Auth**
+    - Create an OpenAI account (https://beta.openai.com/signup)
+    - Create an API key (https://beta.openai.com/account/api-keys)
+
+- **Mindflow Server Auth** (OUT OF ORDER) 
+    - While our server is currently in beta, you can request a token in our Discord server (https://discord.gg/kfVxeNET) or by leaving an issue on the GitHub repo.
+
 - Once you have a JWT auth token:
     - Python: `mf auth <TOKEN>`
     - Rust:   ```mfr auth <TOKEN>``` 
