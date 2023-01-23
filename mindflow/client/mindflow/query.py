@@ -1,5 +1,5 @@
 """
-Make a get request to the backend to check if the references are indexed.
+Make a get request to the backend to check if the documents are indexed.
 """
 from typing import List
 import requests
@@ -13,19 +13,19 @@ class QueryRequest:
     """
 
     query_text: str = None
-    reference_hashes: List[str] = None
+    document_hashes: List[str] = None
     return_prompt: bool = None
     auth: str = None
 
     def __init__(
         self,
         query_text: str,
-        reference_hashes: List[str],
+        document_hashes: List[str],
         return_prompt: bool,
         auth: str,
     ):
         self.query_text = query_text
-        self.reference_hashes = reference_hashes
+        self.document_hashes = document_hashes
         self.return_prompt = return_prompt
         self.auth = auth
 

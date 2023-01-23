@@ -1,20 +1,20 @@
 """
-Module for resolving references to text.
+Module for resolving documents to text.
 """
 
 from typing import List
-from mindflow.index.resolvers.path_resolver import PathResolver
-from mindflow.index.resolvers.base_resolver import Resolved
+from mindflow.index.resolvers.file_resolver import FileResolver
+from mindflow.index.model import Index
 
 
-def resolve(reference: str) -> List[Resolved]:
+def resolve(document_path: str) -> List[Index.Document]:
     """
-    Resolves a reference to text.
+    Resolves a document to text.
     """
 
-    resolvers = [PathResolver()]
+    resolvers = [FileResolver()]
     for resolver in resolvers:
-        if resolver.should_resolve(reference):
-            return resolver.resolve(reference)
+        if resolver.should_resolve(document_path):
+            return resolver.resolve(document_path)
 
-    raise ValueError(f"Cannot resolve reference: {reference}")
+    raise ValueError(f"Cannot resolve document: {document_path}")
