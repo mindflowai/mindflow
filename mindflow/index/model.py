@@ -4,19 +4,27 @@ Index model
 
 from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+import hashlib
 import json
 import os
+
+from enum import Enum
 from typing import List, Dict
 
-import numpy as np
-
-from mindflow.utils.reference import Reference
 from mindflow.client.openai.gpt import GPT
 from mindflow.utils.config import config as Config
 from mindflow import DOT_MINDFLOW
 
 INDEX_PATH = os.path.join(DOT_MINDFLOW, "index.json")
+
+
+class DocumentType(Enum):
+    """
+    Document type enum
+    """
+
+    FILE: str = "file"
+
 
 class Index:
     """
@@ -25,127 +33,128 @@ class Index:
 
     class Document:
         """
-        Index model
+        Document
         """
 
+        document_type: str = None
         path: str = None
-        type: str = None
         hash: str = None
-        summary: str = None
         embedding: List[float] = None
         size: int = None
 
         def __init__(self, index_data):
             if index_data is not None:
+                self.document_type: str = index_data.get("document_type")
                 self.path: str = index_data.get("path")
-                self.type: str = index_data.get("type")
                 self.hash: str = index_data.get("hash")
                 self.embedding: List[float] = index_data.get("embedding")
                 self.size: int = index_data.get("size")
-                self.last_updated: datetime = index_data.get("last_updated")
-                self.created_at: datetime = index_data.get("created_at")
 
-        def read(self) -> str:
+        @classmethod
+        def initialize(cls, document_type: str, path: str) -> "Index.Document":
             """
-            Read file
+            Create document
             """
-            with open(self.path, "r") as file:
-                return file.read()
+            document = cls(None)
+            document.document_type = document_type
+            document.path = path
 
-        def get_summary(self) -> str:
-            """
-            Get index
-            """
-            return self.summary
-
-        def get_embedding(self) -> List[float]:
-            """
-            Get embedding as numpy array
-            """
-            return np.array(self.embedding)
-
+            text_bytes = read_document(document).encode()
+            document.size = len(text_bytes)
+            document.hash = hashlib.sha256(text_bytes).hexdigest()
+            return document
 
     index: Dict[str, Document]
 
     def __init__(self):
-        self.index_json = self.load()
+        self.index = self.load_from_disk()
 
-    def load(self) -> dict:
+    def load_from_disk(self) -> dict:
+        """
+        Load index from disk (JSON)
+        """
         if os.path.isfile(INDEX_PATH):
 
             # Open the authentication file in read and write mode
-            with open(INDEX_PATH, "r+") as index_file:
+            with open(INDEX_PATH, "r+", encoding="utf-8") as index_file:
                 # Read the existing authentication data
                 return json.load(index_file)
         else:
             return {}
 
-    def save(self, documents: List[Document]):
+    def save_to_disk(self, documents: List[Document]):
         """
-        Add index entries to database
+        Add index to disk (JSON)
         """
         update = {document.hash: vars(document) for document in documents}
-        self.index_json.update(update)
-        with open(INDEX_PATH, "w") as auth_file:
-            json.dump(self.index_json, auth_file)
+        self.index.update(update)
+        with open(INDEX_PATH, "w", encoding="utf-8") as auth_file:
+            json.dump(self.index, auth_file)
 
-    def get_missing_hashes(self, hashes: List[str]) -> List[str]:
+    def get_unindexed_documents(self, documents: List[Document]) -> List[str]:
         """
-        Get missing indices by hashes
+        Get missing documents from index
         """
-        return [key for key in hashes if key not in self.index_json]
+        return [document for document in documents if document.hash not in self.index]
 
-    def create_entries(self, references: List[Reference]):
+    def index_documents(self, documents: List[Document]):
         """
         Create index entries
         """
-        entries: List["Index"] = []
+        documents_w_embeddings = [None] * len(documents)
         with ThreadPoolExecutor(max_workers=50) as executor:
-            # Start a separate thread for each reference
-            future_to_reference: dict[Future[Index], Reference] = {
-                executor.submit(self._create_index, reference): reference
-                for reference in references
+            # Start a separate thread for each document
+            future_to_document: dict[Future[Index], Index.Document] = {
+                executor.submit(self._embed_document, document): document
+                for document in documents
             }
 
             # Wait for all threads to complete
-            for future in as_completed(future_to_reference):
+            count = 0
+            for future in as_completed(future_to_document):
                 try:
-                    index: "Index" = future.result()
+                    document: "Index.Document" = future.result()
                 except Exception as error:
-                    print(f"Error creating document for reference {error}")
+                    print(f"Error creating document {error}")
                 else:
-                    entries.append(index)
-        if len(entries) != 0:
-            self.save(entries)
+                    # Remove anti-pattern
+                    documents_w_embeddings[count] = document
+                    count += 1
+        if len(documents_w_embeddings) != 0:
+            documents_w_embeddings = [
+                document for document in documents_w_embeddings if document is not None
+            ]
+            self.save_to_disk(documents_w_embeddings)
 
     def get_document_by_hash(self, hashes: List[str]) -> List["Index"]:
         """
         Get index document by hash
         """
         # Find all documents with a hash that is in the given list of hashes
-        entries: dict = [
-            self.index_json[hash] for hash in hashes if hash in self.index_json
-        ]
+        entries: dict = [self.index[hash] for hash in hashes if hash in self.index]
         # Return a list of cls objects constructed from the found documents
         return [Index.Document(index) for index in entries]
 
     @staticmethod
-    def _create_index(reference: Reference) -> Document:
+    def _embed_document(document: Document) -> Document:
         """
         Create index document
         """
-        return Index.Document(
-            {
-                "path": reference.path,
-                "type": reference.type,
-                "hash": reference.hash,
-                "text": reference.text,
-                "embedding": GPT.get_embedding(
-                    reference.text, Config.GPT_MODEL_EMBEDDING
-                ),
-                "size": reference.size,
-            }
+        document.embedding = GPT.get_embedding(
+            read_document(document), Config.GPT_MODEL_EMBEDDING
         )
+        return document
+
+
+def read_document(document: Index.Document) -> str:
+    """
+    Read document
+    """
+    if document.document_type == "file":
+        with open(document.path, "r", encoding="utf-8") as file:
+            return file.read()
+    else:
+        raise Exception(f"Document type {document.document_type} not supported")
 
 
 index = Index()

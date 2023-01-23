@@ -21,24 +21,24 @@ def _add_generate_args(parser: argparse.ArgumentParser):
         "-i",
         "--index",
         action="store_true",
-        help="Generate an index the references.",
+        help="Generate an index for documents.",
     )
 
 
-def _add_reference_args(parser: argparse.ArgumentParser):
+def _add_document_args(parser: argparse.ArgumentParser):
     """
-    Add arguments for commands that require references to text.
+    Add arguments for handling document paths.
     """
     parser.add_argument(
-        "references",
+        "document_paths",
         nargs="+",
-        help="A list of references to summarize (file path, API, web address).",
+        help="A list of document paths to summarize (file path, API, web address).",
     )
 
 
 def _add_query_args(parser: argparse.ArgumentParser):
     """
-    Add arguments for commands that require references to text.
+    Add arguments for querying documents.
     """
     parser.add_argument(
         "query", type=str, help="The query you want to make on some data."
@@ -71,7 +71,7 @@ def _add_auth_args(parser: argparse.ArgumentParser):
 
 def _add_ask_args(parser: argparse.ArgumentParser):
     """
-    Add arguments for commands that require references to text.
+    Add arguments interacting with the GPT model.
     """
     parser.add_argument("prompt", type=str, help="Prompt for GPT model.")
 

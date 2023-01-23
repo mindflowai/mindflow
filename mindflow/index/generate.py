@@ -1,5 +1,5 @@
 """
-Generate an index for a list of resolved paths.
+Generate an index for a list of documents.
 """
 
 from asyncio import Future
@@ -8,31 +8,29 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_compl
 
 from alive_progress import alive_bar
 
-from mindflow.client.mindflow.get_unindexed_references import (
-    get_unindexed_references as remote_get_unindexed_references,
+from mindflow.client.mindflow.get_unindexed_documents import (
+    get_unindexed_documents as remote_get_unindexed_documents,
 )
-from mindflow.client.mindflow.index_references import (
-    index_references as remote_index_references,
+from mindflow.client.mindflow.index_documents import (
+    index_documents as remote_index_documents,
 )
-from mindflow.index.resolvers.base_resolver import Resolved
-from mindflow.utils.reference import Reference
-from mindflow.index.model import index as Index
+from mindflow.index.model import Index, index
 
 PACKET_SIZE = 2 * 1024 * 1024
 
 
-def generate_index(all_resolved: List[Resolved], remote: bool = False):
+def generate_index(all_documents: List[Index.Document], remote: bool = False):
     """
-    Generate an index for a list of resolved paths.
+    Generate an index for a list of documents.
     """
 
-    packets: List[Resolved] = create_packets(all_resolved)
+    packets: List[Index.Document] = create_packets(all_documents)
 
     # Create a thread pool with 4 worker threads
     with ThreadPoolExecutor(max_workers=4) as executor:
         # Submit the tasks to the thread pool
-        results: List[Future[List[Reference]]] = [
-            executor.submit(process_packet, packet) for packet in packets
+        results: List[Future[List[Index.Document]]] = [
+            executor.submit(create_index, packet, remote) for packet in packets
         ]
 
         with alive_bar(
@@ -40,37 +38,29 @@ def generate_index(all_resolved: List[Resolved], remote: bool = False):
         ) as progress_bar:
             # Process the results as they complete
             for complete in as_completed(results):
-                references: List[Reference] = complete.result()
-                hashes: List[str] = [reference.hash for reference in references]
-
-                if remote:
-                    create_remote_index(references, hashes)
-                else:
-                    create_local_index(references, hashes)
-
-                progress_bar(len(references))
+                progress_bar(complete.result())
 
 
-def create_packets(all_resolved: List[Resolved]) -> List[List[Resolved]]:
+def create_packets(all_documents: List[Index.Document]) -> List[List[Index.Document]]:
     """
     Creates small packets of files to process.
     """
     with ProcessPoolExecutor(max_workers=4) as executor:
-        sizes = list(executor.map(get_size, all_resolved))
+        sizes = list(executor.map(get_size, all_documents))
 
-    packets: List[List[Reference]] = []
-    packet: List[Reference] = []
+    packets: List[List[Index.Document]] = []
+    packet: List[Index.Document] = []
 
     packet_size: int = 0
     total_size: int = 0
 
-    for resolved, size in zip(all_resolved, sizes):
+    for document, size in zip(all_documents, sizes):
         if packet_size + size <= PACKET_SIZE:
-            packet.append(resolved)
+            packet.append(document)
             packet_size += size
         else:
             packets.append(packet)
-            packet = [resolved]
+            packet = [document]
             packet_size = size
             total_size += packet_size
 
@@ -82,47 +72,38 @@ def create_packets(all_resolved: List[Resolved]) -> List[List[Resolved]]:
     return packets
 
 
-def get_size(resolved: Resolved) -> int:
+def get_size(document: Index.Document) -> int:
     """
     Get the size of a file.
     """
-    return resolved.size_bytes
+    return document.size
 
 
-def process_packet(packet: List[Resolved]) -> List[Reference]:
+def create_remote_index(documents: List[Index.Document]):
     """
-    Process a packet of files.
+    Create an index for a list of documents.
     """
-    result: List[Reference] = []
-    for resolved in packet:
-        reference = resolved.create_reference()
-        if reference:
-            result.append(reference)
-
-    return result
+    documents_to_index: List[Index.Document] = remote_get_unindexed_documents(documents)
+    if documents_to_index:
+        remote_index_documents(documents_to_index)
 
 
-def create_remote_index(references: List[Reference], hashes: List[str]):
+def create_local_index(documents: List[Index.Document]):
     """
-    Create an index for a list of references.
+    Create an index for a list of documents.
     """
-    missing_hashes: Set[str] = remote_get_unindexed_references(hashes).unindexed_hashes
-    references_to_index: List[Reference] = [
-        reference for reference in references if reference.hash in missing_hashes
-    ]
-
-    if references_to_index:
-        remote_index_references(references_to_index)
+    documents_to_index: List[Index.Document] = index.get_unindexed_documents(documents)
+    if documents_to_index:
+        index.index_documents(documents_to_index)
 
 
-def create_local_index(references: List[Reference], hashes: List[str]):
+def create_index(documents: List[Index.Document], remote: bool) -> int:
     """
-    Create an index for a list of references.
+    Create an index for a list of documents.
     """
-    missing_hashes: Set[str] = Index.get_missing_hashes(hashes)
-    references_to_index: List[Reference] = [
-        reference for reference in references if reference.hash in missing_hashes
-    ]
+    if remote:
+        create_remote_index(documents)
+    else:
+        create_local_index(documents)
 
-    if references_to_index:
-        Index.create_entries(references_to_index)
+    return len(documents)

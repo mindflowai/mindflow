@@ -6,28 +6,28 @@ from mindflow.client.openai.gpt import GPT
 
 from mindflow.index.generate import generate_index
 from mindflow.utils.args import (
-    _add_reference_args,
+    _add_document_args,
     _add_remote_args,
 )
 
-from mindflow.index.resolvers.base_resolver import Resolved
 from mindflow.index.resolve import resolve
+from mindflow.index.model import Index
 
 
 class Generate:
-    references: List[str]
+    document_paths: List[str]
     remote: bool
 
     def __init__(self):
         parser = argparse.ArgumentParser(
             description="Generate an index and/or embeddings for files.",
         )
-        _add_reference_args(parser)
+        _add_document_args(parser)
         _add_remote_args(parser)
 
         args = parser.parse_args(sys.argv[2:])
 
-        self.references = args.references
+        self.document_paths = args.document_paths
         self.remote = args.remote
 
     def execute(self):
@@ -37,10 +37,10 @@ class Generate:
         if not self.remote:
             GPT.authorize()
 
-        # Resolve references (Path, URL, etc.)
-        resolved_references: List[Resolved] = []
-        for reference in self.references:
-            resolved_references.extend(resolve(reference))
+        # Resolve documents (Path, URL, etc.)
+        documents: List[Index.Document] = []
+        for document_path in self.document_paths:
+            documents.extend(resolve(document_path))
 
         # Generate index and/or embeddings
-        generate_index(resolved_references, self.remote)
+        generate_index(documents, self.remote)
