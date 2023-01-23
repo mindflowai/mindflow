@@ -91,7 +91,7 @@ class Index:
         with open(INDEX_PATH, "w", encoding="utf-8") as auth_file:
             json.dump(self.index, auth_file)
 
-    def get_unindexed_documents(self, documents: List[Document]) -> List[str]:
+    def get_unindexed_documents(self, documents: List[Document]) -> List[Document]:
         """
         Get missing documents from index
         """

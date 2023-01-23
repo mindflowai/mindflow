@@ -66,7 +66,7 @@ def rank_by_embedding(
     ).reshape(1, -1)
 
     batch_size: int = 100
-    ranked_documents: List[Tuple[Index.Document, float]] = [None] * len(documents)
+    ranked_documents: List[Tuple[str, float]] = [None] * len(documents)
 
     doc_count = 0
     for i in range(0, len(documents), batch_size):
