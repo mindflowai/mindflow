@@ -30,6 +30,7 @@ MindFlow is a command-line tool and Visual Studio Code Extension (Currently unde
 
 **Authenticating with MindFlow:**
 2 Types of JWT Authentication - Only one is required:
+
 - **OpenAI Auth**
     - Create an OpenAI account (https://beta.openai.com/signup)
     - Create an API key (https://beta.openai.com/account/api-keys)
