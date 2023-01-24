@@ -29,10 +29,10 @@ def query(query: str, documents: List[Index.Document], return_prompt: bool = Fal
 
     prompt = f"{query}\n\n{selected_content}"
 
-    if return_prompt:
-        return prompt
-
-    return GPT.get_completion(prompt, Config.GPT_MODEL_COMPLETION)
+    # if return_prompt:
+        # return prompt
+    completion = GPT.get_completion(prompt, Config.GPT_MODEL_COMPLETION)
+    return completion
 
 
 def select_content(ranked_hashes: List[Tuple[str, float]]) -> str:

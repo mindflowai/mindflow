@@ -3,7 +3,7 @@ Generate an index for a list of documents.
 """
 
 from asyncio import Future
-from typing import List, Set
+from typing import List
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from alive_progress import alive_bar

@@ -21,25 +21,21 @@ class GPT:
         openai.api_key = Config.openai_auth()
 
     @staticmethod
-    def get_completion(prompt: str, model: str = None) -> str:
+    def get_completion(prompt: str, suffix: str = None, model: str = None) -> str:
         """
         Get response from OpenAI API
         """
-        if model is None:
-            return prompt[:100]
-
-        return openai.Completion.create(engine=model, prompt=prompt, temperature=0,)[
+        completion = openai.Completion.create(engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500)[
             "choices"
-        ][0]["text"]
+        ]
+        print(completion)
+        return completion[0]["text"]
 
     @staticmethod
     def get_embedding(text: str, model: str = None) -> np.ndarray:
         """
         Get embedding from OpenAI API
         """
-        if model is None:
-            return text[:100]
-
         return openai.Embedding.create(engine=model, input=text,)["data"][
             0
         ]["embedding"]

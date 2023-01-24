@@ -3,7 +3,7 @@ import sys
 
 
 from mindflow.utils.args import _add_auth_args
-from mindflow.utils.token import set_token
+from mindflow.utils.auth import set_token
 
 
 class Auth:
