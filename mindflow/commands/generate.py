@@ -42,8 +42,7 @@ class Generate:
         """
         This function is used to generate an index and/or embeddings for files
         """
-        if not self.remote:
-            GPT.authorize()
+        GPT.authorize(self.remote)
 
         # Resolve documents (Path, URL, etc.)
         documents: List[Index.Document] = []

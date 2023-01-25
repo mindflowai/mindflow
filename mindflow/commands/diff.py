@@ -41,8 +41,7 @@ class Diff:
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
         """
-        if not self.remote:
-            GPT.authorize()
+        GPT.authorize(self.remote)
 
         # Run Git diff and get the output with prompt suffix
         prompt = generate_diff_prompt(self.diffargs)

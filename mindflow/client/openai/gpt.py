@@ -14,11 +14,12 @@ class GPT:
     """
 
     @staticmethod
-    def authorize():
+    def authorize(remote: bool = False):
         """
         Authorize OpenAI API
         """
-        openai.api_key = Config.openai_auth()
+        if not remote:
+            openai.api_key = Config.openai_auth()
 
     @staticmethod
     def get_completion(prompt: str, suffix: str = None, model: str = None) -> str:

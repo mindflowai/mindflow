@@ -60,8 +60,7 @@ class Query:
         """
         This function is used to ask a custom question about files, folders, and websites.
         """
-        if not self.remote:
-            GPT.authorize()
+        GPT.authorize(self.remote)
 
         # Resolve documents (Path, URL, etc.)
         documents: List[Index.Document] = []

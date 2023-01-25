@@ -40,8 +40,7 @@ class Ask:
         """
         This function is used to generate a prompt and then use it as a prompt for GPT bot.
         """
-        if not self.remote:
-            GPT.authorize()
+        GPT.authorize(self.remote)
 
         # Prompt GPT through Mindflow API or locally
         if self.remote:
