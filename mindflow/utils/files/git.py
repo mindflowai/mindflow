@@ -8,12 +8,14 @@ from typing import List
 
 
 class NotInGit(BaseException):
-    pass
-
+    """
+    Raised when the given path is not within a git repository.
+    """
 
 class GitError(BaseException):
-    pass
-
+    """
+    Raised when a git command fails.
+    """
 
 def is_within_git_repo(path: os.PathLike) -> bool:
     """

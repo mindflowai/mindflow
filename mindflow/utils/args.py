@@ -1,3 +1,7 @@
+"""
+Arguments setters for CLI parser.
+"""
+
 import argparse
 
 

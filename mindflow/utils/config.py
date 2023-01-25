@@ -1,13 +1,12 @@
 """
-Configurations
+Configurations.
 """
-import os
 from mindflow.utils.auth import get_token, AuthType
 
-# Create and instantiate a configuration class that gives you the API location and the Auth
+
 class Config:
     """
-    Configuration class
+    Configuration class.
     """
 
     API_LOCATION: str = "http://127.0.0.1:5000/api/mindflow"
@@ -18,10 +17,16 @@ class Config:
     SEARCH_INDEX_TOKEN_LIMIT: int = 1500
 
     def mindflow_auth(self) -> str:
-        return get_token(AuthType.Mindflow)
+        """
+        Retrieves the mindflow auth token.
+        """
+        return get_token(AuthType.MINDFLOW)
 
     def openai_auth(self) -> str:
-        return get_token(AuthType.OpenAI)
+        """
+        Retrieves the openai auth token.
+        """
+        return get_token(AuthType.OPENAI)
 
 
 # instantiates the configurations

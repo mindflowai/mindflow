@@ -25,9 +25,9 @@ class GPT:
         """
         Get response from OpenAI API
         """
-        response = openai.Completion.create(engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500)[
-            "choices"
-        ][0]["text"]
+        response = openai.Completion.create(
+            engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500
+        )["choices"][0]["text"]
         return response
 
     @staticmethod

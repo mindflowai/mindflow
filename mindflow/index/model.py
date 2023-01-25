@@ -9,12 +9,13 @@ import json
 import os
 
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Generator
 
 from mindflow.utils.search_tree import create_text_search_tree
 from mindflow import DOT_MINDFLOW
 
 INDEX_PATH = os.path.join(DOT_MINDFLOW, "index.json")
+
 
 class DocumentType(Enum):
     """
@@ -111,14 +112,17 @@ class Index:
                 self.save_to_disk([document])
                 del document, future
 
-    def get_document_by_hash(self, hashes: List[str]) -> List[Document]:
+    def get_document_by_hash(
+        self, document_hashes: List[str]
+    ) -> Generator[List[Document], None, None]:
         """
         Get index document by hash
         """
         # Find all documents with a hash that is in the given list of hashes
-        entries: dict = [self.index[hash] for hash in hashes if hash in self.index]
-        # Return a list of cls objects constructed from the found documents
-        return [Index.Document(index) for index in entries]
+        for document_hash in document_hashes:
+            if document_hash in self.index:
+                yield Index.Document(self.index[document_hash])
+
 
 def read_document(document: Index.Document) -> str:
     """

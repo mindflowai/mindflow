@@ -1,3 +1,7 @@
+"""
+`diff` command
+"""
+
 import argparse
 import sys
 
@@ -10,6 +14,10 @@ from mindflow.utils.config import config as Config
 
 
 class Diff:
+    """
+    Class for initializing Diff args and executing the diff command.
+    """
+
     remote: bool
     skip_clipboard: bool
     return_prompt: bool
@@ -39,7 +47,7 @@ class Diff:
         # Run Git diff and get the output with prompt suffix
         prompt = generate_diff_prompt(self.diffargs)
 
-        ## Prompt GPT through Mindflow API or locally
+        # Prompt GPT through Mindflow API or locally
         if self.remote:
             response: str = remote_completion(prompt, self.return_prompt).text
         else:

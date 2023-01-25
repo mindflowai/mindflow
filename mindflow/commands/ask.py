@@ -1,3 +1,7 @@
+"""
+`ask` command
+"""
+
 import sys
 import argparse
 
@@ -9,6 +13,10 @@ from mindflow.utils.config import config as Config
 
 
 class Ask:
+    """
+    Class for initializing Ask args and executing the ask command.
+    """
+
     remote: bool
     skip_clipboard: bool
     return_prompt: bool
@@ -35,7 +43,7 @@ class Ask:
         if not self.remote:
             GPT.authorize()
 
-        ## Prompt GPT through Mindflow API or locally
+        # Prompt GPT through Mindflow API or locally
         if self.remote:
             response: str = remote_completion(self.prompt, self.return_prompt).text
         else:

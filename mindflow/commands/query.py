@@ -1,3 +1,7 @@
+"""
+`query` command
+"""
+
 import argparse
 
 import sys
@@ -22,6 +26,10 @@ from mindflow.command_helpers.query.query import query as local_query
 
 
 class Query:
+    """
+    Class for initializing Query args and executing the query command.
+    """
+
     query: str
     document_paths: List[str]
     index: bool
@@ -55,16 +63,16 @@ class Query:
         if not self.remote:
             GPT.authorize()
 
-        ## Resolve documents (Path, URL, etc.)
+        # Resolve documents (Path, URL, etc.)
         documents: List[Index.Document] = []
         for document_path in self.document_paths:
             documents.extend(resolve(document_path))
 
-        ## Generate index and/or embeddings
+        # Generate index and/or embeddings
         if self.index:
             generate_index(documents, self.remote)
 
-        ## Query through Mindflow API or locally
+        # Query through Mindflow API or locally
         if self.remote:
             response: str = remote_query(self.query, documents, self.return_prompt).text
         else:

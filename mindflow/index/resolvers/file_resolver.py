@@ -6,7 +6,7 @@ import os
 from typing import List, Union
 
 from mindflow.index.resolvers.base_resolver import BaseResolver
-from mindflow.index.model import Index, DocumentType
+from mindflow.index.model import Index
 from mindflow.utils.files.utf8 import is_valid_utf8
 from mindflow.utils.files.extract import extract_files
 

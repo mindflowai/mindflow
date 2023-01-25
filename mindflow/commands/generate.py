@@ -1,3 +1,7 @@
+"""
+`generate` command
+"""
+
 import sys
 import argparse
 
@@ -15,6 +19,10 @@ from mindflow.index.model import Index
 
 
 class Generate:
+    """
+    Class for initializing Generate args and executing the generate command.
+    """
+
     document_paths: List[str]
     remote: bool
 
