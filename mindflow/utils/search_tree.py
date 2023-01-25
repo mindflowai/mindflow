@@ -29,18 +29,6 @@ class Node:
         self.embedding = GPT.get_embedding(text, Config.GPT_MODEL_EMBEDDING)
         self.leaves = leaves
 
-
-class TextChunk:
-    """
-    Simple text chunk class for handling text chunks.
-    """
-
-    def __init__(self, text: str, start: int, end: int):
-        self.start = start
-        self.end = end
-        self.text = text
-
-
 def count_tokens(text: str) -> int:
     """
     Counts/estimates the number of tokens this text will consume by GPT.
