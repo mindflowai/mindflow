@@ -1,3 +1,7 @@
+"""
+`diff` command
+"""
+
 import argparse
 import sys
 
@@ -6,10 +10,14 @@ from mindflow.command_helpers.diff.diff import generate_diff_prompt
 from mindflow.client.mindflow.completion import completion as remote_completion
 from mindflow.utils.args import _add_diff_args, _add_remote_args, _add_response_args
 from mindflow.utils.response import handle_response_text
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 
 
 class Diff:
+    """
+    Class for initializing Diff args and executing the diff command.
+    """
+
     remote: bool
     skip_clipboard: bool
     return_prompt: bool
@@ -33,19 +41,18 @@ class Diff:
         """
         This function is used to generate a git diff and then use it as a prompt for GPT bot.
         """
-        if not self.remote:
-            GPT.authorize()
+        GPT.authorize(self.remote)
 
         # Run Git diff and get the output with prompt suffix
         prompt = generate_diff_prompt(self.diffargs)
 
-        ## Prompt GPT through Mindflow API or locally
+        # Prompt GPT through Mindflow API or locally
         if self.remote:
             response: str = remote_completion(prompt, self.return_prompt).text
         else:
             if self.return_prompt:
                 response: str = prompt
             else:
-                response: str = GPT.get_completion(prompt, Config.GPT_MODEL_COMPLETION)
+                response: str = GPT.get_completion(prompt, CONFIG.GPT_MODEL_COMPLETION)
 
         handle_response_text(response, self.skip_clipboard)

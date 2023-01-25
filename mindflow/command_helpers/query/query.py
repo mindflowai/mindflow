@@ -2,95 +2,162 @@
 This module contains the logic for generating the prompt for the chatbot.
 """
 
+from typing import List, Tuple
+
 import sys
 import numpy as np
 
-from typing import List, Tuple, Union
-
-from mindflow.index.model import Index, index, read_document
-from mindflow.client.openai.gpt import GPT
-from mindflow.utils.config import config as Config
-
 from sklearn.metrics.pairwise import cosine_similarity
+
+from mindflow.index.model import Index, index
+from mindflow.client.openai.gpt import GPT
+from mindflow.utils.config import IndexType, config as CONFIG
+
+
+class DocumentChunk:
+    """
+    This class is used to store the chunks of a document.
+    """
+
+    def __init__(self, path: str, start: int, end: int, embedding: np.ndarray = None):
+        self.path = path
+        self.start = start
+        self.end = end
+        self.embedding = embedding
+
+    @staticmethod
+    def from_search_tree(
+        document: Index.Document,
+    ) -> Tuple[List["DocumentChunk"], List[np.array]]:
+        """
+        This function is used to split the document into chunks.
+        """
+        if document.index_type == IndexType.DEEP:
+            return DocumentChunk._from_search_tree_deep(
+                document.search_tree, document.path
+            )
+        return DocumentChunk._from_search_tree_shallow(
+            document.search_tree, document.path
+        )
+
+    @classmethod
+    def _from_search_tree_deep(
+        cls, search_tree: dict, path: str
+    ) -> Tuple[List["DocumentChunk"], List[np.array]]:
+        """
+        This function is used to split the document into chunks.
+        """
+        stack = [search_tree]
+        chunks: List["DocumentChunk"] = [
+            cls(path, search_tree["start"], search_tree["end"])
+        ]
+        embeddings: List[str] = [
+            GPT.get_embedding(
+                search_tree["summary"],
+                CONFIG.GPT_MODEL_EMBEDDING,
+            )
+        ]
+        rolling_summary: List[str] = []
+        while stack:
+            node = stack.pop()
+            rolling_summary.append(node["summary"])
+            if node["leaves"]:
+                for leaf in node["leaves"]:
+                    stack.append(leaf)
+                    chunks.append(cls(path, leaf["start"], leaf["end"]))
+                    rolling_summary_embedding = GPT.get_embedding(
+                        "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
+                        CONFIG.GPT_MODEL_EMBEDDING,
+                    )
+                    embeddings.append(rolling_summary_embedding)
+            rolling_summary.pop()
+
+        return chunks, embeddings
+
+    @classmethod
+    def _from_search_tree_shallow(
+        cls, search_tree: dict, path: str
+    ) -> Tuple[List["DocumentChunk"], List[np.array]]:
+        """
+        This function is used to split the document into chunks.
+        """
+        stack = [search_tree]
+        chunks: List["DocumentChunk"] = [
+            cls(path, search_tree["start"], search_tree["end"])
+        ]
+        embeddings: List[np.ndarray] = [search_tree["embedding"]]
+        while stack:
+            node = stack.pop()
+            if node["leaves"]:
+                for leaf in node["leaves"]:
+                    stack.append(leaf)
+                    chunks.append(cls(path, leaf["start"], leaf["end"]))
+                    embeddings.append(np.array(leaf["embedding"]))
+
+        return chunks, embeddings
 
 
 def query(query: str, documents: List[Index.Document], return_prompt: bool = False):
     """
     This function is used to generate a prompt based on a question or summarization task
     """
-    embedding_ranked_hashes: List[str] = rank_by_embedding(query, documents)
-    if len(embedding_ranked_hashes) == 0:
+    document_hashes: List[str] = [document.hash for document in documents]
+    embedding_ranked_document_chunks: List[
+        Tuple(DocumentChunk, float)
+    ] = rank_document_chunks_by_embedding(query, document_hashes)
+    if len(embedding_ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
         )
         sys.exit(1)
 
-    selected_content = select_content(embedding_ranked_hashes)
-
-    prompt = f"{query}\n\n{selected_content}"
+    selected_content = select_content(embedding_ranked_document_chunks)
 
     if return_prompt:
-        return prompt
+        return f"{query}\n\n{selected_content}"
 
-    return GPT.get_completion(prompt, Config.GPT_MODEL_COMPLETION)
+    return GPT.get_completion(query, selected_content, CONFIG.GPT_MODEL_COMPLETION)
 
 
-def select_content(ranked_hashes: List[Tuple[str, float]]) -> str:
+def select_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     """
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = Config.CHATGPT_TOKEN_LIMIT * 3
-    for ranked_hash, _ in ranked_hashes:
-        document: Union[Index.Document, None] = index.get_document_by_hash(
-            [ranked_hash]
-        )
-        if document:
-            text = read_document(document[0])
-            if len(selected_content + text) > char_limit:
-                selected_content += text[: char_limit - len(selected_content)]
-                break
-            selected_content += text
+    char_limit: int = CONFIG.CHATGPT_TOKEN_LIMIT * 3
+    for document_chunk, _ in ranked_document_chunks:
+        if document_chunk:
+            with open(document_chunk.path, "r", encoding="utf-8") as file:
+                file.seek(document_chunk.start)
+                text = file.read(document_chunk.end - document_chunk.start)
+                if len(selected_content + text) > char_limit:
+                    selected_content += text[: char_limit - len(selected_content)]
+                    break
+                selected_content += text
 
     return selected_content
 
 
-def rank_by_embedding(
-    query: str, documents: List[Index.Document]
-) -> List[Tuple[str, float]]:
+def rank_document_chunks_by_embedding(
+    query: str, documents_hashes: List[str]
+) -> List[Tuple[DocumentChunk, float]]:
     """
     This function is used to select the most relevant content for the prompt.
     """
     prompt_embeddings = np.array(
-        GPT.get_embedding(query, Config.GPT_MODEL_EMBEDDING)
+        GPT.get_embedding(query, CONFIG.GPT_MODEL_EMBEDDING)
     ).reshape(1, -1)
 
-    batch_size: int = 100
-    ranked_documents: List[Tuple[str, float]] = [None] * len(documents)
+    ranked_document_chunks = []
+    for i in range(0, len(documents_hashes), 100):
+        for document in index.get_document_by_hash(documents_hashes[i : i + 100]):
+            document_chunks, document_chunk_embeddings = DocumentChunk.from_search_tree(
+                document
+            )
+            similarities = cosine_similarity(
+                prompt_embeddings, document_chunk_embeddings
+            )[0]
+            ranked_document_chunks.extend(list(zip(document_chunks, similarities)))
 
-    doc_count = 0
-    for i in range(0, len(documents), batch_size):
-        batch_documents: List[Index.Document] = documents[i : i + batch_size]
-
-        # Get documents from index that have the embeddings
-        batch_documents = index.get_document_by_hash(
-            document.hash for document in batch_documents
-        )
-        if len(batch_documents) == 0:
-            continue
-
-        document_embeddings = [document.embedding for document in batch_documents]
-        document_embeddings = np.array(document_embeddings).reshape(
-            len(document_embeddings), -1
-        )
-
-        for j, similarity_score in enumerate(
-            cosine_similarity(prompt_embeddings, document_embeddings)[0]
-        ):
-            ranked_documents[doc_count] = (batch_documents[j].hash, similarity_score)
-            doc_count += 1
-
-    ranked_documents = [
-        document for document in ranked_documents if document is not None
-    ]
-    return sorted(ranked_documents, key=lambda x: x[1], reverse=True)
+    ranked_document_chunks.sort(key=lambda x: x[1], reverse=True)
+    return ranked_document_chunks

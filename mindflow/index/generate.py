@@ -3,7 +3,7 @@ Generate an index for a list of documents.
 """
 
 from asyncio import Future
-from typing import List, Set
+from typing import List
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from alive_progress import alive_bar
@@ -97,7 +97,7 @@ def create_local_index(documents: List[Index.Document]):
         index.index_documents(documents_to_index)
 
 
-def create_index(documents: List[Index.Document], remote: bool) -> int:
+def create_index(documents: List[Index.Document], remote: bool = False) -> int:
     """
     Create an index for a list of documents.
     """

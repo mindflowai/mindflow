@@ -11,6 +11,8 @@ from mindflow.commands.ask import Ask
 from mindflow.commands.auth import Auth
 from mindflow.commands.generate import Generate
 from mindflow.commands.query import Query
+from mindflow.commands.refresh import Refresh
+from mindflow.commands.delete import Delete
 
 
 MF_DESCRIPTION = """
@@ -28,7 +30,7 @@ diff       `mf diff [<git diff args>]`                 Runs a `git diff` and sum
 generate   `mf generate [<Files + Folders>]`           Generate index of files/folders in Mindflow Server.
 query      `mf query <YOUR QUERY> [<Files + Folders>]` Query your files/folders.
 auth       `mf auth <AUTH TOKEN>`                      Authorize Mindflow with JWT.
-
+refresh    `mf refresh`                                Deletes Mindflow Index and optionally regenerates it.
 
 """
 
@@ -48,6 +50,8 @@ class CommandLineInterface:
         AUTH = Auth
         DIFF = Diff
         ASK = Ask
+        REFRESH = Refresh
+        DELETE = Delete
 
     def __init__(self):
         parser = argparse.ArgumentParser(description=MF_DESCRIPTION, usage=MF_USAGE)

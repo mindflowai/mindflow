@@ -1,3 +1,7 @@
+"""
+Arguments setters for CLI parser.
+"""
+
 import argparse
 
 
@@ -22,6 +26,13 @@ def _add_generate_args(parser: argparse.ArgumentParser):
         "--index",
         action="store_true",
         help="Generate an index for documents.",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--deep-index",
+        action="store_true",
+        help="Generate deep query embeddings for documents.",
     )
 
 

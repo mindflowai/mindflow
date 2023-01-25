@@ -1,3 +1,6 @@
+"""
+Handles the generation of a prompt based on a diff.
+"""
 import subprocess
 from typing import List
 

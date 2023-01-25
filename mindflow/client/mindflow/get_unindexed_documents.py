@@ -5,7 +5,7 @@ import json
 from typing import List, Set
 import requests
 
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 from mindflow.index.model import Index
 
 
@@ -39,10 +39,10 @@ def get_unindexed_documents(documents: List[Index.Document]) -> List[Index.Docum
     """
     document_dict = {document.hash: document for document in documents}
     response = requests.post(
-        f"{Config.API_LOCATION}/unindexed",
+        f"{CONFIG.API_LOCATION}/unindexed",
         json=vars(
             GetUnindexedDocumentsRequest(
-                list(document_dict.keys()), Config.mindflow_auth()
+                list(document_dict.keys()), CONFIG.mindflow_auth()
             )
         ),
         timeout=10,

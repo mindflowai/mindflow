@@ -1,12 +1,20 @@
+"""
+`auth` command
+"""
+
 import argparse
 import sys
 
 
 from mindflow.utils.args import _add_auth_args
-from mindflow.utils.token import set_token
+from mindflow.utils.auth import set_token
 
 
 class Auth:
+    """
+    Class for initializing Auth args and executing the auth command.
+    """
+
     token: str
 
     def __init__(self):

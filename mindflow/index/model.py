@@ -3,19 +3,16 @@ Index model
 """
 
 from asyncio import Future
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
 
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Generator
 
-from mindflow.client.openai.gpt import GPT
-from mindflow.utils.config import config as Config
-from mindflow import DOT_MINDFLOW
-
-INDEX_PATH = os.path.join(DOT_MINDFLOW, "index.json")
+from mindflow.utils.search_tree import create_text_search_tree
+from mindflow.utils.config import config as CONFIG
 
 
 class DocumentType(Enum):
@@ -39,7 +36,8 @@ class Index:
         document_type: str = None
         path: str = None
         hash: str = None
-        embedding: List[float] = None
+        index_type: str = None
+        search_tree: dict = None
         size: int = None
 
         def __init__(self, index_data):
@@ -47,7 +45,8 @@ class Index:
                 self.document_type: str = index_data.get("document_type")
                 self.path: str = index_data.get("path")
                 self.hash: str = index_data.get("hash")
-                self.embedding: List[float] = index_data.get("embedding")
+                self.index_type: str = index_data.get("index_type")
+                self.search_tree: dict = index_data.get("search_tree")
                 self.size: int = index_data.get("size")
 
         @classmethod
@@ -73,10 +72,10 @@ class Index:
         """
         Load index from disk (JSON)
         """
-        if os.path.isfile(INDEX_PATH):
+        if os.path.isfile(CONFIG.INDEX_PATH):
 
             # Open the authentication file in read and write mode
-            with open(INDEX_PATH, "r+", encoding="utf-8") as index_file:
+            with open(CONFIG.INDEX_PATH, "r+", encoding="utf-8") as index_file:
                 # Read the existing authentication data
                 return json.load(index_file)
         else:
@@ -88,8 +87,8 @@ class Index:
         """
         update = {document.hash: vars(document) for document in documents}
         self.index.update(update)
-        with open(INDEX_PATH, "w", encoding="utf-8") as auth_file:
-            json.dump(self.index, auth_file)
+        with open(CONFIG.INDEX_PATH, "w", encoding="utf-8") as disk_file:
+            json.dump(self.index, disk_file, indent=4)
 
     def get_unindexed_documents(self, documents: List[Document]) -> List[Document]:
         """
@@ -101,49 +100,52 @@ class Index:
         """
         Create index entries
         """
-        documents_w_embeddings = [None] * len(documents)
-        with ThreadPoolExecutor(max_workers=50) as executor:
+        with ThreadPoolExecutor(max_workers=10) as executor:
             # Start a separate thread for each document
-            future_to_document: dict[Future[Index], Index.Document] = {
-                executor.submit(self._embed_document, document): document
+            future_to_document: List[Future[dict]] = [
+                executor.submit(create_text_search_tree, read_document(document))
                 for document in documents
-            }
-
-            # Wait for all threads to complete
-            count = 0
-            for future in as_completed(future_to_document):
-                try:
-                    document: "Index.Document" = future.result()
-                except Exception as error:
-                    print(f"Error creating document {error}")
-                else:
-                    # Remove anti-pattern
-                    documents_w_embeddings[count] = document
-                    count += 1
-        if len(documents_w_embeddings) != 0:
-            documents_w_embeddings = [
-                document for document in documents_w_embeddings if document is not None
             ]
-            self.save_to_disk(documents_w_embeddings)
 
-    def get_document_by_hash(self, hashes: List[str]) -> List["Index"]:
+            for future, document in zip(future_to_document, documents):
+                document.index_type = CONFIG.INDEX_TYPE
+                document.search_tree = future.result()
+                self.save_to_disk([document])
+                del document, future
+
+    def get_document_by_hash(
+        self, document_hashes: List[str]
+    ) -> Generator[List[Document], None, None]:
         """
         Get index document by hash
         """
         # Find all documents with a hash that is in the given list of hashes
-        entries: dict = [self.index[hash] for hash in hashes if hash in self.index]
-        # Return a list of cls objects constructed from the found documents
-        return [Index.Document(index) for index in entries]
+        for document_hash in document_hashes:
+            if document_hash in self.index:
+                yield Index.Document(self.index[document_hash])
 
-    @staticmethod
-    def _embed_document(document: Document) -> Document:
+    def get_all_document_paths(self) -> Generator[List[str], None, None]:
         """
-        Create index document
+        Get all document paths
         """
-        document.embedding = GPT.get_embedding(
-            read_document(document), Config.GPT_MODEL_EMBEDDING
-        )
-        return document
+        for document in self.index.values():
+            yield document.path
+
+    def delete_index_by_hash(self, document_hashes: List[str]):
+        """
+        Remove documents from index
+        """
+        for document_hash in document_hashes:
+            if document_hash in self.index:
+                del self.index[document_hash]
+        self.save_to_disk([])
+
+    def delete_index(self):
+        """
+        Delete index
+        """
+        self.index = {}
+        self.save_to_disk([])
 
 
 def read_document(document: Index.Document) -> str:

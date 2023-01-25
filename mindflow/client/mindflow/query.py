@@ -4,7 +4,7 @@ Make a get request to the backend to check if the documents are indexed.
 from typing import List
 import requests
 
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 
 
 class QueryRequest:
@@ -48,9 +48,9 @@ def query(
     This function handles the prompt generation and copying to clipboard.
     """
     response = requests.post(
-        f"{Config.API_LOCATION}/query",
+        f"{CONFIG.API_LOCATION}/query",
         json=vars(
-            QueryRequest(query_text, hashes, return_prompt, Config.mindflow_auth())
+            QueryRequest(query_text, hashes, return_prompt, CONFIG.mindflow_auth())
         ),
         timeout=10,
     )
