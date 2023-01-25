@@ -11,6 +11,7 @@ from typing import List
 from mindflow.client.openai.gpt import GPT
 from mindflow.client.mindflow.query import query as remote_query
 
+from mindflow.utils.config import config as CONFIG
 from mindflow.utils.response import handle_response_text
 from mindflow.index.generate import generate_index
 from mindflow.index.resolve import resolve
@@ -34,6 +35,7 @@ class Query:
     document_paths: List[str]
     index: bool
     remote: bool
+    deep_index: bool
     return_prompt: bool
     skip_clipboard: bool
 
@@ -53,6 +55,7 @@ class Query:
         self.index = args.index
         self.remote = args.remote
         self.query = args.query
+        self.deep_index = args.deep_index
         self.return_prompt = args.return_prompt
         self.skip_clipboard = args.skip_clipboard
 
@@ -61,6 +64,7 @@ class Query:
         This function is used to ask a custom question about files, folders, and websites.
         """
         GPT.authorize(self.remote)
+        CONFIG.set_deep_index(self.deep_index)
 
         # Resolve documents (Path, URL, etc.)
         documents: List[Index.Document] = []

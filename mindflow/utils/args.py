@@ -28,6 +28,13 @@ def _add_generate_args(parser: argparse.ArgumentParser):
         help="Generate an index for documents.",
     )
 
+    parser.add_argument(
+        "-d",
+        "--deep-index",
+        action="store_true",
+        help="Generate deep query embeddings for documents.",
+    )
+
 
 def _add_document_args(parser: argparse.ArgumentParser):
     """

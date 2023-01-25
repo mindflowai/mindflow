@@ -6,7 +6,7 @@ import json
 from typing import List
 import requests
 
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 from mindflow.index.model import Index
 
 
@@ -30,8 +30,8 @@ def index_documents(unindexed_documents: List[Index.Document]) -> None:
     This function makes a post request to the backend to index the unindexed documents.
     """
     response = requests.post(
-        f"{Config.API_LOCATION}/index",
-        json=vars(IndexDocumentsRequest(unindexed_documents, Config.mindflow_auth())),
+        f"{CONFIG.API_LOCATION}/index",
+        json=vars(IndexDocumentsRequest(unindexed_documents, CONFIG.mindflow_auth())),
         timeout=10,
     )
     if response.status_code != 200:

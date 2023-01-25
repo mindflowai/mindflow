@@ -5,7 +5,7 @@ This file is used to load the chat gpt model.
 import openai
 import numpy as np
 
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 
 
 class GPT:
@@ -19,7 +19,7 @@ class GPT:
         Authorize OpenAI API
         """
         if not remote:
-            openai.api_key = Config.openai_auth()
+            openai.api_key = CONFIG.openai_auth()
 
     @staticmethod
     def get_completion(prompt: str, suffix: str = None, model: str = None) -> str:

@@ -3,7 +3,7 @@ Send basic prompts to the backend.
 """
 
 import requests
-from mindflow.utils.config import config as Config
+from mindflow.utils.config import config as CONFIG
 
 
 class CompletionRequest:
@@ -37,8 +37,8 @@ def completion(prompt: str, return_prompt: bool = False) -> CompletionResponse:
     This function makes a post request to the backend to get a direct response from GPT.
     """
     response = requests.post(
-        f"{Config.API_LOCATION}/prompt",
-        json=vars(CompletionRequest(prompt, return_prompt, Config.mindflow_auth())),
+        f"{CONFIG.API_LOCATION}/prompt",
+        json=vars(CompletionRequest(prompt, return_prompt, CONFIG.mindflow_auth())),
         timeout=10,
     )
     if response.status_code != 200:
