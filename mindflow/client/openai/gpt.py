@@ -25,11 +25,10 @@ class GPT:
         """
         Get response from OpenAI API
         """
-        completion = openai.Completion.create(engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500)[
+        response = openai.Completion.create(engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500)[
             "choices"
-        ]
-        print(completion)
-        return completion[0]["text"]
+        ][0]["text"]
+        return response
 
     @staticmethod
     def get_embedding(text: str, model: str = None) -> np.ndarray:

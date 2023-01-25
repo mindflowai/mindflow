@@ -3,7 +3,7 @@ Index model
 """
 
 from asyncio import Future
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
@@ -11,7 +11,7 @@ import os
 from enum import Enum
 from typing import List, Dict
 
-from mindflow.utils.gpt_token_estimator import create_text_search_tree
+from mindflow.utils.search_tree import create_text_search_tree
 from mindflow import DOT_MINDFLOW
 
 INDEX_PATH = os.path.join(DOT_MINDFLOW, "index.json")
@@ -87,7 +87,7 @@ class Index:
         update = {document.hash: vars(document) for document in documents}
         self.index.update(update)
         with open(INDEX_PATH, "w", encoding="utf-8") as auth_file:
-            json.dump(self.index, auth_file)
+            json.dump(self.index, auth_file, indent=4)
 
     def get_unindexed_documents(self, documents: List[Document]) -> List[Document]:
         """
@@ -99,7 +99,7 @@ class Index:
         """
         Create index entries
         """
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=10) as executor:
             # Start a separate thread for each document
             future_to_document: List[Future[dict]] = [
                 executor.submit(create_text_search_tree, read_document(document))
@@ -108,8 +108,8 @@ class Index:
 
             for future, document in zip(future_to_document, documents):
                 document.search_tree = future.result()
-
-        self.save_to_disk(documents)
+                self.save_to_disk([document])
+                del document, future
 
     def get_document_by_hash(self, hashes: List[str]) -> List[Document]:
         """
@@ -119,7 +119,6 @@ class Index:
         entries: dict = [self.index[hash] for hash in hashes if hash in self.index]
         # Return a list of cls objects constructed from the found documents
         return [Index.Document(index) for index in entries]
-
 
 def read_document(document: Index.Document) -> str:
     """

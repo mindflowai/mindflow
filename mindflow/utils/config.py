@@ -15,6 +15,7 @@ class Config:
     GPT_MODEL_EMBEDDING: str = "text-embedding-ada-002"
     GPT_MODEL_COMPLETION: str = "text-davinci-003"
     CHATGPT_TOKEN_LIMIT: int = 1024
+    SEARCH_INDEX_TOKEN_LIMIT: int = 1500
 
     def mindflow_auth(self) -> str:
         return get_token(AuthType.Mindflow)
