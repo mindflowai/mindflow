@@ -201,9 +201,7 @@ class Index:
         Create index entries
         """
         # Get documents that need to be indexed
-        if kwargs.get("refresh", True) and kwargs.get("force", True):
-            pass
-        elif kwargs.get("refresh", True):
+        if kwargs.get("refresh", True):
             document_references = self._refreshable_documents(document_references)
         else:
             document_references = self._unindexed_documents(document_references)
