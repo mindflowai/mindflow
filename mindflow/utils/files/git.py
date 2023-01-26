@@ -47,7 +47,7 @@ def get_git_files(path: os.PathLike) -> List[str]:
             check=True,
         )
         git_files = output.stdout.decode().strip().split("\n")
-        return [os.path.join(os.fspath(path), f) for f in git_files]
+        return [os.path.abspath(os.path.join(os.fspath(path), f)) for f in git_files]
     except GitError as error:
         logging.debug("Failed extract git files with 'git ls-files': %s", error)
         return []

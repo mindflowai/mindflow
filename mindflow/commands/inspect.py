@@ -1,5 +1,5 @@
 """
-`delete` command
+`inspect` command
 """
 
 import sys
@@ -15,9 +15,9 @@ from mindflow.utils.args import (
 )
 
 
-class Delete:
+class Inspect:
     """
-    Class for initializing Delete args and executing the delete command.
+    Class for initializing Inspect args and executing the inspect command.
     """
 
     document_paths: List[str]
@@ -25,7 +25,7 @@ class Delete:
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description="Delete your MindFlow index.",
+            description="Inspect your MindFlow index.",
         )
         _add_document_args(parser)
         _add_remote_args(parser)
@@ -37,20 +37,15 @@ class Delete:
 
     def execute(self):
         """
-        This function is used to delete your MindFlow index.
+        This function is used to inspect your MindFlow index.
         """
         if self.remote:
             print("Remote delete not implemented yet.")
             return
 
-        if self.document_paths == ["^"]:
-            index.delete_documents()
-            return
-
         # Resolve documents (Path, URL, etc.) and get their hashes
-
         document_references: List[DocumentReference] = []
         for document_path in self.document_paths:
             document_references.extend(resolve(document_path))
 
-        index.delete_documents(document_references)
+        index.show(document_references)

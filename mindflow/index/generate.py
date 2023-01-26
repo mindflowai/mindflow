@@ -4,7 +4,7 @@ Generate an index for a list of documents.
 
 from asyncio import Future
 from typing import List
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from alive_progress import alive_bar
 
@@ -14,23 +14,23 @@ from mindflow.client.mindflow.get_unindexed_documents import (
 from mindflow.client.mindflow.index_documents import (
     index_documents as remote_index_documents,
 )
-from mindflow.index.model import Index, index
+from mindflow.index.model import index, DocumentReference
 
 PACKET_SIZE = 2 * 1024 * 1024
 
 
-def generate_index(all_documents: List[Index.Document], remote: bool = False):
+def generate_index(document_references: List[DocumentReference], **kwargs):
     """
     Generate an index for a list of documents.
     """
 
-    packets: List[Index.Document] = create_packets(all_documents)
+    packets: List[DocumentReference] = create_packets(document_references)
 
     # Create a thread pool with 4 worker threads
     with ThreadPoolExecutor(max_workers=4) as executor:
         # Submit the tasks to the thread pool
-        results: List[Future[List[Index.Document]]] = [
-            executor.submit(create_index, packet, remote) for packet in packets
+        results: List[Future[int]] = [
+            executor.submit(create_index, packet, **kwargs) for packet in packets
         ]
 
         with alive_bar(
@@ -41,27 +41,26 @@ def generate_index(all_documents: List[Index.Document], remote: bool = False):
                 progress_bar(complete.result())
 
 
-def create_packets(all_documents: List[Index.Document]) -> List[List[Index.Document]]:
+def create_packets(
+    document_references: List[DocumentReference],
+) -> List[List[DocumentReference]]:
     """
     Creates small packets of files to process.
     """
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        sizes = list(executor.map(get_size, all_documents))
-
-    packets: List[List[Index.Document]] = []
-    packet: List[Index.Document] = []
+    packets: List[List[DocumentReference]] = []
+    packet: List[DocumentReference] = []
 
     packet_size: int = 0
     total_size: int = 0
 
-    for document, size in zip(all_documents, sizes):
-        if packet_size + size <= PACKET_SIZE:
-            packet.append(document)
-            packet_size += size
+    for document_reference in document_references:
+        if packet_size + document_reference.doc_size <= PACKET_SIZE:
+            packet.append(document_reference)
+            packet_size += document_reference.doc_size
         else:
             packets.append(packet)
-            packet = [document]
-            packet_size = size
+            packet = [document_reference]
+            packet_size = document_reference.doc_size
             total_size += packet_size
 
     if packet:
@@ -72,38 +71,17 @@ def create_packets(all_documents: List[Index.Document]) -> List[List[Index.Docum
     return packets
 
 
-def get_size(document: Index.Document) -> int:
-    """
-    Get the size of a file.
-    """
-    return document.size
-
-
-def create_remote_index(documents: List[Index.Document]):
+def create_index(document_references: List[DocumentReference], **kwargs) -> int:
     """
     Create an index for a list of documents.
     """
-    documents_to_index: List[Index.Document] = remote_get_unindexed_documents(documents)
-    if documents_to_index:
-        remote_index_documents(documents_to_index)
-
-
-def create_local_index(documents: List[Index.Document]):
-    """
-    Create an index for a list of documents.
-    """
-    documents_to_index: List[Index.Document] = index.get_unindexed_documents(documents)
-    if documents_to_index:
-        index.index_documents(documents_to_index)
-
-
-def create_index(documents: List[Index.Document], remote: bool = False) -> int:
-    """
-    Create an index for a list of documents.
-    """
-    if remote:
-        create_remote_index(documents)
+    if kwargs.get("remote", True):
+        documents_references_to_index: List[
+            DocumentReference
+        ] = remote_get_unindexed_documents(document_references)
+        if documents_references_to_index:
+            remote_index_documents(documents_references_to_index)
     else:
-        create_local_index(documents)
+        index.index_documents(document_references, **kwargs)
 
-    return len(documents)
+    return len(document_references)
