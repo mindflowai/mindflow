@@ -8,16 +8,17 @@ import argparse
 from typing import List
 from mindflow.client.openai.gpt import GPT
 
+from mindflow.index.model import DocumentReference
+from mindflow.index.resolve import resolve
 from mindflow.index.generate import generate_index
+
 from mindflow.utils.args import (
     _add_document_args,
     _add_generate_args,
     _add_remote_args,
 )
-from mindflow.utils.config import config as CONFIG
 
-from mindflow.index.resolve import resolve
-from mindflow.index.model import Index
+from mindflow.utils.helpers import index_type
 
 
 class Generate:
@@ -48,12 +49,12 @@ class Generate:
         This function is used to generate an index and/or embeddings for files
         """
         GPT.authorize(self.remote)
-        CONFIG.set_deep_index(self.deep_index)
 
         # Resolve documents (Path, URL, etc.)
-        documents: List[Index.Document] = []
+        document_references: List[DocumentReference] = []
         for document_path in self.document_paths:
-            documents.extend(resolve(document_path))
+            document_references.extend(resolve(document_path))
 
         # Generate index and/or embeddings
-        generate_index(documents, self.remote)
+        kwargs = {"remote": self.remote, "index_type": index_type(self.deep_index)}
+        generate_index(document_references, **kwargs)

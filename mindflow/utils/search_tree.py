@@ -4,14 +4,17 @@ Module containing logic to build search tree for document index.
 
 # from transformers import GPT2TokenizerFast
 from typing import List
-from collections import deque
+from copy import deepcopy
+
+import numpy as np
+
 
 from mindflow.client.openai.gpt import GPT
 from mindflow.utils.prompts import SEARCH_INDEX
-from mindflow.utils.config import config as CONFIG, IndexType
+from mindflow.utils.config import config as CONFIG
+from mindflow.utils.helpers import IndexType
 
 # import warnings
-
 # warnings.filterwarnings("ignore", category=UserWarning, module='transformers')
 
 
@@ -20,19 +23,56 @@ class Node:
     Simple node class for search tree.
     """
 
-    def __init__(
-        self, start: int, end: int, text: str = None, leaves: List["Node"] = None
-    ):
+    start: int
+    end: int
+    summary: str
+    embedding: np.ndarray
+    leaves: List["Node"]
+
+    def __init__(self, index_type: str, start: int, end: int, text: str = None):
         self.start = start
         self.end = end
         if text:
-            if CONFIG.INDEX_TYPE == IndexType.DEEP:
+            if index_type == IndexType.DEEP:
                 self.summary = GPT.get_completion(
                     SEARCH_INDEX, text, CONFIG.GPT_MODEL_COMPLETION
                 )
             else:
                 self.embedding = GPT.get_embedding(text, CONFIG.GPT_MODEL_EMBEDDING)
+
+    def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
+
+    def to_dict(self) -> dict:
+        return {
+            "start": self.start,
+            "end": self.end,
+            "summary": self.summary if hasattr(self, "summary") else None,
+            "embedding": self.embedding if hasattr(self, "embedding") else None,
+            "leaves": [leaf.to_dict() for leaf in self.leaves]
+            if hasattr(self, "leaves")
+            else None,
+        }
+
+    def iterative_to_dict(self) -> dict:
+        # Can't figure out what is wrong with this yet. Leaves coming up null.
+        stack = [(self, None)]
+        while stack:
+            node, parent_leaves = stack.pop()
+            node_dict = {
+                "start": node.start,
+                "end": node.end,
+                "summary": node.summary if hasattr(node, "summary") else None,
+                "embedding": node.embedding if hasattr(node, "embedding") else None,
+                "leaves": [],
+            }
+            if parent_leaves:
+                parent_leaves.append(node_dict)
+            if hasattr(node, "leaves"):
+                for leaf in node.leaves:
+                    leaves = node_dict["leaves"]
+                    stack.append((leaf, leaves))
+        return node_dict
 
 
 def count_tokens(text: str) -> int:
@@ -44,52 +84,21 @@ def count_tokens(text: str) -> int:
     return len(text) / 4  # Token Estimation for speed
 
 
-def tree_to_dict(root: Node) -> dict:
-    """
-    Iteratively convert the Node tree to a dictionary.
-    """
-    tree_dict = {
-        "start": root.start,
-        "end": root.end,
-        "summary": root.summary if hasattr(root, "summary") else None,
-        "embedding": root.embedding if hasattr(root, "embedding") else None,
-        "leaves": [],
-    }
-    queue = deque([root])
-    while queue:
-        node = queue.popleft()
-        if node.leaves:
-            for leaf in node.leaves:
-                queue.append(leaf)
-                tree_dict["leaves"].append(
-                    {
-                        "start": leaf.start,
-                        "end": leaf.end,
-                        "summary": leaf.summary if hasattr(leaf, "summary") else None,
-                        "embedding": root.embedding
-                        if hasattr(leaf, "embedding")
-                        else None,
-                        "leaves": [],
-                    }
-                )
-    return tree_dict
-
-
 # This function is used to split a string into chunks of a specified token limit using binary search
-def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
+def binary_split_raw_text_to_nodes(text: str, index_type: str) -> List[Node]:
     """
     Splits text into smaller chunks to not exceed the token limit.
     """
     nodes = []
-    stack = [(text, 0, len(text))]
+    stack = [(0, len(text))]
     while stack:
-        text, start, end = stack.pop()
+        start, end = stack.pop()
         if count_tokens(text[start:end]) < CONFIG.SEARCH_INDEX_TOKEN_LIMIT:
-            nodes.append(Node(start + start, start + end, text[start:end], []))
+            nodes.append(Node(index_type, start, end, text[start:end]))
         else:
-            mid = (start + end) // 2
-            stack.append((text, start, mid))
-            stack.append((text, mid, end))
+            mid = ((end - start) // 2) + start
+            stack.append((start, mid))
+            stack.append((mid, end))
     return nodes
 
 
@@ -108,17 +117,18 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
             chunks.append(nodes[start:end])
         else:
             mid = (start + end) // 2
-            stack.append((nodes, start, mid))
-            stack.append((nodes, mid, end))
+            stack.append((nodes, deepcopy(start), mid))
+            stack.append((nodes, mid, deepcopy(end)))
     return chunks
 
 
-def create_nodes(leaf_nodes: List[Node]) -> Node:
+def create_nodes(leaf_nodes: List[Node], index_type: str) -> Node:
     """
     This function is used to iteratively create a nodes of our search tree
     """
-    if CONFIG.INDEX_TYPE == IndexType.SHALLOW:
-        return Node(leaf_nodes[0].start, leaf_nodes[-1].end)
+    if index_type == IndexType.SHALLOW:
+        print(f"start: {leaf_nodes[0].start}, end: {leaf_nodes[-1].end}")
+        return Node(index_type, leaf_nodes[0].start, leaf_nodes[-1].end)
 
     stack = [(leaf_nodes, 0, len(leaf_nodes))]
     while stack:
@@ -136,19 +146,27 @@ def create_nodes(leaf_nodes: List[Node]) -> Node:
             parent_node_summaries = "\n".join(
                 [node.summary for node in leaf_nodes[start:end]]
             )
-            return Node(
+            node = Node(
+                index_type,
                 leaf_nodes[start].start,
                 leaf_nodes[end - 1].end,
                 parent_node_summaries,
-                leaf_nodes[start:end],
             )
+            node.set_leaves(leaf_nodes[start:end])
+            return node
 
 
-def create_text_search_tree(text: str) -> dict:
+def create_text_search_tree(text: str, index_type: bool) -> dict:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
     if count_tokens(text) < CONFIG.SEARCH_INDEX_TOKEN_LIMIT:
-        return tree_to_dict(Node(0, len(text), text, []))
-
-    return tree_to_dict(create_nodes(binary_split_raw_text_to_nodes(text)))
+        return Node(index_type, 0, len(text), text).to_dict()
+    raw_text_nodes = binary_split_raw_text_to_nodes(text, index_type)
+    if index_type == IndexType.SHALLOW:
+        shallow_search_tree = Node(index_type, 0, len(text))
+        shallow_search_tree.set_leaves(raw_text_nodes)
+        return shallow_search_tree.to_dict()
+    return create_nodes(
+        binary_split_raw_text_to_nodes(text, index_type), index_type
+    ).to_dict()

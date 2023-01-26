@@ -6,8 +6,10 @@ import argparse
 import sys
 
 from mindflow.client.openai.gpt import GPT
-from mindflow.command_helpers.diff.diff import generate_diff_prompt
 from mindflow.client.mindflow.completion import completion as remote_completion
+
+from mindflow.command_helpers.diff.diff import generate_diff_prompt
+
 from mindflow.utils.args import _add_diff_args, _add_remote_args, _add_response_args
 from mindflow.utils.response import handle_response_text
 from mindflow.utils.config import config as CONFIG

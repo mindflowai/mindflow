@@ -100,3 +100,12 @@ def _add_response_args(parser: argparse.ArgumentParser):
         action="store_true",
         help="Do not copy to clipboard (testing).",
     )
+
+
+def _add_force_args(parser: argparse.ArgumentParser):
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Apply THE FORCE to your command.",
+    )

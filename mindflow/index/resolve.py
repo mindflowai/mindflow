@@ -3,11 +3,11 @@ Module for resolving documents to text.
 """
 
 from typing import List
+from mindflow.index.model import DocumentReference
 from mindflow.index.resolvers.file_resolver import FileResolver
-from mindflow.index.model import Index
 
 
-def resolve(document_path: str) -> List[Index.Document]:
+def resolve(document_path: str) -> List[DocumentReference]:
     """
     Resolves a document to text.
     """

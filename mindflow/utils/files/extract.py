@@ -23,7 +23,7 @@ def extract_files(path: os.PathLike) -> List[os.PathLike]:
         with os.scandir(path) as paths:
             for scanned_path in paths:
                 if scanned_path.is_file():
-                    file_paths.append(os.fspath(scanned_path.path))
+                    file_paths.append(os.path.abspath(scanned_path.path))
                 elif path.is_dir():
                     file_paths.extend(extract_files(scanned_path.path))
         return file_paths

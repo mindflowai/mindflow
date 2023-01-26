@@ -11,11 +11,12 @@ from typing import List
 from mindflow.client.openai.gpt import GPT
 from mindflow.client.mindflow.query import query as remote_query
 
-from mindflow.utils.config import config as CONFIG
-from mindflow.utils.response import handle_response_text
+from mindflow.command_helpers.query.query import query as local_query
+
 from mindflow.index.generate import generate_index
 from mindflow.index.resolve import resolve
-from mindflow.index.model import Index
+from mindflow.index.model import DocumentReference
+
 from mindflow.utils.args import (
     _add_query_args,
     _add_generate_args,
@@ -23,7 +24,8 @@ from mindflow.utils.args import (
     _add_remote_args,
     _add_response_args,
 )
-from mindflow.command_helpers.query.query import query as local_query
+from mindflow.utils.response import handle_response_text
+from mindflow.utils.helpers import index_type
 
 
 class Query:
@@ -64,21 +66,25 @@ class Query:
         This function is used to ask a custom question about files, folders, and websites.
         """
         GPT.authorize(self.remote)
-        CONFIG.set_deep_index(self.deep_index)
 
         # Resolve documents (Path, URL, etc.)
-        documents: List[Index.Document] = []
+        document_references: List[DocumentReference] = []
         for document_path in self.document_paths:
-            documents.extend(resolve(document_path))
+            document_references.extend(resolve(document_path))
 
         # Generate index and/or embeddings
         if self.index:
-            generate_index(documents, self.remote)
+            kwargs = {"remote": self.remote, "index_type": index_type(self.deep_index)}
+            generate_index(document_references, **kwargs)
 
         # Query through Mindflow API or locally
         if self.remote:
-            response: str = remote_query(self.query, documents, self.return_prompt).text
+            response: str = remote_query(
+                self.query, document_references, self.return_prompt
+            ).text
         else:
-            response: str = local_query(self.query, documents, self.return_prompt)
+            response: str = local_query(
+                self.query, document_references, self.return_prompt
+            )
 
         handle_response_text(response, self.skip_clipboard)

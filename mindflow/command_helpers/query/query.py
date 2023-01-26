@@ -9,9 +9,10 @@ import numpy as np
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-from mindflow.index.model import Index, index
+from mindflow.index.model import Index, DocumentReference, index
 from mindflow.client.openai.gpt import GPT
-from mindflow.utils.config import IndexType, config as CONFIG
+from mindflow.utils.helpers import IndexType
+from mindflow.utils.config import config as CONFIG
 
 
 class DocumentChunk:
@@ -82,29 +83,33 @@ class DocumentChunk:
         This function is used to split the document into chunks.
         """
         stack = [search_tree]
-        chunks: List["DocumentChunk"] = [
-            cls(path, search_tree["start"], search_tree["end"])
-        ]
-        embeddings: List[np.ndarray] = [search_tree["embedding"]]
+        chunks: List["DocumentChunk"] = []
+        embeddings: List[np.ndarray] = []
+        if search_tree["embedding"] is not None:
+            chunks.append(cls(path, search_tree["start"], search_tree["end"]))
+            embeddings.append(np.asarray(search_tree["embedding"]))
         while stack:
             node = stack.pop()
             if node["leaves"]:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(path, leaf["start"], leaf["end"]))
-                    embeddings.append(np.array(leaf["embedding"]))
+                    embeddings.append(np.asarray(leaf["embedding"]))
 
         return chunks, embeddings
 
 
-def query(query: str, documents: List[Index.Document], return_prompt: bool = False):
+def query(
+    query: str,
+    document_references: List[DocumentReference],
+    return_prompt: bool = False,
+):
     """
     This function is used to generate a prompt based on a question or summarization task
     """
-    document_hashes: List[str] = [document.hash for document in documents]
     embedding_ranked_document_chunks: List[
         Tuple(DocumentChunk, float)
-    ] = rank_document_chunks_by_embedding(query, document_hashes)
+    ] = rank_document_chunks_by_embedding(query, document_references)
     if len(embedding_ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
@@ -139,7 +144,7 @@ def select_content(ranked_document_chunks: List[DocumentChunk]) -> str:
 
 
 def rank_document_chunks_by_embedding(
-    query: str, documents_hashes: List[str]
+    query: str, document_reference: List[DocumentReference]
 ) -> List[Tuple[DocumentChunk, float]]:
     """
     This function is used to select the most relevant content for the prompt.
@@ -149,8 +154,8 @@ def rank_document_chunks_by_embedding(
     ).reshape(1, -1)
 
     ranked_document_chunks = []
-    for i in range(0, len(documents_hashes), 100):
-        for document in index.get_document_by_hash(documents_hashes[i : i + 100]):
+    for i in range(0, len(document_reference), 100):
+        for document in index.documents(document_reference[i : i + 100]):
             document_chunks, document_chunk_embeddings = DocumentChunk.from_search_tree(
                 document
             )
