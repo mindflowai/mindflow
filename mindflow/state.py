@@ -12,7 +12,7 @@ from mindflow.db.objects.static_definition.mind_flow_model import (
 )
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
-from mindflow.index.resolve import resolve
+from mindflow.resolving.resolve import resolve
 from mindflow.input import Arguments, Command, DBConfig
 
 

@@ -6,7 +6,7 @@ from typing import List
 
 from mindflow.db.objects.document import DocumentReference
 from mindflow.db.static_definition import ObjectConfig
-from mindflow.index.resolvers.file_resolver import FileResolver
+from mindflow.resolving.resolvers.file_resolver import FileResolver
 
 
 def resolve(document_path: str, document_config: ObjectConfig) -> List[DocumentReference]:

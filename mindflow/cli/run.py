@@ -21,12 +21,13 @@ MF_USAGE = """
 mf <command> [<args>]
 
 ask        `mf ask <PROMPT>`                           Ask a question and get a prompt.
+config     `mf config`                                 Configure Mindflow.
 diff       `mf diff [<git diff args>]`                 Runs a `git diff` and summarizes the changes.
-index      `mf index [<Files + Folders>]`              Generate index of files/folders.
-query      `mf query <YOUR QUERY> [<Files + Folders>]` Query your files/folders.
-delete     `mf delete <FILE/FOLDER>`                   Delete a file/folder from Mindflow.
-refresh    `mf refresh <FILE/FOLDER>`                  Refresh Mindflow index by regenerating already existing document indexes.
-inspect    `mf inspect <FILE/FOLDER>`                  Inspect a file/folder in the Mindflow index.
+index      `mf index [<document paths>]`              Generate index of files/folders.
+query      `mf query <YOUR QUERY> [<document paths>]`  Query your files/folders.
+delete     `mf delete <document paths>`                   Delete a file/folder from Mindflow.
+refresh    `mf refresh <document paths>`                  Refresh Mindflow index by regenerating already existing document indexes.
+inspect    `mf inspect <document paths>`                  Inspect a file/folder in the Mindflow index.
 
 """
 
