@@ -4,7 +4,7 @@ Handles git related operations.
 import logging
 import os
 import subprocess
-from typing import List
+from typing import List, Union
 
 
 class NotInGit(BaseException):
@@ -19,7 +19,7 @@ class GitError(BaseException):
     """
 
 
-def is_within_git_repo(path: os.PathLike) -> bool:
+def is_within_git_repo(path: Union[str, os.PathLike]) -> bool:
     """
     Checks if the given path is within a git repository.
     """
@@ -35,7 +35,7 @@ def is_within_git_repo(path: os.PathLike) -> bool:
         return False
 
 
-def get_git_files(path: os.PathLike) -> List[str]:
+def get_git_files(path: Union[str, os.PathLike]) -> List[str]:
     """
     Extract all files from a git repository that are not gitignored.
     """

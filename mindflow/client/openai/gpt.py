@@ -2,10 +2,14 @@
 This file is used to load the chat gpt model.
 """
 
-import openai
 import numpy as np
+import openai
 
-from mindflow.utils.config import config as CONFIG
+from mindflow.state import STATE
+from mindflow.utils.prompts import SEARCH_INDEX
+
+if hasattr(STATE.configured_service.openai, "api_key"):
+    openai.api_key = STATE.configured_service.openai.api_key
 
 
 class GPT:
@@ -14,28 +18,41 @@ class GPT:
     """
 
     @staticmethod
-    def authorize(remote: bool = False):
-        """
-        Authorize OpenAI API
-        """
-        if not remote:
-            openai.api_key = CONFIG.openai_auth()
-
-    @staticmethod
-    def get_completion(prompt: str, suffix: str = None, model: str = None) -> str:
+    def summarize(text: str) -> str:
         """
         Get response from OpenAI API
         """
+        # print(f"Suffix: {suffix}")
         response = openai.Completion.create(
-            engine=model, prompt=prompt, suffix=suffix, temperature=0, max_tokens=500
+            engine=STATE.configured_model.index.api,
+            prompt=f"{SEARCH_INDEX}\n\n{text}",
+            temperature=0,
+            max_tokens=500,
         )["choices"][0]["text"]
+
         return response
 
     @staticmethod
-    def get_embedding(text: str, model: str = None) -> np.ndarray:
+    def query(prompt: str, selected_content: str) -> str:
+        """
+        Get response from OpenAI API
+        """
+        # print(f"Suffix: {suffix}")
+        response = openai.Completion.create(
+            engine=STATE.configured_model.query.api,
+            prompt=f"{prompt}\n\n{selected_content}",
+            temperature=0,
+            max_tokens=500,
+        )["choices"][0]["text"]
+
+        return response
+
+    @staticmethod
+    def embed(text: str) -> np.ndarray:
         """
         Get embedding from OpenAI API
         """
-        return openai.Embedding.create(engine=model, input=text,)["data"][
-            0
-        ]["embedding"]
+
+        return openai.Embedding.create(
+            engine=STATE.configured_model.embedding.api, input=text
+        )["data"][0]["embedding"]

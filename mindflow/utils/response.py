@@ -4,12 +4,14 @@ Handle response text from Mindflow API.
 
 import pyperclip
 
+from mindflow.state import STATE
 
-def handle_response_text(text: str, skip_clipboard: bool):
+
+def handle_response_text(text: str):
     """
     Copy to clipboard or print response text.
     """
-    if not skip_clipboard:
+    if not STATE.arguments.skip_clipboard:
         try:
             pyperclip.copy(text)
             print("Response copied to clipboard!!!")
