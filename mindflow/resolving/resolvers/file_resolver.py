@@ -1,17 +1,15 @@
 """
 File/Directory Resolver
 """
-from logging import log
 import os
 
 from typing import List, Optional, Union
 from mindflow.db.static_definition import ObjectConfig
 
-from mindflow.index.resolvers.base_resolver import BaseResolver
+from mindflow.resolving.resolvers.base_resolver import BaseResolver
 from mindflow.db.objects.document import Document, DocumentReference
 from mindflow.db.objects.static_definition.document import DocumentType
 
-from mindflow.utils.files.utf8 import is_valid_utf8
 from mindflow.utils.files.extract import extract_files
 
 
