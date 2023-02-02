@@ -8,15 +8,11 @@ from copy import deepcopy
 
 import numpy as np
 
-
 from mindflow.client.openai.gpt import GPT
-from mindflow.utils.prompts import SEARCH_INDEX
-from mindflow.utils.config import config as CONFIG
-from mindflow.utils.helpers import IndexType
+from mindflow.state import STATE
 
 # import warnings
 # warnings.filterwarnings("ignore", category=UserWarning, module='transformers')
-
 
 class Node:
     """
@@ -29,16 +25,11 @@ class Node:
     embedding: np.ndarray
     leaves: List["Node"]
 
-    def __init__(self, index_type: str, start: int, end: int, text: str = None):
+    def __init__(self, start: int, end: int, text: str = None):
         self.start = start
         self.end = end
         if text:
-            if index_type == IndexType.DEEP:
-                self.summary = GPT.get_completion(
-                    SEARCH_INDEX, text, CONFIG.GPT_MODEL_COMPLETION
-                )
-            else:
-                self.embedding = GPT.get_embedding(text, CONFIG.GPT_MODEL_EMBEDDING)
+            self.summary = GPT.summarize(text)
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -85,7 +76,7 @@ def count_tokens(text: str) -> int:
 
 
 # This function is used to split a string into chunks of a specified token limit using binary search
-def binary_split_raw_text_to_nodes(text: str, index_type: str) -> List[Node]:
+def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
     """
     Splits text into smaller chunks to not exceed the token limit.
     """
@@ -93,8 +84,11 @@ def binary_split_raw_text_to_nodes(text: str, index_type: str) -> List[Node]:
     stack = [(0, len(text))]
     while stack:
         start, end = stack.pop()
-        if count_tokens(text[start:end]) < CONFIG.SEARCH_INDEX_TOKEN_LIMIT:
-            nodes.append(Node(index_type, start, end, text[start:end]))
+        if (
+            count_tokens(text[start:end])
+            < STATE.configured_model.index.soft_token_limit
+        ):
+            nodes.append(Node(start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
             stack.append((start, mid))
@@ -112,7 +106,7 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
         nodes, start, end = stack.pop()
         if (
             sum(count_tokens(node.summary) for node in nodes[start:end])
-            < CONFIG.SEARCH_INDEX_TOKEN_LIMIT
+            < STATE.configured_model.index.soft_token_limit
         ):
             chunks.append(nodes[start:end])
         else:
@@ -122,20 +116,16 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
     return chunks
 
 
-def create_nodes(leaf_nodes: List[Node], index_type: str) -> Node:
+def create_nodes(leaf_nodes: List[Node]) -> Node:
     """
     This function is used to iteratively create a nodes of our search tree
     """
-    if index_type == IndexType.SHALLOW:
-        print(f"start: {leaf_nodes[0].start}, end: {leaf_nodes[-1].end}")
-        return Node(index_type, leaf_nodes[0].start, leaf_nodes[-1].end)
-
     stack = [(leaf_nodes, 0, len(leaf_nodes))]
     while stack:
         leaf_nodes, start, end = stack.pop()
         if (
             sum(count_tokens(leaf_node.summary) for leaf_node in leaf_nodes[start:end])
-            > CONFIG.SEARCH_INDEX_TOKEN_LIMIT
+            > STATE.configured_model.index.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
                 leaf_nodes[start:end]
@@ -147,7 +137,6 @@ def create_nodes(leaf_nodes: List[Node], index_type: str) -> Node:
                 [node.summary for node in leaf_nodes[start:end]]
             )
             node = Node(
-                index_type,
                 leaf_nodes[start].start,
                 leaf_nodes[end - 1].end,
                 parent_node_summaries,
@@ -156,17 +145,11 @@ def create_nodes(leaf_nodes: List[Node], index_type: str) -> Node:
             return node
 
 
-def create_text_search_tree(text: str, index_type: bool) -> dict:
+def create_text_search_tree(text: str) -> dict:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
-    if count_tokens(text) < CONFIG.SEARCH_INDEX_TOKEN_LIMIT:
-        return Node(index_type, 0, len(text), text).to_dict()
-    raw_text_nodes = binary_split_raw_text_to_nodes(text, index_type)
-    if index_type == IndexType.SHALLOW:
-        shallow_search_tree = Node(index_type, 0, len(text))
-        shallow_search_tree.set_leaves(raw_text_nodes)
-        return shallow_search_tree.to_dict()
-    return create_nodes(
-        binary_split_raw_text_to_nodes(text, index_type), index_type
-    ).to_dict()
+    if count_tokens(text) < STATE.configured_model.index.soft_token_limit:
+        return Node(0, len(text), text).to_dict()
+    # raw_text_nodes = binary_split_raw_text_to_nodes(text)
+    return create_nodes(binary_split_raw_text_to_nodes(text)).to_dict()
