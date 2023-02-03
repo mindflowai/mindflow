@@ -12,7 +12,7 @@ from mindflow.db.db import retrieve_object_bulk
 from mindflow.db.objects.document import Document
 from mindflow.commands.index import index
 from mindflow.state import STATE
-from mindflow.client.openai.gpt import GPT
+from mindflow.client.gpt import GPT
 
 from mindflow.utils.response import handle_response_text
 

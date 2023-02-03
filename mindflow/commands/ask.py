@@ -3,7 +3,7 @@
 """
 
 from mindflow.state import STATE
-from mindflow.client.openai.gpt import GPT
+from mindflow.client.gpt import GPT
 from mindflow.utils.response import handle_response_text
 
 
