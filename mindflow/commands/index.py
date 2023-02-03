@@ -58,6 +58,7 @@ def index():
                 del document_reference, search_tree_future
                 progress_bar()
 
+
 class Node:
     """
     Simple node class for search tree.
@@ -195,5 +196,4 @@ def create_text_search_tree(text: str) -> dict:
     """
     if count_tokens(text) < STATE.configured_model.index.soft_token_limit:
         return Node(0, len(text), text).to_dict()
-    # raw_text_nodes = binary_split_raw_text_to_nodes(text)
     return create_nodes(binary_split_raw_text_to_nodes(text)).to_dict()

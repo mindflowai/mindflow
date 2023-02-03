@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 from mindflow.utils.enum import ExtendedEnum
 
 
@@ -47,7 +48,7 @@ db = create_and_load_json(JSON_DB_PATH)
 
 
 class ObjectConfig:
-    def __init__(self, store: str, collection: str, path: str):
+    def __init__(self, store: str, collection: str, path: Optional[str]):
         self.store = store
         self.collection = collection
         self.path = path

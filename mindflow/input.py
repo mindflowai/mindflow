@@ -3,15 +3,6 @@ from typing import List
 
 from mindflow.db.static_definition import Collection, ObjectConfig, ObjectStoreType
 
-
-class Interface(Enum):
-    """
-    Interface for MindFlow
-    """
-
-    CLI = "cli"
-
-
 class Command(Enum):
     """
     Arguments for MindFlow
