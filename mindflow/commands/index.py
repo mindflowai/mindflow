@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from alive_progress import alive_bar
-from mindflow.client.openai.gpt import GPT
+from mindflow.client.gpt import GPT
 
 from mindflow.state import STATE
 from mindflow.db.db import set_object

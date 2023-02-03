@@ -2,6 +2,7 @@
 This file is used to load the chat gpt model.
 """
 
+from typing import Optional
 import numpy as np
 import openai
 
@@ -33,7 +34,7 @@ class GPT:
         return response
 
     @staticmethod
-    def query(prompt: str, selected_content: str) -> str:
+    def query(prompt: str, selected_content: Optional[str]) -> str:
         """
         Get response from OpenAI API
         """

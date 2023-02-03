@@ -3,7 +3,7 @@
 """
 import subprocess
 from mindflow.state import STATE
-from mindflow.client.openai.gpt import GPT
+from mindflow.client.gpt import GPT
 
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
