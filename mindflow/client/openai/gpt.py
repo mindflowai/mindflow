@@ -40,7 +40,8 @@ class GPT:
         # print(f"Suffix: {suffix}")
         response = openai.Completion.create(
             engine=STATE.configured_model.query.api,
-            prompt=f"{prompt}\n\n{selected_content}",
+            prompt=prompt,
+            suffix=selected_content,
             temperature=0,
             max_tokens=500,
         )["choices"][0]["text"]
@@ -53,6 +54,8 @@ class GPT:
         Get embedding from OpenAI API
         """
 
-        return openai.Embedding.create(
+        response = openai.Embedding.create(
             engine=STATE.configured_model.embedding.api, input=text
         )["data"][0]["embedding"]
+
+        return response
