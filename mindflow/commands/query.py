@@ -2,6 +2,7 @@
 `query` command
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 from typing import List, Tuple
 import numpy as np
@@ -98,7 +99,7 @@ def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     """
     selected_content: str = ""
     char_limit: int = STATE.configured_model.query.soft_token_limit * 3
-    for document_chunk, _ in ranked_document_chunks:
+    for document_chunk in ranked_document_chunks:
         if document_chunk:
             with open(document_chunk.path, "r", encoding="utf-8") as file:
                 file.seek(document_chunk.start)
@@ -111,7 +112,7 @@ def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     return selected_content
 
 
-def rank_document_chunks_by_embedding() -> List[Tuple[DocumentChunk, float]]:
+def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
     """
     This function is used to select the most relevant content for the prompt.
     """
@@ -123,14 +124,15 @@ def rank_document_chunks_by_embedding() -> List[Tuple[DocumentChunk, float]]:
         documents = retrieve_object_bulk(document_ids, STATE.db_config.document)
         if not documents:
             continue
-        for document in documents:
-            document_chunks, document_chunk_embeddings = DocumentChunk.from_search_tree(
-                Document(document)
-            )
-            similarities = cosine_similarity(
-                prompt_embeddings, document_chunk_embeddings
-            )[0]
-            ranked_document_chunks.extend(list(zip(document_chunks, similarities)))
+        
+        with ThreadPoolExecutor(max_workers=50) as executor:
+            futures = [executor.submit(DocumentChunk.from_search_tree, Document(document)) for document in documents]
+            for future in as_completed(futures):
+                document_chunks, document_chunk_embeddings = future.result()
+                similarities = cosine_similarity(
+                    prompt_embeddings, document_chunk_embeddings
+                )[0]
+                ranked_document_chunks.extend(list(zip(document_chunks, similarities)))
 
     ranked_document_chunks.sort(key=lambda x: x[1], reverse=True)
-    return ranked_document_chunks
+    return [chunk for chunk, _ in ranked_document_chunks]
