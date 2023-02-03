@@ -36,7 +36,9 @@ class FileResolver(BaseResolver):
         """
         return os.path.isfile(document_path) or os.path.isdir(document_path)
 
-    def resolve(self, document_path: str, document_config: ObjectConfig) -> List[DocumentReference]:
+    def resolve(
+        self, document_path: str, document_config: ObjectConfig
+    ) -> List[DocumentReference]:
         """
         Extract text from files.
         """

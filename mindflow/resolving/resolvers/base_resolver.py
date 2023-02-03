@@ -25,7 +25,9 @@ class BaseResolver:
         Checks if a string is a valid document path for this resolver.
         """
 
-    def resolve(self, document_path: str, document_config: ObjectConfig) -> List[DocumentReference]:
+    def resolve(
+        self, document_path: str, document_config: ObjectConfig
+    ) -> List[DocumentReference]:
         """
         Resolve a document path to text.
         """

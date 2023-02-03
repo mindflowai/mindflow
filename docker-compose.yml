@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  flask_api:
+    container_name: mindflow-api
+    restart: always
+    env_file: .env
+    build: .
+    networks:
+      - db_network
+      - web_network
+  nginx:
+    container_name: nginx
+    restart: always
+    image: "nginx:latest"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - web_network
+    depends_on: 
+      - flask_api
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+ 

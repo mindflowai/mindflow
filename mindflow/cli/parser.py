@@ -17,7 +17,6 @@ def ask_args() -> argparse.Namespace:
         description="Ask a question.",
     )
     add_query_arg(parser)
-    add_remote_arg(parser)
     add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
@@ -41,7 +40,6 @@ def delete_args() -> argparse.Namespace:
         description="Delete a document.",
     )
     add_document_paths_arg(parser)
-    add_remote_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
 
@@ -53,7 +51,6 @@ def diff_args() -> argparse.Namespace:
         description="Summarize your git diff.",
     )
     add_diffargs_arg(parser)
-    add_remote_arg(parser)
     add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
@@ -78,7 +75,6 @@ def inspect_args() -> argparse.Namespace:
         description="Inspect your index.",
     )
     add_document_paths_arg(parser)
-    add_remote_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
 
@@ -92,7 +88,6 @@ def query_args() -> argparse.Namespace:
     add_document_paths_arg(parser)
     add_index_arg(parser)
     add_query_arg(parser)
-    add_remote_arg(parser)
     add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
@@ -106,7 +101,6 @@ def refresh_args() -> argparse.Namespace:
         description="Refresh your index.",
     )
     add_document_paths_arg(parser)
-    add_remote_arg(parser)
     add_force_arg(parser)
     return parser.parse_args(sys.argv[2:])
 

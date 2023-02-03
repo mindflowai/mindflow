@@ -60,7 +60,8 @@ def config_service():
     service_key = ask_service()
     service_config_param = ask_service_config()
     service_config = retrieve_object(
-        service_key, STATE.db_config.service_config,
+        service_key,
+        STATE.db_config.service_config,
     )
     if not service_config:
         service_config = {}

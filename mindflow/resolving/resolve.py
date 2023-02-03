@@ -9,7 +9,9 @@ from mindflow.db.static_definition import ObjectConfig
 from mindflow.resolving.resolvers.file_resolver import FileResolver
 
 
-def resolve(document_path: str, document_config: ObjectConfig) -> List[DocumentReference]:
+def resolve(
+    document_path: str, document_config: ObjectConfig
+) -> List[DocumentReference]:
     """
     Resolves a document to text.
     """

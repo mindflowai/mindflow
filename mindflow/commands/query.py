@@ -16,6 +16,7 @@ from mindflow.client.gpt import GPT
 
 from mindflow.utils.response import handle_response_text
 
+
 def query():
     """
     This function is used to ask a custom question about files, folders, and websites.
@@ -29,6 +30,7 @@ def query():
         select_content(),
     )
     handle_response_text(response)
+
 
 def select_content():
     """
@@ -46,6 +48,7 @@ def select_content():
     selected_content = trim_content(embedding_ranked_document_chunks)
 
     return selected_content
+
 
 class DocumentChunk:
     """
@@ -120,13 +123,18 @@ def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
 
     ranked_document_chunks = []
     for i in range(0, len(STATE.document_references), 100):
-        document_ids = [document.id for document in STATE.document_references[i : i + 100]]
+        document_ids = [
+            document.id for document in STATE.document_references[i : i + 100]
+        ]
         documents = retrieve_object_bulk(document_ids, STATE.db_config.document)
         if not documents:
             continue
-        
+
         with ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [executor.submit(DocumentChunk.from_search_tree, Document(document)) for document in documents]
+            futures = [
+                executor.submit(DocumentChunk.from_search_tree, Document(document))
+                for document in documents
+            ]
             for future in as_completed(futures):
                 document_chunks, document_chunk_embeddings = future.result()
                 similarities = cosine_similarity(

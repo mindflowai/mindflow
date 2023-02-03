@@ -8,7 +8,16 @@ from typing import Tuple
 
 from mindflow.cli.parser import get_parsed_cli_args
 from mindflow.db.static_definition import JSON_DB_PATH, ObjectStoreType
-from mindflow.input import Command
+from mindflow.input import Arguments, Command, DBConfig
+from mindflow.state import ConfiguredModel, ConfiguredService, STATE
+
+from mindflow.commands.ask import ask
+from mindflow.commands.config import config
+from mindflow.commands.delete import delete
+from mindflow.commands.diff import diff
+from mindflow.commands.index import index
+from mindflow.commands.inspect import inspect
+from mindflow.commands.query import query
 
 MF_DESCRIPTION = """
 
@@ -33,6 +42,7 @@ inspect    `mf inspect <document paths>`                  Inspect a file/folder 
 
 
 def cli() -> Tuple[str, dict, str, str]:
+    # Parse Arguments
     parser = set_parser()
     args = parser.parse_args(arg.upper() for arg in sys.argv[1:2])
     command = Command[args.command].value
@@ -49,7 +59,34 @@ def cli() -> Tuple[str, dict, str, str]:
         if hasattr(args, "skip_clipboard")
         else None,
     }
-    return command, arguments, ObjectStoreType.JSON.value, JSON_DB_PATH
+
+    # Configure State
+    STATE.db_config = DBConfig(ObjectStoreType.JSON.value, JSON_DB_PATH)
+    STATE.configured_service = ConfiguredService(STATE.db_config)
+    STATE.configured_model = ConfiguredModel(
+        command, STATE.configured_service, STATE.db_config
+    )
+    STATE.arguments = Arguments(arguments)
+    STATE.command = command
+
+    # Execute Command
+    match command:
+        case Command.ASK.value:
+            ask()
+        case Command.CONFIG.value:
+            config()
+        case Command.DELETE.value:
+            delete()
+        case Command.DIFF.value:
+            diff()
+        case Command.INSPECT.value:
+            inspect()
+        case Command.QUERY.value:
+            query()
+        case Command.REFRESH.value:
+            index()
+        case Command.INDEX.value:
+            index()
 
 
 def set_parser():

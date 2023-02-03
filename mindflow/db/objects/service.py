@@ -1,5 +1,4 @@
 from typing import Optional
-
 from mindflow.db.db import retrieve_object
 from mindflow.db.static_definition import ObjectConfig
 
