@@ -25,6 +25,14 @@ MindFlow allows users to generate an index of documents using a powerful languag
 - `mf inspect [document paths]`:
     - Inspect your document indices.
 
+## Recommended Use
+While this tool is in beta, it is recommended to use the base models, but more will be added in the future. The base models are:
+- Query: Text Completion Davinci 003
+- Index: Text Completion Curie 001
+- Embedding: Text Embedding Ada 001
+
+By running MF config, you can change the models used for each of these tasks. You can also configure the soft token limit. The soft token limit truncated the text to be sent to the GPT apis. When using the index, this means that your index summaries will be created over smaller chunks of texts, which can be useful, because it allows the query mechanism to more selectively choose chunks of text to return. This will also result in longer indexing times, and it will be more expensive, because more requests must be made. The soft token limit can also be configure for the final prompt, which is the query prompt. Fitting more text into the prompt can allow for more context to be used to generate the response, however, sometimes to much context impacts the quality of the response negatively.
+
 ## Setup
 - **Python:**
     - `pip install mindflow`
