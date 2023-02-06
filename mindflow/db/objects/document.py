@@ -1,7 +1,7 @@
 import hashlib
 from typing import Optional, Union
-from mindflow.db.static_definition import ObjectConfig
-from mindflow.db.db import retrieve_object
+from mindflow.db.db import DATABASE
+from mindflow.db.static_definition import Collection
 
 
 class Document:
@@ -32,12 +32,11 @@ class Document:
         document_path: str,
         document_text: str,
         document_type: str,
-        document_config: ObjectConfig,
     ) -> Optional["DocumentReference"]:
         """
         Create document reference
         """
-        document = cls(retrieve_object(document_path, document_config))
+        document = cls(DATABASE.json.retrieve_object(Collection.DOCUMENT.value, document_path))
         old_hash = None
         if hasattr(document, "hash"):
             old_hash = document.hash

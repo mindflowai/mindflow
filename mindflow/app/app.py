@@ -1,9 +1,12 @@
 from flask import Flask, request
+from mindflow.db.objects.configurations import Configurations
 
-from mindflow.input import Arguments, Command, DBConfig
-from mindflow.state import STATE, ConfiguredModel, ConfiguredService
+from mindflow.input import Arguments, Command
+from mindflow.settings import Settings
+from mindflow.state import STATE
 
 from mindflow.commands.ask import ask
+
 # from mindflow.commands.config import config
 from mindflow.commands.delete import delete
 from mindflow.commands.diff import diff
@@ -27,16 +30,15 @@ class API:
             keys_to_keep = ["query", "return_prompt", "skip_clipboard"]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.ASK.value, STATE.configured_service, STATE.db_config
-            )
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
-            STATE.command = Command.ASK.value
+            STATE.command = Command.INDEX.value
 
             ask()
 
@@ -53,16 +55,15 @@ class API:
 
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.DELETE.value, STATE.configured_service, STATE.db_config
-            )
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
-            STATE.command = Command.DELETE.value
+            STATE.command = Command.INDEX.value
 
             delete()
 
@@ -73,16 +74,15 @@ class API:
             keys_to_keep = ["git_diff_args", "return_prompt", "skip_clipboard"]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.DIFF.value, STATE.configured_service, STATE.db_config
-            )
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
-            STATE.command = Command.DIFF.value
+            STATE.command = Command.INDEX.value
 
             diff()
 
@@ -93,14 +93,17 @@ class API:
             keys_to_keep = ["document_paths"]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.INDEX.value, STATE.configured_service, STATE.db_config
-            )
+            database = params.get("database", None)
+            path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
+
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
 
@@ -119,16 +122,19 @@ class API:
             ]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.QUERY.value, STATE.configured_service, STATE.db_config
-            )
+            database = params.get("database", None)
+            path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
+
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
-            STATE.command = Command.QUERY.value
+            STATE.command = Command.INDEX.value
 
             query()
 
@@ -139,16 +145,15 @@ class API:
             keys_to_keep = ["document_paths", "force"]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.REFRESH.value, STATE.configured_service, STATE.db_config
-            )
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
-            STATE.command = Command.REFRESH.value
+            STATE.command = Command.INDEX.value
 
             index()
 
@@ -159,14 +164,13 @@ class API:
             keys_to_keep = ["document_paths"]
             arguments = trim_json(arguments, keys_to_keep)
 
-            db_config = params.get("db_config", None)
+            database = params.get("database", None)
             path = params.get("path", None)
+            auth = params.get("auth", None)
+            user_configurations = params.get("user_configurations", {})
 
-            STATE.db_config = DBConfig(db_config, path)
-            STATE.configured_service = ConfiguredService(STATE.db_config)
-            STATE.configured_model = ConfiguredModel(
-                Command.INDEX.value, STATE.configured_service, STATE.db_config
-            )
+            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
 

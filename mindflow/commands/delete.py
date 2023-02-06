@@ -3,8 +3,8 @@
 """
 
 from mindflow.state import STATE
-from mindflow.db.db import delete_object_bulk
-
+from mindflow.db.db import DATABASE
+from mindflow.db.static_definition import Collection
 
 def delete():
     """
@@ -14,4 +14,4 @@ def delete():
     paths = [
         document_reference.path for document_reference in STATE.document_references
     ]
-    delete_object_bulk(paths, STATE.db_config.document)
+    DATABASE.json.delete_object_bulk(Collection.DOCUMENT.value, paths)

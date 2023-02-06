@@ -8,10 +8,12 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from alive_progress import alive_bar
-from mindflow.client.gpt import GPT
 
 from mindflow.state import STATE
-from mindflow.db.db import set_object
+from mindflow.db.db import DATABASE
+from mindflow.db.static_definition import Collection
+from mindflow.client.gpt import GPT
+
 from mindflow.db.objects.document import Document
 from mindflow.utils.document.read import read_document
 
@@ -52,8 +54,9 @@ def index():
             ):
                 document = Document(document_reference.__dict__)
                 document.search_tree = search_tree_future.result()
-                set_object(
-                    document_reference.path, document.__dict__, STATE.db_config.document
+                DATABASE.json.set_object(
+                    Collection.DOCUMENT.value,
+                    document.__dict__,
                 )
                 del document_reference, search_tree_future
                 progress_bar()
@@ -131,7 +134,7 @@ def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
         start, end = stack.pop()
         if (
             count_tokens(text[start:end])
-            < STATE.configured_model.index.soft_token_limit
+            < STATE.settings.models.index.soft_token_limit
         ):
             nodes.append(Node(start, end, text[start:end]))
         else:
@@ -151,7 +154,7 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
         nodes, start, end = stack.pop()
         if (
             sum(count_tokens(node.summary) for node in nodes[start:end])
-            < STATE.configured_model.index.soft_token_limit
+            < STATE.settings.models.index.soft_token_limit
         ):
             chunks.append(nodes[start:end])
         else:
@@ -170,7 +173,7 @@ def create_nodes(leaf_nodes: List[Node]) -> Node:
         leaf_nodes, start, end = stack.pop()
         if (
             sum(count_tokens(leaf_node.summary) for leaf_node in leaf_nodes[start:end])
-            > STATE.configured_model.index.soft_token_limit
+            > STATE.settings.models.index.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
                 leaf_nodes[start:end]
@@ -194,6 +197,6 @@ def create_text_search_tree(text: str) -> dict:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
-    if count_tokens(text) < STATE.configured_model.index.soft_token_limit:
+    if count_tokens(text) < STATE.settings.models.index.soft_token_limit:
         return Node(0, len(text), text).to_dict()
     return create_nodes(binary_split_raw_text_to_nodes(text)).to_dict()

@@ -5,8 +5,6 @@ Base Resolver Class
 from typing import List, Optional
 
 from mindflow.db.objects.document import DocumentReference
-from mindflow.db.static_definition import ObjectConfig
-
 
 class BaseResolver:
     """
@@ -26,7 +24,7 @@ class BaseResolver:
         """
 
     def resolve(
-        self, document_path: str, document_config: ObjectConfig
+        self, document_path: str
     ) -> List[DocumentReference]:
         """
         Resolve a document path to text.

@@ -17,7 +17,7 @@ class GPTEndpoints:
 
     @property
     def configured_api(self):
-        openai.api_key = STATE.configured_service.openai.api_key
+        openai.api_key = STATE.settings.services.openai.api_key
         return openai
 
     def summarize(self, text: str) -> str:
@@ -27,7 +27,7 @@ class GPTEndpoints:
         try:
             # print(f"Suffix: {suffix}")
             response = self.configured_api.Completion.create(
-                engine=STATE.configured_model.index.api,
+                engine=STATE.settings.models.index.api,
                 prompt=f"{SEARCH_INDEX}\n\n{text}",
                 temperature=0,
                 max_tokens=500,
@@ -45,7 +45,7 @@ class GPTEndpoints:
         try:
             # print(f"Suffix: {suffix}")
             response = self.configured_api.Completion.create(
-                engine=STATE.configured_model.query.api,
+                engine=STATE.settings.models.query.api,
                 prompt=prompt,
                 suffix=selected_content,
                 temperature=0,
@@ -63,7 +63,7 @@ class GPTEndpoints:
         """
         try:
             response = self.configured_api.Embedding.create(
-                engine=STATE.configured_model.embedding.api, input=text
+                engine=STATE.settings.models.embedding.api, input=text
             )["data"][0]["embedding"]
 
             return response
