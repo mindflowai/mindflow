@@ -58,7 +58,6 @@ def set_configuration():
 def config_service():
     service_key = ask_service()
     service_config_param = ask_service_config()
-    print(STATE.user_configurations.service_config.__dict__)
     service_config = getattr(STATE.user_configurations.service_config, service_key.value)
 
     match service_config_param:
