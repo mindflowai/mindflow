@@ -1,60 +1,78 @@
-from copy import deepcopy
 import json
+import os
+import sys
 
 from typing import List, Optional
-from mindflow.db.static_definition import ObjectConfig, db
 
+MINDFLOW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mindflow")
 
-def retrieve_object_json(object_id: str, object_config: ObjectConfig) -> Optional[dict]:
-    file = deepcopy(db)
+class JsonDatabase: 
 
-    objects = file.get(object_config.collection, None)
-    if not objects:
+    def __init__(self):
+        if not os.path.exists(MINDFLOW_DIR):
+            os.makedirs(MINDFLOW_DIR)
+
+        def create_and_load_json(path: str) -> dict:
+            if os.path.exists(path):
+                print(path)
+                # Open the authentication file in read and write mode
+                with open(path, "r+", encoding="utf-8") as json_file:
+                    # Read the existing authentication data
+                    return json.load(json_file)
+            with open(path, "w", encoding="utf-8") as json_file:
+                json.dump({}, json_file)
+            return {}
+
+        self.file = create_and_load_json(self.path)
+
+    def save(self):
+        with open(self.path, "w", encoding="utf-8") as json_file:
+            json.dump(self.file, json_file, indent=4)
+
+    @property
+    def path(self):
+        return os.path.join(MINDFLOW_DIR, "db.json")
+
+    def retrieve_object(self, collection: str, object_id: str) -> Optional[dict]:
+        objects = self.file.get(collection, None)
+        if not objects:
+            return None
+
+        if isinstance(objects, dict):
+            return objects.get(object_id, None)
+
         return None
 
-    if isinstance(objects, dict):
-        return objects.get(object_id, None)
+    def retrieve_object_bulk(
+        self, collection: str, object_ids: List[str]
+    ) -> Optional[List[dict]]:
+        objects = self.file.get(collection, None)
+        if not objects:
+            return None
 
-    return None
+        if isinstance(objects, dict):
+            return [objects[object_id] for object_id in object_ids if object_id in objects]
 
-
-def retrieve_object_json_bulk(
-    object_ids: List[str], object_config: ObjectConfig
-) -> Optional[List[dict]]:
-    file = deepcopy(db)
-
-    # print(file)
-    objects = file.get(object_config.collection, None)
-    if not objects:
         return None
 
-    if isinstance(objects, dict):
-        return [objects[object_id] for object_id in object_ids if object_id in objects]
 
-    return None
+    ### Delete objects from json from ID list and overwrite the file
+    def delete_object_bulk(self, collection: str, object_ids: List[str]):
+        if not collection in self.file:
+            self.file[collection] = {}
 
-
-### Delete objects from json from ID list and overwrite the file
-def delete_object_json_bulk(object_ids: List[str], object_config: ObjectConfig):
-
-    collection = db.get(object_config.collection, None)
-    if not collection:
-        db[object_config.collection] = {}
-
-    for object_id in object_ids:
-        if db[object_config.collection].get(object_id, None):
-            del db[object_config.collection][object_id]
-
-    print(object_config.path)
-    with open(object_config.path, "w", encoding="utf-8") as file:
-        json.dump(db, file, indent=4)
+        for object_id in object_ids:
+            if self.file[collection].get(object_id, None):
+                del self.file[collection][object_id]
 
 
-def set_object_json(object_id: str, value: dict, object_config: ObjectConfig):
-    collection = db.get(object_config.collection, None)
-    if not collection:
-        db[object_config.collection] = {}
+    def set_object(self, collection: str, value: dict):
+        if not collection in self.file:
+            self.file[collection] = {}
 
-    db[object_config.collection][object_id] = value
-    with open(object_config.path, "w", encoding="utf-8") as file:
-        json.dump(db, file, indent=4)
+        object_id = value.get("id", None)
+        if not object_id:
+            print("No ID found in object")
+            sys.exit(1)
+
+        self.file[collection][object_id] = value

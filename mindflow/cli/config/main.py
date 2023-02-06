@@ -2,7 +2,6 @@ import getpass
 import sys
 
 from mindflow.cli.config.menu import menu
-from mindflow.db.db import retrieve_object, set_object
 from mindflow.db.objects.static_definition.model import (
     ModelConfigParameterKey,
     ModelHardTokenLimit,
@@ -59,12 +58,9 @@ def set_configuration():
 def config_service():
     service_key = ask_service()
     service_config_param = ask_service_config()
-    service_config = retrieve_object(
-        service_key,
-        STATE.db_config.service_config,
-    )
-    if not service_config:
-        service_config = {}
+    print(STATE.user_configurations.service_config.__dict__)
+    service_config = getattr(STATE.user_configurations.service_config, service_key.value)
+
     match service_config_param:
         case ServiceConfigParameterKey.API_KEY:
             value = getpass.getpass("API Key: ")
@@ -74,21 +70,14 @@ def config_service():
             print("Unrecognized model config parameter")
             sys.exit(1)
 
-    service_config[service_config_param.value] = value
-    set_object(
-        service_key.value,
-        service_config,
-        STATE.db_config.service_config,
-    )
-
+    setattr(service_config, service_config_param.value, value)
 
 def config_model():
     service_key = ask_service()
     model_key = ask_model_by_service(service_key)
     model_config_param = ask_model_config()
-    model_config = retrieve_object(model_key, STATE.db_config.model_config)
-    if not model_config:
-        model_config = {}
+    model_config = getattr(STATE.user_configurations.model_config, model_key.value)
+
     match model_config_param:
         case ModelConfigParameterKey.SOFT_TOKEN_LIMIT:
             model_hard_token_limit = get_model_static(
@@ -107,12 +96,7 @@ def config_model():
         case _:
             print("Unrecognized model config parameter")
             sys.exit(1)
-    model_config[model_config_param.value] = value
-    set_object(
-        model_key.value,
-        model_config,
-        STATE.db_config.model_config,
-    )
+    setattr(model_config, model_config_param.value, value)
 
 
 def config_mindflow_model():
@@ -121,24 +105,24 @@ def config_mindflow_model():
         case MindFlowModelID.INDEX:
             match ask_service():
                 case ServiceID.OPENAI:
-                    set_object(
+                    setattr(
+                        STATE.user_configurations.mindflow_model_config,
                         mindflow_model_key.value,
                         ask_model_text_completion_openai().value,
-                        STATE.db_config.mindflow_model_config,
                     )
         case MindFlowModelID.QUERY:
             match ask_service():
                 case ServiceID.OPENAI:
-                    set_object(
+                    setattr(
+                        STATE.user_configurations.mindflow_model_config,
                         mindflow_model_key.value,
                         ask_model_text_completion_openai().value,
-                        STATE.db_config.mindflow_model_config,
                     )
         case MindFlowModelID.EMBEDDING:
             match ask_service():
                 case ServiceID.OPENAI:
-                    set_object(
+                    setattr(
+                        STATE.user_configurations.mindflow_model_config,
                         mindflow_model_key.value,
                         ask_model_text_embedding_openai().value,
-                        STATE.db_config.mindflow_model_config,
                     )

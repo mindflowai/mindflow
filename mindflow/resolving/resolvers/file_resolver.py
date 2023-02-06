@@ -4,7 +4,6 @@ File/Directory Resolver
 import os
 
 from typing import List, Optional, Union
-from mindflow.db.static_definition import ObjectConfig
 
 from mindflow.resolving.resolvers.base_resolver import BaseResolver
 from mindflow.db.objects.document import Document, DocumentReference
@@ -37,7 +36,7 @@ class FileResolver(BaseResolver):
         return os.path.isfile(document_path) or os.path.isdir(document_path)
 
     def resolve(
-        self, document_path: str, document_config: ObjectConfig
+        self, document_path: str
     ) -> List[DocumentReference]:
         """
         Extract text from files.
@@ -49,7 +48,7 @@ class FileResolver(BaseResolver):
                 continue
             document_references.append(
                 Document.create_document_reference(
-                    path, document_text, DocumentType.FILE.value, document_config
+                    path, document_text, DocumentType.FILE.value
                 )
             )
         return document_references

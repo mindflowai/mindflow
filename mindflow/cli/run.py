@@ -4,12 +4,15 @@ Command Line Client for Mindflow
 
 import argparse
 import sys
-from typing import Tuple
+
+from mindflow.db.db import DATABASE
+from mindflow.db.objects.configurations import Configurations
+from mindflow.state import STATE
+from mindflow.db.static_definition import Collection
+from mindflow.input import Arguments, Command
 
 from mindflow.cli.parser import get_parsed_cli_args
-from mindflow.db.static_definition import JSON_DB_PATH, ObjectStoreType
-from mindflow.input import Arguments, Command, DBConfig
-from mindflow.state import ConfiguredModel, ConfiguredService, STATE
+from mindflow.settings import Settings
 
 from mindflow.commands.ask import ask
 from mindflow.commands.config import config
@@ -41,7 +44,7 @@ inspect    `mf inspect <document paths>`                  Inspect a file/folder 
 """
 
 
-def cli() -> Tuple[str, dict, str, str]:
+def cli():
     # Parse Arguments
     parser = set_parser()
     args = parser.parse_args(arg.upper() for arg in sys.argv[1:2])
@@ -60,12 +63,13 @@ def cli() -> Tuple[str, dict, str, str]:
         else None,
     }
 
+    user_configurations = DATABASE.json.retrieve_object(Collection.CONFIGURATIONS.value, "configurations")
+    if user_configurations is None:
+        user_configurations = {}
+
     # Configure State
-    STATE.db_config = DBConfig(ObjectStoreType.JSON.value, JSON_DB_PATH)
-    STATE.configured_service = ConfiguredService(STATE.db_config)
-    STATE.configured_model = ConfiguredModel(
-        command, STATE.configured_service, STATE.db_config
-    )
+    STATE.user_configurations = Configurations.initialize(user_configurations)
+    STATE.settings = Settings.initialize(command, user_configurations)
     STATE.arguments = Arguments(arguments)
     STATE.command = command
 
@@ -75,6 +79,7 @@ def cli() -> Tuple[str, dict, str, str]:
             ask()
         case Command.CONFIG.value:
             config()
+            STATE.user_configurations.save()
         case Command.DELETE.value:
             delete()
         case Command.DIFF.value:
@@ -87,6 +92,9 @@ def cli() -> Tuple[str, dict, str, str]:
             index()
         case Command.INDEX.value:
             index()
+    
+    print("Saving database...")
+    DATABASE.json.save()
 
 
 def set_parser():

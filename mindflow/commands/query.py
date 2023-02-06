@@ -8,11 +8,13 @@ from typing import List, Tuple
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from mindflow.db.db import retrieve_object_bulk
-from mindflow.db.objects.document import Document
-from mindflow.commands.index import index
+from mindflow.db.db import DATABASE
+from mindflow.db.static_definition import Collection
 from mindflow.state import STATE
 from mindflow.client.gpt import GPT
+
+from mindflow.db.objects.document import Document
+from mindflow.commands.index import index
 
 from mindflow.utils.response import handle_response_text
 
@@ -78,7 +80,7 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embeddings: List[str] = [GPT.embed(document.search_tree["summary"])]
+        embeddings: List[np.ndarray] = [GPT.embed(document.search_tree["summary"])]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -101,7 +103,7 @@ def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = STATE.configured_model.query.soft_token_limit * 3
+    char_limit: int = STATE.settings.models.query.soft_token_limit * 3
     for document_chunk in ranked_document_chunks:
         if document_chunk:
             with open(document_chunk.path, "r", encoding="utf-8") as file:
@@ -126,7 +128,7 @@ def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
         document_ids = [
             document.id for document in STATE.document_references[i : i + 100]
         ]
-        documents = retrieve_object_bulk(document_ids, STATE.db_config.document)
+        documents = DATABASE.json.retrieve_object_bulk(Collection.DOCUMENT.value, document_ids)
         if not documents:
             continue
 

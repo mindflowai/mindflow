@@ -1,13 +1,11 @@
-from typing import Union
-
-from mindflow.db.db import retrieve_object
-from mindflow.db.static_definition import ObjectConfig
+from typing import Optional
 
 
 class Model(object):
     """Model object."""
 
     id: str
+    api: str
     name: str
     model_type: str
     hard_token_limit: int
@@ -16,19 +14,23 @@ class Model(object):
 
     soft_token_limit: int
 
-    def __init__(self, params: Union[dict, None], config: ObjectConfig):
+    @classmethod
+    def initialize(cls, params: dict, config: Optional[dict]) -> Optional["Model"]:
         if not params or params == {}:
-            return
-        self.id = params.get("id", params.get("path", None))
-        self.api = params.get("api", None)
-        self.name = params.get("name", None)
-        self.model_type = params.get("model_type", None)
-        self.hard_token_limit = params.get("hard_token_limit", None)
-        self.token_cost = params.get("token_cost", None)
-        self.token_cost_unit = params.get("token_cost_unit", None)
+            return None
+        new = cls()
+        new.id = params.get("id", params.get("path", None))
+        new.api = params.get("api", None)
+        new.name = params.get("name", None)
+        new.model_type = params.get("model_type", None)
+        new.hard_token_limit = params.get("hard_token_limit", None)
+        new.token_cost = params.get("token_cost", None)
+        new.token_cost_unit = params.get("token_cost_unit", None)
 
-        model_config = retrieve_object(self.id, config)
-        if model_config:
-            self.soft_token_limit = model_config.get("soft_token_limit", None)
-        if not hasattr(self, "soft_token_limit"):
-            self.soft_token_limit = self.hard_token_limit // 3
+        if config:
+            new.soft_token_limit = config.get("soft_token_limit", None)
+        if not hasattr(new, "soft_token_limit"):
+            new.soft_token_limit = new.hard_token_limit // 3
+        
+        return new
+
