@@ -97,5 +97,4 @@ class Configurations:
     
     def save(self):
         user_configurations = self.todict(self)
-        print(user_configurations)
         DATABASE.json.set_object(Collection.CONFIGURATIONS.value, user_configurations)
