@@ -6,7 +6,7 @@ with open("requirements.txt", "r") as f:
 
 setup(
     name="mindflow",
-    version="0.2.8",
+    version="0.2.9",
     py_modules=["mindflow"],
     entry_points={"console_scripts": ["mf = mindflow.main:main"]},
     packages=find_packages(),
