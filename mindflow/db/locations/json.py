@@ -6,8 +6,8 @@ from typing import List, Optional
 
 MINDFLOW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mindflow")
 
-class JsonDatabase: 
 
+class JsonDatabase:
     def __init__(self):
         if not os.path.exists(MINDFLOW_DIR):
             os.makedirs(MINDFLOW_DIR)
@@ -51,10 +51,11 @@ class JsonDatabase:
             return None
 
         if isinstance(objects, dict):
-            return [objects[object_id] for object_id in object_ids if object_id in objects]
+            return [
+                objects[object_id] for object_id in object_ids if object_id in objects
+            ]
 
         return None
-
 
     ### Delete objects from json from ID list and overwrite the file
     def delete_object_bulk(self, collection: str, object_ids: List[str]):
@@ -64,7 +65,6 @@ class JsonDatabase:
         for object_id in object_ids:
             if self.file[collection].get(object_id, None):
                 del self.file[collection][object_id]
-
 
     def set_object(self, collection: str, value: dict):
         if not collection in self.file:

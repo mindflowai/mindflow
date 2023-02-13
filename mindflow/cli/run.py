@@ -63,7 +63,9 @@ def cli():
         else None,
     }
 
-    user_configurations = DATABASE.json.retrieve_object(Collection.CONFIGURATIONS.value, "configurations")
+    user_configurations = DATABASE.json.retrieve_object(
+        Collection.CONFIGURATIONS.value, "configurations"
+    )
     if user_configurations is None:
         user_configurations = {}
 
@@ -92,7 +94,7 @@ def cli():
             index()
         case Command.INDEX.value:
             index()
-    
+
     print("Saving database...")
     DATABASE.json.save()
 

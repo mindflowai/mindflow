@@ -15,10 +15,10 @@ class Model(object):
     soft_token_limit: int
 
     @classmethod
-    def initialize(cls, params: dict, config: Optional[dict]) -> Optional["Model"]:
-        if not params or params == {}:
-            return None
+    def initialize(cls, params: dict, config: Optional[dict]) -> "Model":
         new = cls()
+        if not params or params == {}:
+            return new
         new.id = params.get("id", params.get("path", None))
         new.api = params.get("api", None)
         new.name = params.get("name", None)
@@ -31,6 +31,5 @@ class Model(object):
             new.soft_token_limit = config.get("soft_token_limit", None)
         if not hasattr(new, "soft_token_limit"):
             new.soft_token_limit = new.hard_token_limit // 3
-        
-        return new
 
+        return new

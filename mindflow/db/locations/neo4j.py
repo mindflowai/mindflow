@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from neo4j import GraphDatabase
 
+
 class Neo4jDatabase:
     def __init__(self, config: dict):
         self.config = config
@@ -17,7 +18,7 @@ class Neo4jDatabase:
         if not auth:
             print("No auth provided for Neo4j")
             sys.exit(1)
-        
+
         user = auth.get("user", None)
         password = auth.get("password", None)
         if not user or not password:
@@ -29,7 +30,6 @@ class Neo4jDatabase:
     @property
     def session(self):
         return self.driver.session()
-    
 
     def retrieve_object(self, collection: str, object_id: str) -> Optional[dict]:
         result = self.session.run(
@@ -41,7 +41,6 @@ class Neo4jDatabase:
         )
 
         return dict(result.single()["d"].items())
-
 
     def retrieve_object_bulk(
         self, collection: str, object_ids: List[str]
@@ -57,7 +56,6 @@ class Neo4jDatabase:
 
         return [dict(record["d"].items()) for record in result]
 
-
     ### Delete objects from json from ID list and overwrite the file
     def delete_object_bulk(self, collection: str, object_ids: List[str]):
         return self.session.run(
@@ -68,7 +66,6 @@ class Neo4jDatabase:
         """,
             {"collection": collection, "object_ids": object_ids},
         )
-
 
     def set_object(self, collection: str, value: dict):
         return self.session.run(

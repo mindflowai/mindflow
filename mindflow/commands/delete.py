@@ -6,6 +6,7 @@ from mindflow.state import STATE
 from mindflow.db.db import DATABASE
 from mindflow.db.static_definition import Collection
 
+
 def delete():
     """
     This function is used to delete your MindFlow index.
