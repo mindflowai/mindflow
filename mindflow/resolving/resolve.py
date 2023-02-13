@@ -8,9 +8,7 @@ from mindflow.db.objects.document import DocumentReference
 from mindflow.resolving.resolvers.file_resolver import FileResolver
 
 
-def resolve(
-    document_path: str
-) -> List[DocumentReference]:
+def resolve(document_path: str) -> List[DocumentReference]:
     """
     Resolves a document to text.
     """

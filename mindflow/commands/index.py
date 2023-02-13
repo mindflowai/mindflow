@@ -3,7 +3,7 @@
 """
 from asyncio import Future
 from copy import deepcopy
-from typing import List
+from typing import List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
@@ -73,7 +73,7 @@ class Node:
     embedding: np.ndarray
     leaves: List["Node"]
 
-    def __init__(self, start: int, end: int, text: str = None):
+    def __init__(self, start: int, end: int, text: Optional[str] = None):
         self.start = start
         self.end = end
         if text:
@@ -98,7 +98,7 @@ class Node:
         stack = [(self, None)]
         while stack:
             node, parent_leaves = stack.pop()
-            node_dict = {
+            node_dict: dict = {
                 "start": node.start,
                 "end": node.end,
                 "summary": node.summary if hasattr(node, "summary") else None,
@@ -120,7 +120,7 @@ def count_tokens(text: str) -> int:
     """
     # tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
     # count = len(tokenizer(text)['input_ids'])
-    return len(text) / 4  # Token Estimation for speed
+    return len(text) // 4  # Token Estimation for speed
 
 
 # This function is used to split a string into chunks of a specified token limit using binary search
@@ -132,10 +132,7 @@ def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
     stack = [(0, len(text))]
     while stack:
         start, end = stack.pop()
-        if (
-            count_tokens(text[start:end])
-            < STATE.settings.models.index.soft_token_limit
-        ):
+        if count_tokens(text[start:end]) < STATE.settings.models.index.soft_token_limit:
             nodes.append(Node(start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
@@ -191,6 +188,7 @@ def create_nodes(leaf_nodes: List[Node]) -> Node:
             )
             node.set_leaves(leaf_nodes[start:end])
             return node
+    return Node(0, 0)
 
 
 def create_text_search_tree(text: str) -> dict:

@@ -58,7 +58,9 @@ def set_configuration():
 def config_service():
     service_key = ask_service()
     service_config_param = ask_service_config()
-    service_config = getattr(STATE.user_configurations.service_config, service_key.value)
+    service_config = getattr(
+        STATE.user_configurations.service_config, service_key.value
+    )
 
     match service_config_param:
         case ServiceConfigParameterKey.API_KEY:
@@ -70,6 +72,7 @@ def config_service():
             sys.exit(1)
 
     setattr(service_config, service_config_param.value, value)
+
 
 def config_model():
     service_key = ask_service()

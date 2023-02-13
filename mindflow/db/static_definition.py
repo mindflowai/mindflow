@@ -1,9 +1,11 @@
 from mindflow.utils.enum import ExtendedEnum
 
+
 class ObjectStoreType(ExtendedEnum):
     STATIC = "static"
     JSON = "json"
     NEO4J = "neo4j"
+
 
 class Collection(ExtendedEnum):
     SERVICE = "service"

@@ -35,7 +35,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -60,7 +62,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -79,7 +83,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -102,7 +108,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -131,7 +139,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -150,7 +160,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value
@@ -169,7 +181,9 @@ class API:
             auth = params.get("auth", None)
             user_configurations = params.get("user_configurations", {})
 
-            STATE.user_configurations = Configurations.initialize(STATE.command, user_configurations)
+            STATE.user_configurations = Configurations.initialize(
+                STATE.command, user_configurations
+            )
             STATE.settings = Settings.initialize(user_configurations)
             STATE.arguments = Arguments(arguments)
             STATE.command = Command.INDEX.value

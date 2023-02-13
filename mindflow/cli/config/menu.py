@@ -1,5 +1,5 @@
-from typing import List
 from simple_term_menu import TerminalMenu
+from typing import List
 
 
 def menu(options: List[str], prompt: str):

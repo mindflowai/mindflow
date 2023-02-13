@@ -3,10 +3,11 @@
 """
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import sys
-from typing import List, Tuple
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List, Optional, Tuple
+
+import sys
+import numpy as np
 
 from mindflow.db.db import DATABASE
 from mindflow.db.static_definition import Collection
@@ -57,7 +58,9 @@ class DocumentChunk:
     This class is used to store the chunks of a document.
     """
 
-    def __init__(self, path: str, start: int, end: int, embedding: np.ndarray = None):
+    def __init__(
+        self, path: str, start: int, end: int, embedding: Optional[np.ndarray] = None
+    ):
         self.path = path
         self.start = start
         self.end = end
@@ -67,7 +70,7 @@ class DocumentChunk:
     def from_search_tree(
         cls,
         document: Document,
-    ) -> Tuple[List["DocumentChunk"], List[np.array]]:
+    ) -> Tuple[List["DocumentChunk"], List[np.ndarray]]:
         """
         This function is used to split the document into chunks.
         """
@@ -128,7 +131,9 @@ def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
         document_ids = [
             document.id for document in STATE.document_references[i : i + 100]
         ]
-        documents = DATABASE.json.retrieve_object_bulk(Collection.DOCUMENT.value, document_ids)
+        documents = DATABASE.json.retrieve_object_bulk(
+            Collection.DOCUMENT.value, document_ids
+        )
         if not documents:
             continue
 

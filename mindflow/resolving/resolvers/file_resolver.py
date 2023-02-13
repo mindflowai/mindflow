@@ -35,9 +35,7 @@ class FileResolver(BaseResolver):
         """
         return os.path.isfile(document_path) or os.path.isdir(document_path)
 
-    def resolve(
-        self, document_path: str
-    ) -> List[DocumentReference]:
+    def resolve(self, document_path: str) -> List[DocumentReference]:
         """
         Extract text from files.
         """
@@ -46,9 +44,10 @@ class FileResolver(BaseResolver):
             document_text = self.read_document(path)
             if not document_text:
                 continue
-            document_references.append(
-                Document.create_document_reference(
-                    path, document_text, DocumentType.FILE.value
-                )
+            document_reference = Document.create_document_reference(
+                path, document_text, DocumentType.FILE.value
             )
+            if document_reference:
+                document_references.append(document_reference)
+
         return document_references

@@ -36,7 +36,9 @@ class Document:
         """
         Create document reference
         """
-        document = cls(DATABASE.json.retrieve_object(Collection.DOCUMENT.value, document_path))
+        document = cls(
+            DATABASE.json.retrieve_object(Collection.DOCUMENT.value, document_path)
+        )
         old_hash = None
         if hasattr(document, "hash"):
             old_hash = document.hash

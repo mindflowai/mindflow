@@ -14,7 +14,9 @@ def inspect():
     document_paths = [document.path for document in STATE.document_references]
     print(
         json.dumps(
-            DATABASE.json.retrieve_object_bulk(Collection.DOCUMENT.value, document_paths),
+            DATABASE.json.retrieve_object_bulk(
+                Collection.DOCUMENT.value, document_paths
+            ),
             indent=4,
         )
     )

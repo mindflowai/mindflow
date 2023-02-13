@@ -21,9 +21,7 @@ class State:
     def document_references(self) -> List[DocumentReference]:
         document_references: List[DocumentReference] = []
         for document_path in self.arguments.document_paths:
-            document_references.extend(
-                resolve(document_path)
-            )
+            document_references.extend(resolve(document_path))
         return document_references
 
     @property
@@ -33,6 +31,7 @@ class State:
             for document_reference in self.document_references
             if index_document(self.command, document_reference, self.arguments.force)
         ]
+
 
 def index_document(
     command: str, document_reference: DocumentReference, force: Optional[bool]
@@ -47,5 +46,6 @@ def index_document(
     if document_reference.old_hash is None:
         return True
     return False
+
 
 STATE = State()
