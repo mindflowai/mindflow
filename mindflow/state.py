@@ -1,5 +1,4 @@
 from typing import List, Optional
-from mindflow.db.objects.configurations import Configurations
 from mindflow.settings import Settings
 from mindflow.db.objects.document import DocumentReference
 
@@ -12,7 +11,6 @@ class State:
     State of the application
     """
 
-    user_configurations: Configurations
     settings: Settings
     arguments: Arguments
     command: str
@@ -43,7 +41,7 @@ def index_document(
             return False
         return True
 
-    if document_reference.old_hash is None:
+    if not hasattr(document_reference, "old_hash"):
         return True
     return False
 

@@ -1,35 +1,82 @@
-from typing import Optional
+from mindflow.db.db.database import Collection
+from mindflow.db.objects.base import BaseObject, StaticObject
+from mindflow.db.objects.static_definition.model import ModelID
 
-
-class Model(object):
+class Model(StaticObject):
     """Model object."""
 
     id: str
     api: str
     name: str
+    service: str
     model_type: str
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
 
+    # Config
     soft_token_limit: int
 
-    @classmethod
-    def initialize(cls, params: dict, config: Optional[dict]) -> "Model":
-        new = cls()
-        if not params or params == {}:
-            return new
-        new.id = params.get("id", params.get("path", None))
-        new.api = params.get("api", None)
-        new.name = params.get("name", None)
-        new.model_type = params.get("model_type", None)
-        new.hard_token_limit = params.get("hard_token_limit", None)
-        new.token_cost = params.get("token_cost", None)
-        new.token_cost_unit = params.get("token_cost_unit", None)
+    _collection: Collection = Collection.MODEL
 
-        if config:
-            new.soft_token_limit = config.get("soft_token_limit", None)
-        if not hasattr(new, "soft_token_limit"):
-            new.soft_token_limit = new.hard_token_limit // 3
+class ModelConfig(BaseObject):
+    """Model config object."""
+    id: str
+    soft_token_limit: int
 
-        return new
+    _collection: Collection = Collection.CONFIGURATIONS
+
+class ConfiguredModel:
+    id: str
+    api: str
+    name: str
+    service: str
+    model_type: str
+    hard_token_limit: int
+    token_cost: int
+    token_cost_unit: str
+
+    # Config
+    soft_token_limit: int
+
+    def __init__(self, model_id: str):
+        model = Model.load(model_id)
+        model_config = ModelConfig.load(f"{model_id}_config")
+        
+        if model:
+            for key, value in model.__dict__.items():
+                setattr(self, key, value)
+            
+        if model_config:
+            for key, value in model_config.__dict__.items():
+                if value not in [None, ""]:
+                    setattr(self, key, value)
+
+class ConfiguredModels:
+    @property
+    def gpt_3_5_turbo(self):
+        return ConfiguredModel(ModelID.GPT_3_5_TURBO.value)
+
+    @property
+    def gpt_3_5_turbo_0301(self):
+        return ConfiguredModel(ModelID.GPT_3_5_TURBO_0301.value)
+
+    @property
+    def text_davinci_003(self):
+        return ConfiguredModel(ModelID.TEXT_DAVINCI_003.value)
+
+    @property
+    def text_curie_001(self):
+        return ConfiguredModel(ModelID.TEXT_CURIE_001.value)
+    
+    @property
+    def text_babbage_001(self):
+        return ConfiguredModel(ModelID.TEXT_BABBAGE_001.value)
+    
+    @property
+    def text_ada_001(self):
+        return ConfiguredModel(ModelID.TEXT_ADA_001.value)
+    
+    @property
+    def text_embedding_ada_002(self):
+        return ConfiguredModel(ModelID.TEXT_EMBEDDING_ADA_002.value)

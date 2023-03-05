@@ -5,10 +5,8 @@ Command Line Client for Mindflow
 import argparse
 import sys
 
-from mindflow.db.db import DATABASE
-from mindflow.db.objects.configurations import Configurations
+from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.state import STATE
-from mindflow.db.static_definition import Collection
 from mindflow.input import Arguments, Command
 
 from mindflow.cli.parser import get_parsed_cli_args
@@ -63,15 +61,8 @@ def cli():
         else None,
     }
 
-    user_configurations = DATABASE.json.retrieve_object(
-        Collection.CONFIGURATIONS.value, "configurations"
-    )
-    if user_configurations is None:
-        user_configurations = {}
-
     # Configure State
-    STATE.user_configurations = Configurations.initialize(user_configurations)
-    STATE.settings = Settings.initialize(command, user_configurations)
+    STATE.settings = Settings()
     STATE.arguments = Arguments(arguments)
     STATE.command = command
 
@@ -81,7 +72,6 @@ def cli():
             ask()
         case Command.CONFIG.value:
             config()
-            STATE.user_configurations.save()
         case Command.DELETE.value:
             delete()
         case Command.DIFF.value:
@@ -96,7 +86,7 @@ def cli():
             index()
 
     print("Saving database...")
-    DATABASE.json.save()
+    DATABASE_CONTROLLER.databases.json.save_file()
 
 
 def set_parser():

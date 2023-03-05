@@ -3,8 +3,10 @@ from typing import List, Optional
 
 from neo4j import GraphDatabase
 
+from mindflow.db.db.database import Database
 
-class Neo4jDatabase:
+
+class Neo4jDatabase(Database):
     def __init__(self, config: dict):
         self.config = config
 
@@ -31,7 +33,7 @@ class Neo4jDatabase:
     def session(self):
         return self.driver.session()
 
-    def retrieve_object(self, collection: str, object_id: str) -> Optional[dict]:
+    def load(self, collection: str, object_id: str) -> Optional[dict]:
         result = self.session.run(
             """
             MATCH (d:{collection}}) WHERE d.id = {object_id}
@@ -42,7 +44,7 @@ class Neo4jDatabase:
 
         return dict(result.single()["d"].items())
 
-    def retrieve_object_bulk(
+    def load_bulk(
         self, collection: str, object_ids: List[str]
     ) -> Optional[List[dict]]:
         result = self.session.run(
@@ -57,7 +59,7 @@ class Neo4jDatabase:
         return [dict(record["d"].items()) for record in result]
 
     ### Delete objects from json from ID list and overwrite the file
-    def delete_object_bulk(self, collection: str, object_ids: List[str]):
+    def delete_bulk(self, collection: str, object_ids: List[str]):
         return self.session.run(
             """
             UNWIND {object_ids} AS id
@@ -67,7 +69,7 @@ class Neo4jDatabase:
             {"collection": collection, "object_ids": object_ids},
         )
 
-    def set_object(self, collection: str, value: dict):
+    def save(self, collection: str, value: dict):
         return self.session.run(
             """
             CREATE (d:{collection} {params})
