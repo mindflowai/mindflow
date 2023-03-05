@@ -2,8 +2,8 @@
 `inspect` command
 """
 import json
-from mindflow.db.db import DATABASE
-from mindflow.db.static_definition import Collection
+from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.database import Collection
 from mindflow.state import STATE
 
 
@@ -14,7 +14,7 @@ def inspect():
     document_paths = [document.path for document in STATE.document_references]
     print(
         json.dumps(
-            DATABASE.json.retrieve_object_bulk(
+            DATABASE_CONTROLLER.databases.json.load_bulk(
                 Collection.DOCUMENT.value, document_paths
             ),
             indent=4,

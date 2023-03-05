@@ -2,6 +2,9 @@ import getpass
 import sys
 
 from mindflow.cli.config.menu import menu
+from mindflow.db.objects.mindflow_model import MindFlowModelConfig
+from mindflow.db.objects.model import ModelConfig
+from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import (
     ModelConfigParameterKey,
     ModelHardTokenLimit,
@@ -58,9 +61,6 @@ def set_configuration():
 def config_service():
     service_key = ask_service()
     service_config_param = ask_service_config()
-    service_config = getattr(
-        STATE.user_configurations.service_config, service_key.value
-    )
 
     match service_config_param:
         case ServiceConfigParameterKey.API_KEY:
@@ -70,15 +70,18 @@ def config_service():
         case _:
             print("Unrecognized model config parameter")
             sys.exit(1)
+    
+    service_config = ServiceConfig.load(f"{service_key.value}_config")
+    if not service_config:
+        service_config = ServiceConfig(id=f"{service_key.value}_config")
 
     setattr(service_config, service_config_param.value, value)
-
+    service_config.save()
 
 def config_model():
     service_key = ask_service()
     model_key = ask_model_by_service(service_key)
     model_config_param = ask_model_config()
-    model_config = getattr(STATE.user_configurations.model_config, model_key.value)
 
     match model_config_param:
         case ModelConfigParameterKey.SOFT_TOKEN_LIMIT:
@@ -98,7 +101,13 @@ def config_model():
         case _:
             print("Unrecognized model config parameter")
             sys.exit(1)
-    setattr(model_config, model_config_param.value, value)
+    
+    model_configs = ModelConfig.load(f"{model_key.value}_config")
+    if not model_configs:
+        model_configs = ModelConfig(id=f"{model_key.value}_config")
+    
+    setattr(model_configs, model_config_param.value, value)
+    model_configs.save()
 
 
 def config_mindflow_model():
@@ -107,24 +116,20 @@ def config_mindflow_model():
         case MindFlowModelID.INDEX:
             match ask_service():
                 case ServiceID.OPENAI:
-                    setattr(
-                        STATE.user_configurations.mindflow_model_config,
-                        mindflow_model_key.value,
-                        ask_model_text_completion_openai().value,
-                    )
+                    value = ask_model_text_completion_openai().value
         case MindFlowModelID.QUERY:
             match ask_service():
                 case ServiceID.OPENAI:
-                    setattr(
-                        STATE.user_configurations.mindflow_model_config,
-                        mindflow_model_key.value,
-                        ask_model_text_completion_openai().value,
-                    )
+                    value = ask_model_text_completion_openai().value
         case MindFlowModelID.EMBEDDING:
             match ask_service():
                 case ServiceID.OPENAI:
-                    setattr(
-                        STATE.user_configurations.mindflow_model_config,
-                        mindflow_model_key.value,
-                        ask_model_text_embedding_openai().value,
-                    )
+                    value = ask_model_text_embedding_openai().value
+    
+
+    mindflow_model_config = MindFlowModelConfig.load(f"{mindflow_model_key.value}_config")
+    if not mindflow_model_config:
+        mindflow_model_config = MindFlowModelConfig(id=f"{mindflow_model_key.value}_config")
+
+    setattr(mindflow_model_config, "model", value)
+    mindflow_model_config.save()

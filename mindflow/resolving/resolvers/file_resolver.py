@@ -18,17 +18,6 @@ class FileResolver(BaseResolver):
     """
 
     @staticmethod
-    def read_document(document_path: str) -> Optional[str]:
-        """
-        Read a document.
-        """
-        try:
-            with open(document_path, "r", encoding="utf-8") as file:
-                return file.read()
-        except UnicodeDecodeError:
-            return None
-
-    @staticmethod
     def should_resolve(document_path: Union[str, os.PathLike]) -> bool:
         """
         Check if a path is a file or directory.
@@ -41,13 +30,15 @@ class FileResolver(BaseResolver):
         """
         document_references: List[DocumentReference] = []
         for path in extract_files(document_path):
-            document_text = self.read_document(path)
-            if not document_text:
-                continue
-            document_reference = Document.create_document_reference(
-                path, document_text, DocumentType.FILE.value
-            )
+            document_reference: Optional[DocumentReference] = None
+            document = Document.load(path)
+
+            if document:
+                document_reference = document.to_document_reference()
+            else:
+                document_reference = DocumentReference.from_path(path, DocumentType.FILE)
+            
             if document_reference:
                 document_references.append(document_reference)
-
+    
         return document_references

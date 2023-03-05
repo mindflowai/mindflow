@@ -9,8 +9,6 @@ from typing import List, Optional, Tuple
 import sys
 import numpy as np
 
-from mindflow.db.db import DATABASE
-from mindflow.db.static_definition import Collection
 from mindflow.state import STATE
 from mindflow.client.gpt import GPT
 
@@ -27,7 +25,7 @@ def query():
     # Generate index and/or embeddings
     if STATE.arguments.index:
         index()
-
+    
     response = GPT.query(
         STATE.arguments.query,
         select_content(),
@@ -106,7 +104,8 @@ def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = STATE.settings.models.query.soft_token_limit * 3
+    char_limit: int = STATE.settings.mindflow_models.query.model.hard_token_limit * 3
+
     for document_chunk in ranked_document_chunks:
         if document_chunk:
             with open(document_chunk.path, "r", encoding="utf-8") as file:
@@ -131,16 +130,15 @@ def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
         document_ids = [
             document.id for document in STATE.document_references[i : i + 100]
         ]
-        documents = DATABASE.json.retrieve_object_bulk(
-            Collection.DOCUMENT.value, document_ids
-        )
-        if not documents:
+        documents: List[Optional[Document]] = Document.load_bulk(document_ids)
+        documents = [document for document in documents if document]
+        if documents == []:
             continue
-
+        
         with ThreadPoolExecutor(max_workers=50) as executor:
             futures = [
-                executor.submit(DocumentChunk.from_search_tree, Document(document))
-                for document in documents
+                executor.submit(DocumentChunk.from_search_tree, document)
+                for document in documents 
             ]
             for future in as_completed(futures):
                 document_chunks, document_chunk_embeddings = future.result()

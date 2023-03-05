@@ -26,12 +26,24 @@ class GPTEndpoints:
         """
         try:
             # print(f"Suffix: {suffix}")
-            response = self.configured_api.Completion.create(
-                engine=STATE.settings.models.index.api,
-                prompt=f"{SEARCH_INDEX}\n\n{text}",
-                temperature=0,
-                max_tokens=500,
-            )["choices"][0]["text"]
+            if STATE.settings.mindflow_models.index.model.api in ["gpt-3.5-turbo"]:
+                response = self.configured_api.ChatCompletion.create(
+                    model=STATE.settings.mindflow_models.index.model.api,
+                    messages=[
+                        {"role": "system", "content": SEARCH_INDEX},
+                        {"role": "user", "content": text},
+                    ],
+                    temperature=0,
+                    max_tokens=500,
+                    stop=["\n\n"],
+                )["choices"][0]["message"]["content"]
+            else:
+                response = self.configured_api.Completion.create(
+                    engine=STATE.settings.mindflow_models.index.model.api,
+                    prompt=f"{SEARCH_INDEX}\n\n{text}",
+                    temperature=0,
+                    max_tokens=500,
+                )["choices"][0]["text"]
 
             return response
         except Exception as e:
@@ -44,13 +56,28 @@ class GPTEndpoints:
         """
         try:
             # print(f"Suffix: {suffix}")
-            response = self.configured_api.Completion.create(
-                engine=STATE.settings.models.query.api,
-                prompt=prompt,
-                suffix=selected_content,
-                temperature=0,
-                max_tokens=500,
-            )["choices"][0]["text"]
+
+            if STATE.settings.mindflow_models.query.model.api in ["gpt-3.5-turbo"]:
+                response = self.configured_api.ChatCompletion.create(
+                    model=STATE.settings.mindflow_models.index.model.api,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below."},
+                        {"role": "user", "content": prompt},
+                        {"role": "system", "content": selected_content}
+                    ],
+                    temperature=0,
+                    max_tokens=1000,
+                )["choices"][0]["message"]["content"]
+
+                return response
+            else:
+                response = self.configured_api.Completion.create(
+                    engine=STATE.settings.mindflow_models.query.model.api,
+                    prompt=prompt,
+                    suffix=selected_content,
+                    temperature=0,
+                    max_tokens=1000,
+                )["choices"][0]["text"]
             return response
 
         except Exception as e:
@@ -63,7 +90,7 @@ class GPTEndpoints:
         """
         try:
             response = self.configured_api.Embedding.create(
-                engine=STATE.settings.models.embedding.api, input=text
+                engine=STATE.settings.mindflow_models.embedding.model.api, input=text
             )["data"][0]["embedding"]
 
             return response

@@ -1,10 +1,11 @@
 import hashlib
-from typing import Optional, Union
-from mindflow.db.db import DATABASE
-from mindflow.db.static_definition import Collection
+from typing import Optional
+from mindflow.db.db.database import Collection
+from mindflow.db.objects.base import BaseObject
+from mindflow.db.objects.static_definition.document import DocumentType
 
 
-class Document:
+class Document(BaseObject):
     """
     Document
     """
@@ -12,49 +13,36 @@ class Document:
     id: str
     path: str
     document_type: str
-    hash: str
     size: int
+    hash: str
     search_tree: dict
 
-    def __init__(self, params: Union[dict, None]):
-        if params is None:
-            return
-        self.id = params.get("id", params.get("path", None))
-        self.path = params.get("path", None)
-        self.document_type = params.get("document_type", None)
-        self.hash = params.get("hash", None)
-        self.size = params.get("size", None)
-        self.search_tree = params.get("search_tree", None)
+    _collection = Collection.DOCUMENT
 
-    @classmethod
-    def create_document_reference(
-        cls,
-        document_path: str,
-        document_text: str,
-        document_type: str,
-    ) -> Optional["DocumentReference"]:
+    def to_document_reference(
+        self,
+    ) -> "DocumentReference":
         """
         Create document reference
         """
-        document = cls(
-            DATABASE.json.retrieve_object(Collection.DOCUMENT.value, document_path)
-        )
-        old_hash = None
-        if hasattr(document, "hash"):
-            old_hash = document.hash
-
+        document_text: Optional[str] = read_document(self.id, self.document_type)
+        if not document_text:
+            raise Exception("Document text not found")
+        
         document_text_bytes = document_text.encode("utf-8")
         return DocumentReference(
-            id=document_path,
-            path=document_path,
-            document_type=document_type,
-            size=len(document_text_bytes),
-            hash=hashlib.sha256(document_text_bytes).hexdigest(),
-            old_hash=old_hash,
+            {
+                "id": self.id,
+                "path": self.path,
+                "document_type": self.document_type,
+                "size": len(document_text_bytes),
+                "hash": hashlib.sha256(document_text_bytes).hexdigest(),
+                "old_hash": self.hash,
+            }
         )
 
 
-class DocumentReference:
+class DocumentReference(BaseObject):
     """
     Used to handle referenced to indexed documents or yet uncreated documents.
     """
@@ -66,18 +54,51 @@ class DocumentReference:
     hash: str
     old_hash: Optional[str]
 
-    def __init__(
+    def to_document(
         self,
-        id: str,
-        path: str,
-        document_type: str,
-        size: int,
-        hash: str,
-        old_hash: Optional[str],
-    ):
-        self.id = id
-        self.path = path
-        self.document_type = document_type
-        self.size = size
-        self.hash = hash
-        self.old_hash = old_hash
+    ) -> Document:
+        """
+        Create document
+        """
+        return Document({
+            "id": self.id,
+            "path": self.path,
+            "document_type": self.document_type,
+            "size": self.size,
+            "hash": self.hash,
+        })
+
+    @classmethod
+    def from_path(
+        cls,
+        document_path: str,
+        document_type: DocumentType,
+    ) -> Optional["DocumentReference"]:
+        """
+        Create document reference from path
+        """
+        document_text: Optional[str] = read_document(document_path, document_type.value)
+        if not document_text:
+            return None
+        document_text_bytes = document_text.encode()
+        return cls({
+            "id": document_path,
+            "path": document_path,
+            "document_type": document_type.value,
+            "size": len(document_text_bytes),
+            "hash": hashlib.sha256(document_text_bytes).hexdigest(),
+        })
+
+def read_document(document_path: str, document_type: str) -> Optional[str]:
+    """
+    Read a document.
+    """
+    match document_type:
+        case DocumentType.FILE.value:
+            try:
+                with open(document_path, "r", encoding="utf-8") as file:
+                    return file.read()
+            except UnicodeDecodeError:
+                return None
+        case _:
+            return None
