@@ -2,6 +2,7 @@
 Module for resolving documents to text.
 """
 
+import sys
 from typing import List
 
 from mindflow.db.objects.document import DocumentReference
@@ -18,4 +19,5 @@ def resolve(document_path: str) -> List[DocumentReference]:
         if resolver.should_resolve(document_path):
             return resolver.resolve(document_path)
 
-    raise ValueError(f"Cannot resolve document: {document_path}")
+    print(f"Cannot resolve document: {document_path}")
+    sys.exit(1)
