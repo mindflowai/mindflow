@@ -16,5 +16,4 @@ def commit():
         command = command + STATE.arguments.commit_args
 
     # Execute the git diff command and retrieve the output as a string
-    diff_result = subprocess.check_output(command).decode("utf-8")
-    print(diff_result)
+    subprocess.check_output(command).decode("utf-8")
