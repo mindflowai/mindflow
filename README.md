@@ -16,7 +16,7 @@ MindFlow allows users to generate an index of documents using a powerful languag
     - Runs a git diff command and summarizes the changes.
 - `mf index [document paths]`:            
     - Generates an index of documents.
-- `mf query <YOUR QUERY> [document paths]`:  
+- `mf query [document paths] <YOUR QUERY>`:  
     - Queries documents using generated index. Can generate index with [-i] flag.
 - `mf delete [document paths]`:             
     - Deletes generated index documents.
@@ -25,10 +25,100 @@ MindFlow allows users to generate an index of documents using a powerful languag
 - `mf inspect [document paths]`:
     - Inspect your document indices.
 
+## Examples
+1. Query
+    - Clone this repo and run `mf index mindflow` to index the repo.
+    - Run `mf query mindflow "How can I add a new command to this CLI tool? Please show code."` to query the repo.
+    - Output to clipboard:
+
+```
+To add a new command to this CLI tool, you need to follow these steps:
+
+1. Define a new command in the `Command` enum class.
+2. Create a new function that implements the logic for the new command.
+3. Add a new argument parser function for the new command.
+4. Add a new `get_parsed_cli_args` case for the new command.
+5. Update the `cli` function to include the new command in the parser.
+6. Call the new function in the `match` statement in the `cli` function.
+
+Here is an example of how to add a new command called `mycommand`:
+
+1. Define a new command in the `Command` enum class:
+
+class Command(Enum):
+    ...
+    MYCOMMAND = "mycommand"
+
+2. Create a new function that implements the logic for the new command:
+
+def mycommand():
+    print("This is my new command!")
+
+3. Add a new argument parser function for the new command:
+
+def mycommand_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="This is my new command.",
+    )
+    return parser.parse_args(sys.argv[2:])
+
+4. Add a new `get_parsed_cli_args` case for the new command:
+
+def get_parsed_cli_args(command: str) -> argparse.Namespace:
+    ...
+    case Command.MYCOMMAND.value:
+        return mycommand_args()
+    ...
+
+5. Update the `cli` function to include the new command in the parser:
+
+def cli():
+    parser = set_parser()
+    args = parser.parse_args()
+
+    command = Command[args.command].value
+    args = get_parsed_cli_args(command)
+
+    ...
+    parser.add_argument(
+        "command",
+        choices=Command.__members__,
+        help="The command to execute",
+    )
+    ...
+
+6. Call the new function in the `match` statement in the `cli` function:
+
+def cli():
+    ...
+    match command:
+        ...
+        case Command.MYCOMMAND.value:
+            mycommand()
+        ...
+```
+
+2. Diff
+    - Run `mf diff` to summarize the changes in the repo.
+    - Output to clipboard:
+
+
+```
+There are two sections in the text provided: Examples and Recommended Use. Here are the changes for each file:
+
+README.md:
+- Line 19: Changed the order of the arguments for the `mf query` command.
+- Lines 26-47: Added an example for the `mf query` command.
+- Lines 50-68: Added instructions for the `mf diff` command.
+- Lines 70-80: Added a note about recommended use and how to configure the tool.
+
+I hope this helps! Let me know if you have any further questions.
+```
+
 ## Recommended Use
 While this tool is in beta, it is recommended to use the base models, but more will be added in the future. The base models are:
-- Query: Text Completion Davinci 003
-- Index: Text Completion Curie 001
+- Query: GPT 3.5 Turbo
+- Index: GPT 3.5 Turbo
 - Embedding: Text Embedding Ada 001
 
 By running MF config, you can change the models used for each of these tasks. You can also configure the soft token limit. The soft token limit truncated the text to be sent to the GPT apis. When using the index, this means that your index summaries will be created over smaller chunks of texts, which can be useful, because it allows the query mechanism to more selectively choose chunks of text to return. This will also result in longer indexing times, and it will be more expensive, because more requests must be made. The soft token limit can also be configure for the final prompt, which is the query prompt. Fitting more text into the prompt can allow for more context to be used to generate the response, however, sometimes to much context impacts the quality of the response negatively.
