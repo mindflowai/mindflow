@@ -9,7 +9,7 @@ def commit():
     """
     Commit command.
     """
-    response: str = GPT.query(COMMIT_PROMPT_PREFIX, generate_git_diff_response())
+    response: str = GPT.query(COMMIT_PROMPT_PREFIX, generate_git_diff_response(['--cached']))
 
     command = ["git", "commit", "-m", response]
     if STATE.arguments.commit_args is not None:
