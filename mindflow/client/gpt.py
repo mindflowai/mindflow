@@ -8,6 +8,7 @@ import openai
 
 from mindflow.state import STATE
 from mindflow.utils.prompts import SEARCH_INDEX
+from mindflow.utils.auth import get_api_key
 
 
 class GPTEndpoints:
@@ -17,7 +18,7 @@ class GPTEndpoints:
 
     @property
     def configured_api(self):
-        openai.api_key = STATE.settings.services.openai.api_key
+        openai.api_key = get_api_key()
         return openai
 
     def summarize(self, text: str) -> str:
