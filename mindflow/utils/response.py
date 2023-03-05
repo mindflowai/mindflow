@@ -13,7 +13,7 @@ def handle_response_text(text: str):
     """
     if not STATE.arguments.skip_clipboard:
         try:
-            pyperclip.copy(text)
+            pyperclip.copy(f"\n{text}")
             print("Response copied to clipboard!!!")
             return
         except Exception as error:

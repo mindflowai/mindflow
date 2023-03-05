@@ -10,8 +10,6 @@ def delete():
     """
     This function is used to delete your MindFlow index.
     """
-
-    paths = [
+    Document.delete_bulk([
         document_reference.path for document_reference in STATE.document_references
-    ]
-    Document.delete_bulk(paths)
+    ])

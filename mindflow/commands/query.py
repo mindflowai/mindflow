@@ -18,7 +18,7 @@ from mindflow.commands.index import index
 from mindflow.utils.response import handle_response_text
 
 
-def query():
+def query() -> str:
     """
     This function is used to ask a custom question about files, folders, and websites.
     """

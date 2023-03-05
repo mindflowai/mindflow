@@ -104,15 +104,23 @@ def cli():
 
 
 ```
-There are two sections in the text provided: Examples and Recommended Use. Here are the changes for each file:
+`mindflow/commands/diff.py` changes:
+- Added import statement for `List` and `Tuple` from the `typing` module.
+- Added a function `parse_git_diff` that takes in the output of a `git diff` command and returns a list of tuples containing the file name and the diff content.
+- Added a function `batch_git_diffs` that takes in the list of tuples returned by `parse_git_diff` and batches them into smaller chunks of diffs that are less than 3000 characters long.
+- Modified the `diff` function to use the new `parse_git_diff` and `batch_git_diffs` functions to batch the diffs and send them to the GPT model for processing.
 
-README.md:
-- Line 19: Changed the order of the arguments for the `mf query` command.
-- Lines 26-47: Added an example for the `mf query` command.
-- Lines 50-68: Added instructions for the `mf diff` command.
-- Lines 70-80: Added a note about recommended use and how to configure the tool.
+`mindflow/commands/inspect.py` changes:
+- Removed the `print` statement that was used to output the result of a database query.The git diff shows changes in two files: `mindflow/commands/diff.py` and `mindflow/commands/inspect.py`.
 
-I hope this helps! Let me know if you have any further questions.
+`mindflow/commands/diff.py` changes:
+- Added import statement for `List` and `Tuple` from the `typing` module.
+- Added a function `parse_git_diff` that takes in the output of a `git diff` command and returns a list of tuples containing the file name and the diff content.
+- Added a function `batch_git_diffs` that takes in the list of tuples returned by `parse_git_diff` and batches them into smaller chunks of diffs that are less than 3000 characters long.
+- Modified the `diff` function to use the new `parse_git_diff` and `batch_git_diffs` functions to batch the diffs and send them to the GPT model for processing.
+
+`mindflow/commands/inspect.py` changes:
+- Removed the `print` statement that was used to output the result of a database query.
 ```
 
 ## Recommended Use

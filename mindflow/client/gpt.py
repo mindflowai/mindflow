@@ -26,7 +26,7 @@ class GPTEndpoints:
         """
         try:
             # print(f"Suffix: {suffix}")
-            if STATE.settings.mindflow_models.index.model.api in ["gpt-3.5-turbo"]:
+            if STATE.settings.mindflow_models.index.model.api in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
                 response = self.configured_api.ChatCompletion.create(
                     model=STATE.settings.mindflow_models.index.model.api,
                     messages=[
@@ -57,7 +57,7 @@ class GPTEndpoints:
         try:
             # print(f"Suffix: {suffix}")
 
-            if STATE.settings.mindflow_models.query.model.api in ["gpt-3.5-turbo"]:
+            if STATE.settings.mindflow_models.query.model.api in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
                 response = self.configured_api.ChatCompletion.create(
                     model=STATE.settings.mindflow_models.index.model.api,
                     messages=[
