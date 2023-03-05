@@ -10,6 +10,8 @@ from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.response import handle_response_text
 
+import concurrent.futures
+
 
 def diff():
     """
@@ -30,12 +32,18 @@ def generate_git_diff_response() -> str:
     batched_parsed_diff_result = batch_git_diffs(parse_git_diff(diff_result))
 
     response: str = ""
-    for batch in batched_parsed_diff_result:
-        content: str = ""
-        for (file_name, diff_content) in batch:
-            content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-        
-        response += GPT.query(GIT_DIFF_PROMPT_PREFIX, content)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for batch in batched_parsed_diff_result:
+            content = ""
+            for (file_name, diff_content) in batch:
+                content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
+            future = executor.submit(GPT.query, GIT_DIFF_PROMPT_PREFIX, content)
+            futures.append(future)
+
+        # Process the results as they become available
+        for future in concurrent.futures.as_completed(futures):
+            response += future.result()
     
     return response
 
