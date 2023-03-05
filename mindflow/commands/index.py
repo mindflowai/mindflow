@@ -8,47 +8,49 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from alive_progress import alive_bar
+from mindflow.db.objects.model import Model
+from mindflow.input import Command
+from mindflow.resolving.resolve import resolve_all_indexable
 
-from mindflow.state import STATE
-from mindflow.client.gpt import GPT
 
-from mindflow.db.objects.document import Document
+from mindflow.db.objects.document import Document, DocumentReference
 from mindflow.utils.document.read import read_document
 
-
-def index():
+def index(document_paths: List[str], command: Command, force: bool, completion_model: Model) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
-    if not STATE.indexable_document_references:
+    indexable_document_references: List[DocumentReference] = resolve_all_indexable(document_paths, command, force)
+    if not indexable_document_references:
         print("No documents to index")
         return
 
     total_size = sum(
         [
             document_reference.size
-            for document_reference in STATE.indexable_document_references
+            for document_reference in indexable_document_references
         ]
     )
     print(f"Total content size: MB {total_size / 1024 / 1024:.2f}")
     # build search trees in parallel
     with alive_bar(
-        len(STATE.indexable_document_references), bar="blocks", spinner="twirls"
+        len(indexable_document_references), bar="blocks", spinner="twirls"
     ) as progress_bar:
 
         with ThreadPoolExecutor(max_workers=50) as executor:
             search_tree_futures: List[Future[dict]] = [
                 executor.submit(
                     create_text_search_tree,
+                    completion_model,
                     read_document(
                         document_reference.path, document_reference.document_type
                     ),
                 )
-                for document_reference in STATE.indexable_document_references
+                for document_reference in indexable_document_references
             ]
 
             for search_tree_future, document_reference in zip(
-                search_tree_futures, STATE.indexable_document_references
+                search_tree_futures, indexable_document_references
             ):
                 document: Document = document_reference.to_document()
                 document.search_tree = search_tree_future.result()
@@ -68,11 +70,11 @@ class Node:
     embedding: np.ndarray
     leaves: List["Node"]
 
-    def __init__(self, start: int, end: int, text: Optional[str] = None):
+    def __init__(self, completion_model: Model, start: int, end: int, text: Optional[str] = None):
         self.start = start
         self.end = end
         if text:
-            self.summary = GPT.summarize(text)
+            self.summary = completion_model.summarize(text)
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -119,7 +121,7 @@ def count_tokens(text: str) -> int:
 
 
 # This function is used to split a string into chunks of a specified token limit using binary search
-def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
+def binary_split_raw_text_to_nodes(completion_model: Model, text: str) -> List[Node]:
     """
     Splits text into smaller chunks to not exceed the token limit.
     """
@@ -127,7 +129,7 @@ def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
     stack = [(0, len(text))]
     while stack:
         start, end = stack.pop()
-        if count_tokens(text[start:end]) < STATE.settings.mindflow_models.index.model.soft_token_limit:
+        if count_tokens(text[start:end]) < completion_model.soft_token_limit:
             nodes.append(Node(start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
@@ -136,7 +138,7 @@ def binary_split_raw_text_to_nodes(text: str) -> List[Node]:
     return nodes
 
 
-def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
+def binary_split_nodes_to_chunks(completion_model: Model, nodes: List[Node]) -> List[List[Node]]:
     """
     Split nodes into smaller chunks to not exceed the token limit.
     """
@@ -146,7 +148,7 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
         nodes, start, end = stack.pop()
         if (
             sum(count_tokens(node.summary) for node in nodes[start:end])
-            < STATE.settings.mindflow_models.index.model.soft_token_limit
+            < completion_model.soft_token_limit
         ):
             chunks.append(nodes[start:end])
         else:
@@ -156,7 +158,7 @@ def binary_split_nodes_to_chunks(nodes: List[Node]) -> List[List[Node]]:
     return chunks
 
 
-def create_nodes(leaf_nodes: List[Node]) -> Node:
+def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
     """
     This function is used to iteratively create a nodes of our search tree
     """
@@ -165,7 +167,7 @@ def create_nodes(leaf_nodes: List[Node]) -> Node:
         leaf_nodes, start, end = stack.pop()
         if (
             sum(count_tokens(leaf_node.summary) for leaf_node in leaf_nodes[start:end])
-            > STATE.settings.mindflow_models.index.model.soft_token_limit
+            > completion_model.model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
                 leaf_nodes[start:end]
@@ -186,10 +188,10 @@ def create_nodes(leaf_nodes: List[Node]) -> Node:
     return Node(0, 0)
 
 
-def create_text_search_tree(text: str) -> dict:
+def create_text_search_tree(completion_model: Model, text: str) -> dict:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
-    if count_tokens(text) < STATE.settings.mindflow_models.index.model.soft_token_limit:
+    if count_tokens(text) < completion_model.soft_token_limit:
         return Node(0, len(text), text).to_dict()
-    return create_nodes(binary_split_raw_text_to_nodes(text)).to_dict()
+    return create_nodes(binary_split_raw_text_to_nodes(completion_model, text)).to_dict()

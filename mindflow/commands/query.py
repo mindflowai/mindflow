@@ -9,37 +9,32 @@ from typing import List, Optional, Tuple
 import sys
 import numpy as np
 
-from mindflow.state import STATE
-from mindflow.client.gpt import GPT
-
-from mindflow.db.objects.document import Document
-from mindflow.commands.index import index
+from mindflow.db.objects.document import Document, DocumentReference
+from mindflow.db.objects.model import Model
+from mindflow.resolving.resolve import resolve_all
 
 from mindflow.utils.response import handle_response_text
 
 
-def query() -> str:
+def query(document_paths: List[str], query: str, completion_model: bool, embedding_model: Model) -> str:
     """
     This function is used to ask a custom question about files, folders, and websites.
     """
-    # Generate index and/or embeddings
-    if STATE.arguments.index:
-        index()
-    
-    response = GPT.query(
-        STATE.arguments.query,
-        select_content(),
+    document_references: List[DocumentReference] = resolve_all(document_paths)
+    response = completion_model.prompt(
+        query,
+        select_content(query, document_references, embedding_model),
     )
     handle_response_text(response)
 
 
-def select_content():
+def select_content(query: str, document_references: List[DocumentReference], embedding_model: Model) -> str:
     """
     This function is used to generate a prompt based on a question or summarization task
     """
     embedding_ranked_document_chunks: List[
         Tuple(DocumentChunk, float)
-    ] = rank_document_chunks_by_embedding()
+    ] = rank_document_chunks_by_embedding(query, document_references, embedding_model)
     if len(embedding_ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
@@ -68,6 +63,7 @@ class DocumentChunk:
     def from_search_tree(
         cls,
         document: Document,
+        embedding_model: Model,
     ) -> Tuple[List["DocumentChunk"], List[np.ndarray]]:
         """
         This function is used to split the document into chunks.
@@ -81,7 +77,7 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embeddings: List[np.ndarray] = [GPT.embed(document.search_tree["summary"])]
+        embeddings: List[np.ndarray] = [embedding_model.embed(document.search_tree["summary"])]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -90,7 +86,7 @@ class DocumentChunk:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding = GPT.embed(
+                    rolling_summary_embedding = embedding_model.embed(
                         "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
                     )
                     embeddings.append(rolling_summary_embedding)
@@ -99,12 +95,12 @@ class DocumentChunk:
         return chunks, embeddings
 
 
-def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
+def trim_content(ranked_document_chunks: List[DocumentChunk], token_limit: int) -> str:
     """
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = STATE.settings.mindflow_models.query.model.hard_token_limit * 3
+    char_limit: int = token_limit * 3
 
     for document_chunk in ranked_document_chunks:
         if document_chunk:
@@ -119,16 +115,16 @@ def trim_content(ranked_document_chunks: List[DocumentChunk]) -> str:
     return selected_content
 
 
-def rank_document_chunks_by_embedding() -> List[DocumentChunk]:
+def rank_document_chunks_by_embedding(query: str, document_references: List[DocumentReference], embedding_model: Model) -> List[DocumentChunk]:
     """
     This function is used to select the most relevant content for the prompt.
     """
-    prompt_embeddings = np.array(GPT.embed(STATE.arguments.query)).reshape(1, -1)
+    prompt_embeddings = np.array(embedding_model.embed(query)).reshape(1, -1)
 
     ranked_document_chunks = []
-    for i in range(0, len(STATE.document_references), 100):
+    for i in range(0, len(document_references), 100):
         document_ids = [
-            document.id for document in STATE.document_references[i : i + 100]
+            document.id for document in document_references[i : i + 100]
         ]
         documents: List[Optional[Document]] = Document.load_bulk(document_ids)
         documents = [document for document in documents if document]

@@ -12,14 +12,15 @@ from mindflow.input import Arguments, Command
 from mindflow.cli.parser import get_parsed_cli_args
 from mindflow.settings import Settings
 
-from mindflow.commands.ask import ask
+from mindflow.commands.ask import AskArgs, ask
 from mindflow.commands.commit import commit
 from mindflow.commands.config import config
-from mindflow.commands.delete import delete
-from mindflow.commands.diff import diff
-from mindflow.commands.index import index
-from mindflow.commands.inspect import inspect
-from mindflow.commands.query import query
+from mindflow.commands.delete import DeleteArgs, delete
+from mindflow.commands.diff import DiffArgs, diff
+from mindflow.commands.index import IndexArgs, index
+from mindflow.commands.inspect import InspectArgs, inspect
+from mindflow.commands.query import QueryArgs, query
+from mindflow.utils.response import handle_response_text
 
 MF_DESCRIPTION = """
 
@@ -50,45 +51,33 @@ def cli():
     args = parser.parse_args(arg.upper() for arg in sys.argv[1:2])
     command = Command[args.command].value
     args = get_parsed_cli_args(command)
-    arguments = {
-        "document_paths": args.document_paths
-        if hasattr(args, "document_paths")
-        else None,
-        "force": args.force if hasattr(args, "force") else None,
-        "index": args.index if hasattr(args, "index") else None,
-        "diff_args": args.diff_args if hasattr(args, "diff_args") else None,
-        "commit_args": args.commit_args if hasattr(args, "commit_args") else None,
-        "query": args.query if hasattr(args, "query") else None,
-        "skip_clipboard": args.skip_clipboard
-        if hasattr(args, "skip_clipboard")
-        else None,
-    }
 
     # Configure State
-    STATE.settings = Settings()
-    STATE.arguments = Arguments(arguments)
-    STATE.command = command
+    settings = Settings()
 
     # Execute Command
     match command:
         case Command.ASK.value:
-            ask()
+            response: str = ask(args.prompt, settings.mindflow_models.query)
+            handle_response_text(response, )
         case Command.COMMIT.value:
             commit()
         case Command.CONFIG.value:
             config()
         case Command.DELETE.value:
-            delete()
+            delete(args.document_paths)
         case Command.DIFF.value:
-            diff()
+            diff(settings.mindflow_models.index)
         case Command.INSPECT.value:
-            inspect()
+            inspect(args.document_paths)
         case Command.QUERY.value:
-            query()
+            if hasattr(args, "index") and args.index:
+                index(args.document_paths, Command.INDEX, args.force, settings.mindflow_models.index)
+            query(args.document_paths, args.query, settings.mindflow_models.query, settings.mindflow_models.embedding)
         case Command.REFRESH.value:
-            index()
+            index(args.document_paths, Command.INDEX, args.force, settings.mindflow_models.index)
         case Command.INDEX.value:
-            index()
+            index(args.document_paths, Command.REFRESH, args.force, settings.mindflow_models.index)
 
     print("Saving database...")
     DATABASE_CONTROLLER.databases.json.save_file()

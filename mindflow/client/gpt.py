@@ -5,8 +5,8 @@ This file is used to load the chat gpt model.
 from typing import Optional
 import numpy as np
 import openai
+from mindflow.db.objects.model import Model
 
-from mindflow.state import STATE
 from mindflow.utils.prompts import SEARCH_INDEX
 
 
@@ -98,5 +98,19 @@ class GPTEndpoints:
             print(e)
             return np.array([])
 
+
+def get_response(configured_api: openai, model: Model, prompt: str, selected_content: Optional[str] = None) -> str:
+    response = configured_api.ChatCompletion.create(
+                model=model.api,
+                messages=[
+                    {"role": "system", "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below."},
+                    {"role": "user", "content": prompt},
+                    {"role": "system", "content": selected_content}
+                ],
+                temperature=0,
+                max_tokens=1000,
+            )["choices"][0]["message"]["content"]
+
+openai.Model.retrieve()
 
 GPT = GPTEndpoints()

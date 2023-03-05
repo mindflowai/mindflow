@@ -1,3 +1,5 @@
+import openai
+
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject, StaticObject
 from mindflow.db.objects.static_definition.model import ModelID
@@ -13,6 +15,8 @@ class Model(StaticObject):
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
+
+    request: callable
 
     # Config
     soft_token_limit: int
@@ -39,7 +43,7 @@ class ConfiguredModel:
     # Config
     soft_token_limit: int
 
-    def __init__(self, model_id: str):
+    def __init__(self, model_id: str, api_key: str = None):
         model = Model.load(model_id)
         model_config = ModelConfig.load(f"{model_id}_config")
         
@@ -51,6 +55,13 @@ class ConfiguredModel:
             for key, value in model_config.__dict__.items():
                 if value not in [None, ""]:
                     setattr(self, key, value)
+        
+    
+    def configure_model(self, api_key: str):
+        if self.service == "openai":
+            openai.api_key = api_key
+            model = openai.Model.retrieve(id=self.api)
+            model
 
 class ConfiguredModels:
     @property

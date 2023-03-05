@@ -2,16 +2,14 @@
 `inspect` command
 """
 import json
+from typing import List
 from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
-from mindflow.state import STATE
 
-
-def inspect():
+def inspect(document_paths: List[str]):
     """
     This function is used to inspect your MindFlow index.
     """
-    document_paths = [document.path for document in STATE.document_references]
     print(
         json.dumps(
             DATABASE_CONTROLLER.databases.json.load_bulk(
