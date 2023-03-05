@@ -21,7 +21,7 @@ def generate_git_diff_response() -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
-    command = ["git", "diff"]
+    command = ["git", "diff", '--cached']
     if STATE.arguments.diff_args is not None:
         command = command + STATE.arguments.diff_args
 
@@ -33,9 +33,9 @@ def generate_git_diff_response() -> str:
     for batch in batched_parsed_diff_result:
         content: str = ""
         for (file_name, diff_content) in batch:
-            content += f"FILE: {file_name}\n DIFF CONTENT: {diff_content}\n\n"
+            content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         
-        response += GPT.query(GIT_DIFF_PROMPT_PREFIX, diff_result)
+        response += GPT.query(GIT_DIFF_PROMPT_PREFIX, content)
     
     return response
 
@@ -59,18 +59,21 @@ def parse_git_diff(diff_output) -> List[Tuple[str, str]]:
     return [(diff['file_name'], '\n'.join(diff['content'])) for diff in file_diffs]
 
 
-def batch_git_diffs(file_diffs: List[Tuple[str,str]]) -> List[List[Tuple[str, str]]]:
+def batch_git_diffs(file_diffs: List[Tuple[str, str]]) -> List[List[Tuple[str, str]]]:
     batches = []
     current_batch = []
     current_batch_size = 0
     for (file_name, diff_content) in file_diffs:
-        if len(diff_content) > STATE.settings.mindflow_models.query.model.hard_token_limit * 3:
-            half_length = len(diff_content) // 2
-            current_batch.append((file_name, diff_content[:half_length]))
-            batches.append(current_batch)
-            current_batch = [(file_name, diff_content[half_length:])]
-            current_batch_size = len(diff_content[half_length:])
-        elif current_batch_size + len(diff_content) > STATE.settings.mindflow_models.query.model.hard_token_limit * 3:
+        if len(diff_content) > STATE.settings.mindflow_models.query.model.hard_token_limit:
+            chunks = [diff_content[i:i + STATE.settings.mindflow_models.query.model.hard_token_limit] for i in range(0, len(diff_content), STATE.settings.mindflow_models.query.model.hard_token_limit)]
+            for chunk in chunks:
+                if current_batch_size + len(chunk) > STATE.settings.mindflow_models.query.model.hard_token_limit * 2:
+                    batches.append(current_batch)
+                    current_batch = []
+                    current_batch_size = 0
+                current_batch.append((file_name, chunk))
+                current_batch_size += len(chunk)
+        elif current_batch_size + len(diff_content) > STATE.settings.mindflow_models.query.model.hard_token_limit * 2:
             batches.append(current_batch)
             current_batch = [(file_name, diff_content)]
             current_batch_size = len(diff_content)
