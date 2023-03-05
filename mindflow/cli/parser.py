@@ -21,6 +21,18 @@ def ask_args() -> argparse.Namespace:
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
+def commit_args() -> argparse.Namespace:
+    """
+    Commit command parser.
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate commit message and commit.",
+    )
+    add_commit_args_arg(parser)
+    add_return_prompt_arg(parser)
+    add_skip_clipboard_arg(parser)
+    return parser.parse_args(sys.argv[2:])
+
 
 def config_args() -> argparse.Namespace:
     """
@@ -50,7 +62,7 @@ def diff_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Summarize your git diff.",
     )
-    add_diffargs_arg(parser)
+    add_diff_args_arg(parser)
     add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
@@ -150,12 +162,23 @@ def add_query_arg(parser: argparse.ArgumentParser):
     )
 
 
-def add_diffargs_arg(parser: argparse.ArgumentParser):
+def add_commit_args_arg(parser: argparse.ArgumentParser):
+    """
+    Add arguments for the commit command.
+    """
+    parser.add_argument(
+        "commit_args",
+        nargs="*",
+        help="Contains all of the git commit args.",
+    )
+
+
+def add_diff_args_arg(parser: argparse.ArgumentParser):
     """
     Add arguments for the diff command.
     """
     parser.add_argument(
-        "diffargs",
+        "diff_args",
         nargs="*",
         help="Contains all of the git diff args.",
     )
@@ -192,6 +215,8 @@ def get_parsed_cli_args(command: str) -> argparse.Namespace:
     match command:
         case Command.ASK.value:
             return ask_args()
+        case Command.COMMIT.value:
+            return commit_args()
         case Command.CONFIG.value:
             return config_args()
         case Command.DELETE.value:

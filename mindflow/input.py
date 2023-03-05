@@ -8,6 +8,7 @@ class Command(Enum):
     """
 
     ASK = "ask"
+    COMMIT = "commit"
     CONFIG = "config"
     DELETE = "delete"
     DIFF = "diff"
@@ -25,7 +26,8 @@ class Arguments:
     document_paths: List[str]
     force: bool
     index: bool
-    git_diff_args: List[str]
+    diff_args: List[str]
+    commit_args: List[str]
     query: str
     skip_clipboard: bool
 
@@ -33,6 +35,7 @@ class Arguments:
         self.document_paths = params.get("document_paths", [])
         self.force = params.get("force", False)
         self.index = params.get("index", False)
-        self.git_diff_args = params.get("git_diff_args", [])
+        self.diff_args = params.get("diff_args", [])
+        self.commit_args = params.get("commit_args", [])
         self.query = params.get("query", "")
         self.skip_clipboard = params.get("skip_clipboard", False)
