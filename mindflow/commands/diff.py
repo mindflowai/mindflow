@@ -23,7 +23,7 @@ def generate_git_diff_response() -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
-    command = ["git", "diff", '--cached']
+    command = ["git", "diff"]
     if STATE.arguments.diff_args is not None:
         command = command + STATE.arguments.diff_args
 
