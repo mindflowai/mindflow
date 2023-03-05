@@ -1,3 +1,4 @@
+import sys
 from typing import Dict, Optional
 from mindflow.db.objects.base import BaseObject, StaticObject
 from mindflow.db.db.database import Collection
@@ -52,12 +53,15 @@ class ConfiguredMindFlowModel:
         if hasattr(configured_services.openai, "api_key"):
             service = configured_services.openai
         else:
-            raise Exception("No service configured for mindflow model: " + mindflow_model_id)
+            print("No service API key configured. Please configure an API key for at least one service.")
+            sys.exit(1)
         
-        self.model = self.defaults.get(service.id, None)
+        model_id = self.defaults.get("openai", None)
 
-        if self.model is None:
+        if model_id is None:
             raise Exception("No default model configured for mindflow model: " + mindflow_model_id + " and service: " + service.id)
+
+        return model_id
 
 class ConfiguredMindFlowModels:
     def __init__(self, configured_services: ConfiguredServices, configured_models: ConfiguredModels):
@@ -66,12 +70,15 @@ class ConfiguredMindFlowModels:
     
     @property
     def index(self):
-        return ConfiguredMindFlowModel(MindFlowModelID.INDEX.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.INDEX.value, self.configured_services, self.configured_models)
+        return model
 
     @property
     def query(self):
-        return ConfiguredMindFlowModel(MindFlowModelID.QUERY.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.QUERY.value, self.configured_services, self.configured_models)
+        return model
 
     @property
     def embedding(self):
-        return ConfiguredMindFlowModel(MindFlowModelID.EMBEDDING.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.EMBEDDING.value, self.configured_services, self.configured_models)
+        return model
