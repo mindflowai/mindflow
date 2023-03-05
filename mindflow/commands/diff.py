@@ -2,7 +2,7 @@
 `diff` command
 """
 import subprocess
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from mindflow.state import STATE
 from mindflow.client.gpt import GPT
 
@@ -17,15 +17,15 @@ def diff():
     """
     Generate response to a git diff and handle output
     """
-    handle_response_text(generate_git_diff_response())
+    handle_response_text(generate_git_diff_response(STATE.arguments.diff_args))
 
-def generate_git_diff_response() -> str:
+def generate_git_diff_response(diff_args: Optional[List[str]]) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
     command = ["git", "diff"]
-    if STATE.arguments.diff_args is not None:
-        command = command + STATE.arguments.diff_args
+    if diff_args is not None:
+        command = command + diff_args
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
