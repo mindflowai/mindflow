@@ -6,6 +6,9 @@ MindFlow answers natural language queries about your repos and provides tools fo
 
 We efficiently index your code repo by leveraging hierarchical embeddings and summaries for files/directories and keep them updated with each file hash so you can save those precious API tokens!
 
+## Support Us!
+Please consider supporting us on our [patreon](https://www.patreon.com/MindFlowAI)! :heart:
+
 ## Getting Started
 
 Pre-requisite: You need to create an OpenAI API account, you can do so [here](https://openai.com/blog/openai-api).
