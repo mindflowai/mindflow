@@ -25,7 +25,7 @@ def run_pr():
     if current_branch == default_branch:
         print("Cannot create pull request from default branch")
         return
-    
+
     if not has_remote_branch(current_branch):
         print("No remote branch for current branch")
         return
