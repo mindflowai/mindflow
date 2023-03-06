@@ -1,16 +1,18 @@
 import subprocess
 from mindflow.commands.diff import diff
+from mindflow.settings import Settings
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
+@click.command(help="")
 def commit():
     """
     Commit command.
     """
-    response: str = GPT.query(COMMIT_PROMPT_PREFIX, diff(['--cached']))
+    settings = Settings()
 
-    command = ["git", "commit", "-m", response]
-    if STATE.arguments.commit_args is not None:
-        command = command + STATE.arguments.commit_args
+    response: str = settings.mindflow_models.query(COMMIT_PROMPT_PREFIX, diff(['--cached']))
+
+    command = ["git", "commit", "-m"] + [response]
 
     # Execute the git diff command and retrieve the output as a string
     subprocess.check_output(command).decode("utf-8")

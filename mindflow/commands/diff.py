@@ -9,16 +9,6 @@ from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 import concurrent.futures
 
-class GitDiffArgs:
-    def __init__(self, diff_args: List[str]):
-        self.revision = None
-        self.cached = False
-        self.staged = False
-        self.unstaged = False
-        self.name_only = False
-        self.diff_filter = None
-        self.diff_algorithm = None
-
 def diff(diff_args: List[str], completion_model: Model) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.

@@ -8,7 +8,7 @@ from mindflow.state import STATE
 from mindflow.commands.ask import ask
 
 # from mindflow.commands.config import config
-from mindflow.commands.delete import delete
+from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.commands.diff import diff
 from mindflow.commands.index import index
 from mindflow.commands.inspect import inspect
