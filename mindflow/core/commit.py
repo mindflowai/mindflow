@@ -11,8 +11,8 @@ def run_commit():
     """
     settings = Settings()
 
-
-    response: str = settings.mindflow_models.query.model(build_context_prompt(COMMIT_PROMPT_PREFIX, run_diff()))
+    git_diff_command = ["git", "diff", "--cached", "--name-only"]
+    response: str = settings.mindflow_models.query.model(build_context_prompt(COMMIT_PROMPT_PREFIX, run_diff(git_diff_command)))
 
     command = ["git", "commit", "-m"] + [response]
 
