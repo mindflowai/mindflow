@@ -1,5 +1,5 @@
 # MindFlow
-![Alt text](images/MindFlowHeader.png)
+![MindFlow Logo](https://user-images.githubusercontent.com/26421036/223063824-1cc18179-40c9-443b-b017-27251824f879.png)
 
 Inspired by our hatred for maintaining documentation, we developed MindFlow; A code search engine powered by [ChatGPT](https://openai.com/blog/chatgpt).
 MindFlow answers natural language queries about your repos and provides tools for streamlining your developer experience.
