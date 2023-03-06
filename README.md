@@ -20,7 +20,7 @@ Pre-requisite: You need to create an OpenAI API account, you can do so [here](ht
 ## Basic Usage
 
 ### Interact with ChatGPT Using the CLI
-Run: `mf ask "What is quantum physics?"`. You should get a response like this:
+The simplest way to use MindFlow is to run `mf ask "What is quantum physics?"` which literally just interfaces directly with chatGPT from the command line. You should get a response like this:
 
 ```
 Quantum physics is the branch of physics that studies the behavior of matter and energy at the scale of atoms and subatomic particles. It is a fundamental theory that describes the laws of nature governing the behavior of matter and energy at the smallest scales. In contrast to classical physics, which describes the behavior of macroscopic objects, quantum physics deals with the properties of individual particles, such as electrons, protons, and photons, and how they interact with each other.
