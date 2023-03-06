@@ -11,6 +11,9 @@ def run_commit():
     """
     settings = Settings()
 
+    print(subprocess.check_call(['git', 'diff', '--cached', '--quiet']))
+    exit()
+
     diff_output = run_diff(("--cached",))
     response: str = settings.mindflow_models.query.model(build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output))
 
