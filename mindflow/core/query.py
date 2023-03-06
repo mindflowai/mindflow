@@ -1,15 +1,19 @@
 """
 `query` command
 """
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
-from typing import Dict, List, Optional, Tuple
-
 import sys
-import numpy as np
+from concurrent.futures import as_completed
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
-from mindflow.db.objects.document import Document, DocumentReference
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
+
+from mindflow.db.objects.document import Document
+from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings

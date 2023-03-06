@@ -4,7 +4,8 @@ Handles git related operations.
 import logging
 import os
 import subprocess
-from typing import List, Union
+from typing import List
+from typing import Union
 
 
 class NotInGit(BaseException):

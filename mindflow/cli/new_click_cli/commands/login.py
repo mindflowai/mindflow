@@ -1,4 +1,5 @@
 import click
+
 from mindflow.core.login import run_login
 
 

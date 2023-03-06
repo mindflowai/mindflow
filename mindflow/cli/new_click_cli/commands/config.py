@@ -1,9 +1,9 @@
 """
 `auth` command
 """
-from mindflow.cli.config.main import set_configuration
-
 import click
+
+from mindflow.cli.config.main import set_configuration
 
 
 @click.command(help="Advanced setup custom mindflow configurations.")

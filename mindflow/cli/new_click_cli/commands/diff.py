@@ -1,9 +1,10 @@
 """
 `diff` command
 """
-
 from typing import Tuple
+
 import click
+
 from mindflow.core.diff import run_diff
 
 

@@ -3,9 +3,9 @@
 """
 import json
 from typing import List
+
 from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
-
 from mindflow.resolving.resolve import resolve_all
 
 

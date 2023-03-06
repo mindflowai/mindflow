@@ -1,10 +1,8 @@
-from mindflow.db.objects.static_definition.service import (
-    ServiceConfigParameterKey,
-    ServiceConfigParameterName,
-    ServiceID,
-    ServiceName,
-)
 from mindflow.cli.config.main import menu
+from mindflow.db.objects.static_definition.service import ServiceConfigParameterKey
+from mindflow.db.objects.static_definition.service import ServiceConfigParameterName
+from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.db.objects.static_definition.service import ServiceName
 
 
 def ask_service_authorization() -> ServiceID:

@@ -1,7 +1,6 @@
 """
 `ask` command
 """
-
 import click
 
 from mindflow.core.ask import run_ask

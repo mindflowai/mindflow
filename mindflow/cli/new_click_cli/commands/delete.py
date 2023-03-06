@@ -1,11 +1,11 @@
 """
 `delete` command
 """
-
 from typing import List
-from mindflow.core.delete import run_delete
 
 import click
+
+from mindflow.core.delete import run_delete
 
 
 @click.command(help="Delete your MindFlow index")

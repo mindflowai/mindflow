@@ -1,8 +1,12 @@
 import sys
-from typing import Dict, Optional
-from mindflow.db.objects.base import BaseObject, StaticObject
+from typing import Dict
+from typing import Optional
+
 from mindflow.db.db.database import Collection
-from mindflow.db.objects.model import Model, ConfiguredModel
+from mindflow.db.objects.base import BaseObject
+from mindflow.db.objects.base import StaticObject
+from mindflow.db.objects.model import ConfiguredModel
+from mindflow.db.objects.model import Model
 from mindflow.db.objects.service import ConfiguredServices
 from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
 

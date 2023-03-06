@@ -1,7 +1,6 @@
 """
 Main
 """
-
 from mindflow.cli.run import cli
 
 

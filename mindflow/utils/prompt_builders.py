@@ -1,4 +1,5 @@
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 
 def build_context_prompt(context: str, text: str) -> List[Dict]:

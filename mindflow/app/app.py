@@ -1,4 +1,5 @@
-from flask import Flask, request
+from flask import Flask
+from flask import request
 
 
 def trim_json(data: dict, keys: list) -> dict:

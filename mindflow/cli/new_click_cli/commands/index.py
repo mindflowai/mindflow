@@ -1,8 +1,8 @@
 """
 `generate` command
 """
-
 from typing import List
+
 import click
 
 from mindflow.core.index import run_index

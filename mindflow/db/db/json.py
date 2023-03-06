@@ -1,8 +1,9 @@
 import json
 import os
 import sys
+from typing import List
+from typing import Optional
 
-from typing import List, Optional
 from mindflow.db.db.database import Database
 
 

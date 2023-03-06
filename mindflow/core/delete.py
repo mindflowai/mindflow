@@ -1,8 +1,8 @@
 """
 `delete` command
 """
-
 from typing import List
+
 from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.objects.document import Document
 from mindflow.resolving.resolve import resolve_all

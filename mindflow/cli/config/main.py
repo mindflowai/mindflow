@@ -2,40 +2,29 @@ import getpass
 import sys
 
 from mindflow.cli.config.menu import menu
-from mindflow.db.objects.mindflow_model import MindFlowModelConfig
-from mindflow.db.objects.model import ModelConfig
-from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.objects.static_definition.model import (
-    ModelConfigParameterKey,
-    ModelHardTokenLimit,
-    get_model_static,
-)
-from mindflow.db.objects.static_definition.mind_flow_model import (
-    MindFlowModelID,
-)
-
-from mindflow.db.objects.static_definition.service import (
-    ServiceConfigParameterKey,
-    ServiceID,
-)
-from mindflow.cli.config.questions.common.enums import (
-    MainOption,
-    YesNo,
-)
+from mindflow.cli.config.questions.common.enums import MainOption
+from mindflow.cli.config.questions.common.enums import YesNo
 from mindflow.cli.config.questions.common.questions import (
     ask_another_config,
 )
-from mindflow.cli.config.questions.service.questions import (
-    ask_service,
-    ask_service_config,
+from mindflow.cli.config.questions.model.questions import ask_mind_flow_model_type
+from mindflow.cli.config.questions.model.questions import ask_model_by_service
+from mindflow.cli.config.questions.model.questions import ask_model_config
+from mindflow.cli.config.questions.model.questions import ask_model_text_completion_openai
+from mindflow.cli.config.questions.model.questions import ask_model_text_embedding_openai
+from mindflow.cli.config.questions.service.questions import ask_service
+from mindflow.cli.config.questions.service.questions import ask_service_config
+from mindflow.db.objects.mindflow_model import MindFlowModelConfig
+from mindflow.db.objects.model import ModelConfig
+from mindflow.db.objects.service import ServiceConfig
+from mindflow.db.objects.static_definition.mind_flow_model import (
+    MindFlowModelID,
 )
-from mindflow.cli.config.questions.model.questions import (
-    ask_mind_flow_model_type,
-    ask_model_by_service,
-    ask_model_config,
-    ask_model_text_completion_openai,
-    ask_model_text_embedding_openai,
-)
+from mindflow.db.objects.static_definition.model import get_model_static
+from mindflow.db.objects.static_definition.model import ModelConfigParameterKey
+from mindflow.db.objects.static_definition.model import ModelHardTokenLimit
+from mindflow.db.objects.static_definition.service import ServiceConfigParameterKey
+from mindflow.db.objects.static_definition.service import ServiceID
 
 
 def set_configuration():

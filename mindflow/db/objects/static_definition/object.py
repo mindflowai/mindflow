@@ -1,8 +1,13 @@
-from typing import Type, Union
-from mindflow.db.objects.service import Service, ServiceConfig
-from mindflow.db.objects.model import Model, ModelConfig
-from mindflow.db.objects.mindflow_model import MindFlowModel, MindFlowModelConfig
+from typing import Type
+from typing import Union
+
 from mindflow.db.objects.document import Document
+from mindflow.db.objects.mindflow_model import MindFlowModel
+from mindflow.db.objects.mindflow_model import MindFlowModelConfig
+from mindflow.db.objects.model import Model
+from mindflow.db.objects.model import ModelConfig
+from mindflow.db.objects.service import Service
+from mindflow.db.objects.service import ServiceConfig
 from mindflow.utils.enum import ExtendedEnum
 
 

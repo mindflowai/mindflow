@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 
 from mindflow.db.db.database import Store
 from mindflow.db.db.json import JsonDatabase

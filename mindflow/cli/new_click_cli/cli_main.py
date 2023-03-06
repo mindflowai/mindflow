@@ -1,6 +1,5 @@
 import click
 
-# from mindflow.cli.new_click_cli.commands.config import config
 from mindflow.cli.new_click_cli.commands.ask import ask
 from mindflow.cli.new_click_cli.commands.commit import commit
 from mindflow.cli.new_click_cli.commands.delete import delete
@@ -10,6 +9,7 @@ from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.cli.new_click_cli.commands.login import login
 from mindflow.cli.new_click_cli.commands.pr import pr
 from mindflow.cli.new_click_cli.commands.query import query
+# from mindflow.cli.new_click_cli.commands.config import config
 
 
 @click.group()

@@ -1,4 +1,7 @@
-from typing import List, Union, Optional
+from typing import List
+from typing import Optional
+from typing import Union
+
 from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
 

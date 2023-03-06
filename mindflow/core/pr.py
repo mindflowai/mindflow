@@ -1,9 +1,11 @@
 import subprocess
 from typing import List
+
 from mindflow.core.diff import run_diff
 from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
-from mindflow.utils.prompts import PR_BODY_PREFIX, PR_TITLE_PREFIX
+from mindflow.utils.prompts import PR_BODY_PREFIX
+from mindflow.utils.prompts import PR_TITLE_PREFIX
 
 
 def run_pr():
