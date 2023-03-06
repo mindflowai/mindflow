@@ -6,3 +6,4 @@ pytest==7.2.0
 scikit-learn==1.0.2
 tqdm==4.64.1
 twine==4.0.2
+traitlets==5.9.0
