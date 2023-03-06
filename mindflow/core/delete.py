@@ -11,9 +11,13 @@ def run_delete(document_paths: List[str]):
     """
     This function is used to delete your MindFlow index.
     """
-    document_to_delete = [document_reference.path for document_reference in resolve_all(document_paths)]
+    documents_references = [document_reference.path for document_reference in resolve_all(document_paths)]
+    documents_to_delete = [document.path for document in Document.load_bulk(documents_references)]
     
-    Document.delete_bulk(document_to_delete)
+    if len(documents_to_delete) == 0:
+        return "No documents to delete"
+
+    Document.delete_bulk(documents_to_delete)
     
     DATABASE_CONTROLLER.databases.json.save_file()
     return "Documents deleted"
