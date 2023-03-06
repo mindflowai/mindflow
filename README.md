@@ -87,3 +87,6 @@ This tool allows you to build an index of text documents and search through them
 
 ## What's next for MindFlow
 In the future, MindFlow plans on becoming an even more integral part of the modern developer's toolkit. We plan on adding the ability to ditch traditional documentation and instead integrate directly with your private documents and communication channels, allowing for a more seamless and intuitive experience. With MindFlow, you can have a true "stream of consciousness" with your code, documentation, and communication channels, making it easier than ever to stay on top of your projects and collaborate with your team. We are excited to continue pushing the boundaries of what's possible with language models and revolutionize the way developers work.
+
+## Socials
+Follow us on [twitter](https://twitter.com/mindflow_ai)!
