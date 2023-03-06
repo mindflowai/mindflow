@@ -60,7 +60,7 @@ class BaseObject:
         )
         if object_dict in [None, []]:
             return []
-        return [cls(object) for object in object_dict]
+        return [cls(object) for object in object_dict if object is not None]
     
     @classmethod
     def delete_bulk(cls, ids: list):
