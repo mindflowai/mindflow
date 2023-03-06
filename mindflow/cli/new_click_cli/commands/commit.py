@@ -1,18 +1,10 @@
-import subprocess
-from mindflow.cli.new_click_cli.commands.diff import diff
-from mindflow.settings import Settings
-from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
+import click
 
-@click.command(help="")
+from mindflow.core.commit import run_commit
+
+@click.command(help="Generate a git commit response by feeding git diff to gpt")
 def commit():
     """
     Commit command.
     """
-    settings = Settings()
-
-    response: str = settings.mindflow_models.query(COMMIT_PROMPT_PREFIX, diff(['--cached']))
-
-    command = ["git", "commit", "-m"] + [response]
-
-    # Execute the git diff command and retrieve the output as a string
-    subprocess.check_output(command).decode("utf-8")
+    run_commit()

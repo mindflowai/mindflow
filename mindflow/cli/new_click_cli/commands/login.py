@@ -1,16 +1,7 @@
 import click
-
-from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.core.login import run_login
 
 @click.command(help="Set your OpenAI API Key. You can get this from `https://platform.openai.com/account/api-keys`")
 @click.argument("openai_api_key")
 def login(openai_api_key):
-    service_config = ServiceConfig.load("openai_config")
-    if not service_config:
-        service_config = ServiceConfig("openai_config")
-
-    service_config.api_key = openai_api_key
-    service_config.save()
-
-    DATABASE_CONTROLLER.databases.json.save_file()
+    run_login(openai_api_key)

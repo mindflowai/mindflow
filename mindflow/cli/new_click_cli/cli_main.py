@@ -2,6 +2,7 @@ import click
 
 # from mindflow.cli.new_click_cli.commands.config import config
 from mindflow.cli.new_click_cli.commands.ask import ask
+from mindflow.cli.new_click_cli.commands.commit import commit
 from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.cli.new_click_cli.commands.diff import diff
 from mindflow.cli.new_click_cli.commands.index import index
@@ -14,6 +15,7 @@ def mindflow_cli():
     pass
 
 mindflow_cli.add_command(ask)
+mindflow_cli.add_command(commit)
 mindflow_cli.add_command(delete)
 mindflow_cli.add_command(diff)
 mindflow_cli.add_command(index)
