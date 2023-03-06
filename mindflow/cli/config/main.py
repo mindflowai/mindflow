@@ -10,8 +10,12 @@ from mindflow.cli.config.questions.common.questions import (
 from mindflow.cli.config.questions.model.questions import ask_mind_flow_model_type
 from mindflow.cli.config.questions.model.questions import ask_model_by_service
 from mindflow.cli.config.questions.model.questions import ask_model_config
-from mindflow.cli.config.questions.model.questions import ask_model_text_completion_openai
-from mindflow.cli.config.questions.model.questions import ask_model_text_embedding_openai
+from mindflow.cli.config.questions.model.questions import (
+    ask_model_text_completion_openai,
+)
+from mindflow.cli.config.questions.model.questions import (
+    ask_model_text_embedding_openai,
+)
 from mindflow.cli.config.questions.service.questions import ask_service
 from mindflow.cli.config.questions.service.questions import ask_service_config
 from mindflow.db.objects.mindflow_model import MindFlowModelConfig

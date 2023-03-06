@@ -9,6 +9,7 @@ from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.cli.new_click_cli.commands.login import login
 from mindflow.cli.new_click_cli.commands.pr import pr
 from mindflow.cli.new_click_cli.commands.query import query
+
 # from mindflow.cli.new_click_cli.commands.config import config
 
 
