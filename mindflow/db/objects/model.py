@@ -72,8 +72,8 @@ class ConfiguredModel:
     def openai_embedding(self, text: str): 
         openai.api_key = self.api_key
         return openai.Embedding.create(
-            model=self.id,
-            query=text
+            engine=self.id,
+            input=text
         )["data"][0]["embedding"]
 
     def __call__(self, prompt, *args, **kwargs):

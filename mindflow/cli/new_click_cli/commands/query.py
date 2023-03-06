@@ -4,7 +4,7 @@
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import sys
 import numpy as np
@@ -12,6 +12,7 @@ import numpy as np
 from mindflow.db.objects.document import Document, DocumentReference
 from mindflow.db.objects.model import Model
 from mindflow.resolving.resolve import resolve_all
+from mindflow.settings import Settings
 
 from mindflow.utils.response import handle_response_text
 
@@ -25,16 +26,26 @@ def query(document_paths: List[str], query: str):
     """
     This function is used to ask a custom question about files, folders, and websites.
     """
-    # document_references: List[DocumentReference] = resolve_all(document_paths)
-    # response = completion_model.prompt(
-    #     query,
-    #     select_content(query, document_references, embedding_model),
-    # )
-    # handle_response_text(response)
-    print("TODO: run query")
+    settings = Settings()
+    completion_model = settings.mindflow_models.query.model
+    embedding_model = settings.mindflow_models.embedding.model
 
+    document_references: List[DocumentReference] = resolve_all(document_paths)
+    messages = build_query_messages(query, select_content(query, document_references, completion_model.hard_token_limit, embedding_model))
+    response = completion_model(messages)
+    handle_response_text(response)
 
-def select_content(query: str, document_references: List[DocumentReference], embedding_model: Model) -> str:
+def build_query_messages(query: str, content: str) -> List[Dict]:
+    """
+    This function is used to build the query messages for the prompt.
+    """
+    return [
+            {"role": "system", "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below."},
+            {"role": "user", "content": query},
+            {"role": "system", "content": content}
+        ]
+
+def select_content(query: str, document_references: List[DocumentReference], token_limit: int, embedding_model: Model) -> str:
     """
     This function is used to generate a prompt based on a question or summarization task
     """
@@ -47,7 +58,7 @@ def select_content(query: str, document_references: List[DocumentReference], emb
         )
         sys.exit(1)
 
-    selected_content = trim_content(embedding_ranked_document_chunks)
+    selected_content = trim_content(embedding_ranked_document_chunks, token_limit)
 
     return selected_content
 
@@ -83,7 +94,7 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embeddings: List[np.ndarray] = [embedding_model.embed(document.search_tree["summary"])]
+        embeddings: List[np.ndarray] = [embedding_model(document.search_tree["summary"])]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -92,7 +103,7 @@ class DocumentChunk:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding = embedding_model.embed(
+                    rolling_summary_embedding = embedding_model(
                         "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
                     )
                     embeddings.append(rolling_summary_embedding)
@@ -125,7 +136,7 @@ def rank_document_chunks_by_embedding(query: str, document_references: List[Docu
     """
     This function is used to select the most relevant content for the prompt.
     """
-    prompt_embeddings = np.array(embedding_model.embed(query)).reshape(1, -1)
+    prompt_embeddings = np.array(embedding_model(query)).reshape(1, -1)
 
     ranked_document_chunks = []
     for i in range(0, len(document_references), 100):
@@ -139,7 +150,7 @@ def rank_document_chunks_by_embedding(query: str, document_references: List[Docu
         
         with ThreadPoolExecutor(max_workers=50) as executor:
             futures = [
-                executor.submit(DocumentChunk.from_search_tree, document)
+                executor.submit(DocumentChunk.from_search_tree, document, embedding_model)
                 for document in documents 
             ]
             for future in as_completed(futures):
