@@ -15,6 +15,12 @@ from mindflow.cli.new_click_cli.commands.query import query
 def mindflow_cli():
     pass
 
+@mindflow_cli.command()
+def version():
+    """Print the version of mindflow."""
+    from mindflow import __version__
+    click.echo(__version__)
+
 mindflow_cli.add_command(ask)
 mindflow_cli.add_command(commit)
 mindflow_cli.add_command(delete)
