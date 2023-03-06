@@ -20,6 +20,7 @@ from mindflow.settings import Settings
 from mindflow.utils.document.read import read_document
 
 import click
+from mindflow.utils.prompt_builders import build_context_prompt
 
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 
@@ -78,10 +79,6 @@ def index(document_paths: List[str], refresh: bool, force: bool) -> None:
     
     DATABASE_CONTROLLER.databases.json.save_file()
 
-
-def get_index_messages(text: str) -> str:
-    return [{"role": "system", "content": INDEX_PROMPT_PREFIX},{"role": "user", "content": text}]
-
 class Node:
     """
     Simple node class for search tree.
@@ -97,7 +94,7 @@ class Node:
         self.start = start
         self.end = end
         if text:
-            self.summary = completion_model(get_index_messages(text))
+            self.summary = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text))
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -193,6 +190,7 @@ def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
             > completion_model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
+                completion_model,
                 leaf_nodes[start:end]
             )
             for node_chunk in node_chunks:

@@ -3,19 +3,27 @@
 """
 import subprocess
 from typing import List, Tuple
+
+import click
 from mindflow.db.objects.model import Model
+from mindflow.settings import Settings
+from mindflow.utils.prompt_builders import build_context_prompt
 
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 import concurrent.futures
 
-def diff(diff_args: List[str], completion_model: Model) -> str:
+from mindflow.utils.response import handle_response_text
+
+@click.command(help="Generate a git diff response by feeding git diff to gpt")
+def diff() -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
-    command = ["git", "diff"]
-    if diff_args is not None:
-        command = command + diff_args
+    settings = Settings()
+    completion_model: Model = settings.mindflow_models.query.model
+
+    command = ["git", "diff", "--cached"]
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
@@ -28,18 +36,18 @@ def diff(diff_args: List[str], completion_model: Model) -> str:
             content = ""
             for (file_name, diff_content) in batch:
                 content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-            future = executor.submit(completion_model.query, GIT_DIFF_PROMPT_PREFIX, content)
+            future = executor.submit(completion_model, build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content))
             futures.append(future)
 
         # Process the results as they become available
         for future in concurrent.futures.as_completed(futures):
             response += future.result()
     
-    return response
+    handle_response_text(response)
 
 import re
 
-def parse_git_diff(diff_output) -> List[Tuple[str, str]]:
+def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
     file_diffs = []
     current_diff = None
     for line in diff_output.split('\n'):

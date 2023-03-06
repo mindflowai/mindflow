@@ -1,5 +1,5 @@
 import subprocess
-from mindflow.commands.diff import diff
+from mindflow.cli.new_click_cli.commands.diff import diff
 from mindflow.settings import Settings
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
