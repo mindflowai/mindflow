@@ -25,6 +25,7 @@ def run_diff(args: str):
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
+    print(diff_result)
     batched_parsed_diff_result = batch_git_diffs(parse_git_diff(diff_result), token_limit=completion_model.hard_token_limit)
 
     response: str = ""
