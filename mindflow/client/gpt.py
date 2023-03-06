@@ -17,7 +17,6 @@ class GPTEndpoints:
 
     @property
     def configured_api(self):
-
         openai.api_key = STATE.settings.services.openai.api_key
         return openai
 
