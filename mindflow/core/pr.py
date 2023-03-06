@@ -13,6 +13,10 @@ def run_pr():
         print("No remote branch for current branch")
         return
     
+    if needs_push():
+        print("Current branch needs to be pushed to remote repository")
+        return
+
     settings = Settings()
 
     # Determine the name of the default branch
@@ -26,6 +30,16 @@ def run_pr():
     pr_body = settings.mindflow_models.query.model(pr_body_prompt)
 
     create_pull_request(pr_title, pr_body)
+
+def needs_push() -> bool:
+    """
+    Returns True if the current branch needs to be pushed to a remote repository, False otherwise.
+    """
+    # Get the output of `git status`
+    git_status = subprocess.check_output(["git", "status"]).decode("utf-8")
+
+    # Check if the output contains the message "Your branch is ahead of 'origin/<branch>' by <num> commit(s), and can be fast-forwarded."
+    return "Your branch is ahead of" in git_status
 
 def has_remote_branch() -> bool:
     """
