@@ -1,9 +1,8 @@
-alive-progress==2.1.0
-click==8.0.4
-numpy==1.19.5
+alive-progress
+click
+numpy
 openai==0.27.0
-pytest==7.2.0
-scikit-learn==1.0.2
-tqdm==4.64.1
-twine==4.0.2
-traitlets==5.9.0
+pytest
+scikit-learn
+tqdm
+traitlets
