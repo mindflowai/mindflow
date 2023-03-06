@@ -29,7 +29,7 @@ You can also ask questions about your code repos. Run the following commands in 
     - This will take the index you generated in the above step and use it as context for your question!
 
 ### Git Diff Summaries
-Run `mf diff` inside of your repository! You should get a response that looks like this:
+Make some changes to your git repo without staging/committing them. Then, run `mf diff`! You should get a response that looks like this:
 
 ```
 `mindflow/commands/diff.py` changes:
