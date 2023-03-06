@@ -11,7 +11,7 @@ from mindflow.commands.ask import ask
 from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.commands.diff import diff
 from mindflow.cli.new_click_cli.commands.index import index
-from mindflow.commands.inspect import inspect
+from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.commands.query import query
 
 

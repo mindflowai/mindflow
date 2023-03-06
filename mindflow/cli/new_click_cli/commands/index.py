@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from alive_progress import alive_bar
+from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.objects.model import Model
 
 from mindflow.resolving.resolve import return_if_indexable, resolve_all
@@ -32,7 +33,7 @@ def index(document_paths: List[str], refresh: bool, force: bool) -> None:
     """
 
     import os
-    ## document_paths = [os.path.abspath(path) for path in document_paths]
+    document_paths = [os.path.abspath(path) for path in document_paths]
 
     settings = Settings()
     completion_model: Model = settings.mindflow_models.index.model
@@ -74,6 +75,8 @@ def index(document_paths: List[str], refresh: bool, force: bool) -> None:
                 document.save()
                 del document_reference, search_tree_future
                 progress_bar()
+    
+    DATABASE_CONTROLLER.databases.json.save_file()
 
 
 def get_index_messages(text: str) -> str:

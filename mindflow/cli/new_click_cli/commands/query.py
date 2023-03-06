@@ -15,17 +15,23 @@ from mindflow.resolving.resolve import resolve_all
 
 from mindflow.utils.response import handle_response_text
 
+import click
 
-def query(document_paths: List[str], query: str, completion_model: bool, embedding_model: Model) -> str:
+@click.command()
+@click.argument("document_paths", type=str, nargs=-1, required=True)
+@click.argument("query", type=str, required=True)
+# def query(document_paths: List[str], query: str, completion_model: bool, embedding_model: Model):
+def query(document_paths: List[str], query: str):
     """
     This function is used to ask a custom question about files, folders, and websites.
     """
-    document_references: List[DocumentReference] = resolve_all(document_paths)
-    response = completion_model.prompt(
-        query,
-        select_content(query, document_references, embedding_model),
-    )
-    handle_response_text(response)
+    # document_references: List[DocumentReference] = resolve_all(document_paths)
+    # response = completion_model.prompt(
+    #     query,
+    #     select_content(query, document_references, embedding_model),
+    # )
+    # handle_response_text(response)
+    print("TODO: run query")
 
 
 def select_content(query: str, document_references: List[DocumentReference], embedding_model: Model) -> str:
@@ -44,6 +50,7 @@ def select_content(query: str, document_references: List[DocumentReference], emb
     selected_content = trim_content(embedding_ranked_document_chunks)
 
     return selected_content
+
 
 class DocumentChunk:
     """

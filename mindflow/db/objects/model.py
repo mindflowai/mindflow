@@ -77,7 +77,6 @@ class ConfiguredModel:
         )["data"][0]["embedding"]
 
     def __call__(self, prompt, *args, **kwargs):
-        print(self.id)
         if self.service == ServiceID.OPENAI.value:
             if self.id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
                 return self.openai_chat_completion(prompt, *args, **kwargs)
