@@ -33,7 +33,7 @@ jobs:
 
     - name: Lint
       run: |
-        black --check
+        black --check .
 
   build:
     needs: lint
