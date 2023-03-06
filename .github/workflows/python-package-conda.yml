@@ -36,7 +36,7 @@ jobs:
         black --check .
 
   Build 🚀:
-    needs: Lint 🧹
+    needs: "Lint 🧹"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
