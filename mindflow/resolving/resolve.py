@@ -29,23 +29,23 @@ def resolve_all(document_paths: List[str]) -> List[DocumentReference]:
         document_references.extend(resolve(document_path))
     return document_references
 
-def resolve_all_indexable(document_references: List[DocumentReference], command: Command, force: bool) -> List[DocumentReference]:
+def return_if_indexable(document_references: List[DocumentReference], refresh: bool, force: bool) -> List[DocumentReference]:
     return [
         document_reference
         for document_reference in document_references
-        if index_document(command, force, document_reference)
+        if index_document(document_reference, refresh, force)
     ]
 
 def index_document(
-    command: Command, force: Optional[bool], document_reference: DocumentReference
+    document_reference: DocumentReference, refresh: bool, force: Optional[bool]
 ) -> bool:
-    if command == Command.REFRESH.value:
+    if refresh:
         if not document_reference.old_hash:
             return False
         if document_reference.old_hash == document_reference.hash and not force:
             return False
         return True
   
-    if not hasattr(document_reference, "old_hash"):
+    if not hasattr(document_reference, "old_hash") or force:
         return True
     return False

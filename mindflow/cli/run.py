@@ -17,7 +17,7 @@ from mindflow.cli.new_click_cli.commands.commit import commit
 from mindflow.cli.new_click_cli.commands.config import config
 from mindflow.cli.new_click_cli.commands.delete import DeleteArgs, delete
 from mindflow.commands.diff import DiffArgs, diff
-from mindflow.commands.index import IndexArgs, index
+from mindflow.cli.new_click_cli.commands.index import IndexArgs, index
 from mindflow.commands.inspect import InspectArgs, inspect
 from mindflow.commands.query import QueryArgs, query
 from mindflow.utils.response import handle_response_text

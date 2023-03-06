@@ -10,7 +10,7 @@ from mindflow.commands.ask import ask
 # from mindflow.commands.config import config
 from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.commands.diff import diff
-from mindflow.commands.index import index
+from mindflow.cli.new_click_cli.commands.index import index
 from mindflow.commands.inspect import inspect
 from mindflow.commands.query import query
 

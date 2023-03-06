@@ -3,24 +3,41 @@
 """
 from asyncio import Future
 from copy import deepcopy
+import os
 from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from alive_progress import alive_bar
 from mindflow.db.objects.model import Model
-from mindflow.input import Command
-from mindflow.resolving.resolve import resolve_all_indexable
+
+from mindflow.resolving.resolve import return_if_indexable, resolve_all
 
 
 from mindflow.db.objects.document import Document, DocumentReference
+from mindflow.settings import Settings
 from mindflow.utils.document.read import read_document
 
-def index(document_paths: List[str], command: Command, force: bool, completion_model: Model) -> None:
+import click
+
+from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
+
+@click.command(help="Index path(s). You can pass as many folders/files/paths as you'd like. Pass `.` to reference all ")
+@click.argument("document_paths", type=str, nargs=-1, required=True)
+@click.option("--force", is_flag=True, default=False)
+@click.option("--refresh", is_flag=True, default=False)
+def index(document_paths: List[str], refresh: bool, force: bool) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
-    indexable_document_references: List[DocumentReference] = resolve_all_indexable(document_paths, command, force)
+
+    import os
+    ## document_paths = [os.path.abspath(path) for path in document_paths]
+
+    settings = Settings()
+    completion_model: Model = settings.mindflow_models.index.model
+    
+    indexable_document_references: List[DocumentReference] = return_if_indexable(resolve_all(document_paths), refresh, force)
     if not indexable_document_references:
         print("No documents to index")
         return
@@ -59,6 +76,9 @@ def index(document_paths: List[str], command: Command, force: bool, completion_m
                 progress_bar()
 
 
+def get_index_messages(text: str) -> str:
+    return [{"role": "system", "content": INDEX_PROMPT_PREFIX},{"role": "user", "content": text}]
+
 class Node:
     """
     Simple node class for search tree.
@@ -74,7 +94,7 @@ class Node:
         self.start = start
         self.end = end
         if text:
-            self.summary = completion_model.summarize(text)
+            self.summary = completion_model(get_index_messages(text))
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -130,7 +150,7 @@ def binary_split_raw_text_to_nodes(completion_model: Model, text: str) -> List[N
     while stack:
         start, end = stack.pop()
         if count_tokens(text[start:end]) < completion_model.soft_token_limit:
-            nodes.append(Node(start, end, text[start:end]))
+            nodes.append(Node(completion_model, start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
             stack.append((start, mid))
@@ -167,7 +187,7 @@ def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
         leaf_nodes, start, end = stack.pop()
         if (
             sum(count_tokens(leaf_node.summary) for leaf_node in leaf_nodes[start:end])
-            > completion_model.model.soft_token_limit
+            > completion_model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
                 leaf_nodes[start:end]
@@ -179,13 +199,14 @@ def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
                 [node.summary for node in leaf_nodes[start:end]]
             )
             node = Node(
+                completion_model,
                 leaf_nodes[start].start,
                 leaf_nodes[end - 1].end,
                 parent_node_summaries,
             )
             node.set_leaves(leaf_nodes[start:end])
             return node
-    return Node(0, 0)
+    return Node(completion_model, 0, 0)
 
 
 def create_text_search_tree(completion_model: Model, text: str) -> dict:
@@ -193,5 +214,6 @@ def create_text_search_tree(completion_model: Model, text: str) -> dict:
     This function is used to create a tree of responses from the OpenAI API
     """
     if count_tokens(text) < completion_model.soft_token_limit:
-        return Node(0, len(text), text).to_dict()
-    return create_nodes(binary_split_raw_text_to_nodes(completion_model, text)).to_dict()
+        return Node(completion_model, 0, len(text), text).to_dict()
+
+    return create_nodes(completion_model, binary_split_raw_text_to_nodes(completion_model, text)).to_dict()
