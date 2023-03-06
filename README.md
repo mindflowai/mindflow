@@ -1,10 +1,8 @@
 # MindFlow
 ![Alt text](images/MindFlowHeader.png)
 
-Inspired by the need for a more efficient and intelligent way to search code, conversations, and documentation we created MindFlow, the search engine powered by ChatGPT.
-
-## What it MindFlow
-MindFlow allows users to generate an index of documents using a powerful language models to provide insightful responses to questions you may have about your data. It offers a selection of models to play around with with the ability to configure each model.
+Inspired by our hatred for maintaining documentation, we developed MindFlow; A code search engine powered by [ChatGPT](https://openai.com/blog/chatgpt).
+MindFlow answers natural language questions about your repos and provides tools for streamlining your developer experience.
 
 ## Getting Started
 
