@@ -7,7 +7,10 @@ import click
 
 from mindflow.core.index import run_index
 
-@click.command(help="Index path(s). You can pass as many folders/files/paths as you'd like. Pass `.` to reference all ")
+
+@click.command(
+    help="Index path(s). You can pass as many folders/files/paths as you'd like. Pass `.` to reference all "
+)
 @click.argument("document_paths", type=str, nargs=-1, required=True)
 @click.option("--force", is_flag=True, default=False)
 @click.option("--refresh", is_flag=True, default=False)

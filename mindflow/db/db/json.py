@@ -5,17 +5,20 @@ import sys
 from typing import List, Optional
 from mindflow.db.db.database import Database
 
+
 def _get_mindflow_dir():
-    if os.name == 'nt':  # Check if the OS is Windows
-        config_dir = os.getenv('APPDATA')
+    if os.name == "nt":  # Check if the OS is Windows
+        config_dir = os.getenv("APPDATA")
     else:
-        config_dir = os.path.join(os.path.expanduser('~'), '.config')
-    mindflow_dir = os.path.join(config_dir, 'mindflow')
+        config_dir = os.path.join(os.path.expanduser("~"), ".config")
+    mindflow_dir = os.path.join(config_dir, "mindflow")
     return mindflow_dir
+
 
 MINDFLOW_DIR = _get_mindflow_dir()
 if not os.path.exists(MINDFLOW_DIR):
     os.makedirs(MINDFLOW_DIR)
+
 
 def create_and_load_json(path: str) -> dict:
     if os.path.exists(path):
@@ -27,8 +30,10 @@ def create_and_load_json(path: str) -> dict:
         json.dump({}, json_file)
     return {}
 
+
 JSON_DATABASE_PATH = os.path.join(MINDFLOW_DIR, "db.json")
 JSON_DATABASE = create_and_load_json(JSON_DATABASE_PATH)
+
 
 class JsonDatabase(Database):
     def load(self, collection: str, object_id: str) -> Optional[dict]:
@@ -41,9 +46,7 @@ class JsonDatabase(Database):
 
         return None
 
-    def load_bulk(
-        self, collection: str, object_ids: List[str]
-    ) -> Optional[List[dict]]:
+    def load_bulk(self, collection: str, object_ids: List[str]) -> Optional[List[dict]]:
         objects = JSON_DATABASE.get(collection, None)
         if not objects:
             return None
@@ -63,7 +66,7 @@ class JsonDatabase(Database):
         if isinstance(objects, dict):
             if object_id in objects:
                 del objects[object_id]
-            else: 
+            else:
                 print("Object not found")
                 sys.exit(1)
 
@@ -90,7 +93,7 @@ class JsonDatabase(Database):
             sys.exit(1)
 
         JSON_DATABASE[collection][object_id] = value
-    
+
     def save_file(self):
         with open(JSON_DATABASE_PATH, "w", encoding="utf-8") as json_file:
             json.dump(JSON_DATABASE, json_file, indent=4)

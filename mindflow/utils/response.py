@@ -2,7 +2,8 @@
 Handle response text from Mindflow API.
 """
 
-import pyperclip
+# import pyperclip
+
 
 def handle_response_text(text: str, skip_clipboard: bool = False):
     """

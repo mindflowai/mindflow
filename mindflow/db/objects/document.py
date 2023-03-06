@@ -28,7 +28,7 @@ class Document(BaseObject):
         document_text: Optional[str] = read_document(self.id, self.document_type)
         if not document_text:
             raise Exception("Document text not found")
-        
+
         document_text_bytes = document_text.encode("utf-8")
         return DocumentReference(
             {
@@ -60,13 +60,15 @@ class DocumentReference(BaseObject):
         """
         Create document
         """
-        return Document({
-            "id": self.id,
-            "path": self.path,
-            "document_type": self.document_type,
-            "size": self.size,
-            "hash": self.hash,
-        })
+        return Document(
+            {
+                "id": self.id,
+                "path": self.path,
+                "document_type": self.document_type,
+                "size": self.size,
+                "hash": self.hash,
+            }
+        )
 
     @classmethod
     def from_path(
@@ -81,24 +83,25 @@ class DocumentReference(BaseObject):
         if not document_text:
             return None
         document_text_bytes = document_text.encode()
-        return cls({
-            "id": document_path,
-            "path": document_path,
-            "document_type": document_type.value,
-            "size": len(document_text_bytes),
-            "hash": hashlib.sha256(document_text_bytes).hexdigest(),
-        })
+        return cls(
+            {
+                "id": document_path,
+                "path": document_path,
+                "document_type": document_type.value,
+                "size": len(document_text_bytes),
+                "hash": hashlib.sha256(document_text_bytes).hexdigest(),
+            }
+        )
+
 
 def read_document(document_path: str, document_type: str) -> Optional[str]:
     """
     Read a document.
     """
-    match document_type:
-        case DocumentType.FILE.value:
-            try:
-                with open(document_path, "r", encoding="utf-8") as file:
-                    return file.read()
-            except UnicodeDecodeError:
-                return None
-        case _:
+    if document_type == DocumentType.FILE.value:
+        try:
+            with open(document_path, "r", encoding="utf-8") as file:
+                return file.read()
+        except UnicodeDecodeError:
             return None
+    return None

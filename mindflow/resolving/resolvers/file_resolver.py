@@ -36,9 +36,11 @@ class FileResolver(BaseResolver):
             if document:
                 document_reference = document.to_document_reference()
             else:
-                document_reference = DocumentReference.from_path(path, DocumentType.FILE)
-            
+                document_reference = DocumentReference.from_path(
+                    path, DocumentType.FILE
+                )
+
             if document_reference:
                 document_references.append(document_reference)
-    
+
         return document_references

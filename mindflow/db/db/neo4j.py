@@ -44,9 +44,7 @@ class Neo4jDatabase(Database):
 
         return dict(result.single()["d"].items())
 
-    def load_bulk(
-        self, collection: str, object_ids: List[str]
-    ) -> Optional[List[dict]]:
+    def load_bulk(self, collection: str, object_ids: List[str]) -> Optional[List[dict]]:
         result = self.session.run(
             """
             UNWIND {object_ids} AS id

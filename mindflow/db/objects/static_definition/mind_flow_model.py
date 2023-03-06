@@ -3,15 +3,18 @@ from mindflow.db.objects.static_definition.model_type import ModelType
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.utils.enum import ExtendedEnum
 
+
 class MindFlowModelParameterKey(ExtendedEnum):
     ID = "id"
     NAME = "name"
     DEFAULTS = "defaults"
 
+
 class MindFlowModelID(ExtendedEnum):
     QUERY = "query"
     INDEX = "index"
     EMBEDDING = "embedding"
+
 
 class MindFlowModelDefaults(ExtendedEnum):
     QUERY: dict = {
@@ -24,15 +27,18 @@ class MindFlowModelDefaults(ExtendedEnum):
         "openai": ModelID.TEXT_EMBEDDING_ADA_002.value,
     }
 
+
 class MindFlowModelName(ExtendedEnum):
     QUERY = "Query"
     INDEX = "Index"
     EMBEDDING = "Embedding"
 
+
 class MindFlowModelType(ExtendedEnum):
     QUERY = ModelType.TEXT_COMPLETION.value
     INDEX = ModelType.TEXT_COMPLETION.value
     EMBEDDING = ModelType.TEXT_EMBEDDING.value
+
 
 class MindFlowModelDescription(ExtendedEnum):
     QUERY = f"{MindFlowModelName.QUERY}:    Used to generate final response from query."
@@ -54,19 +60,19 @@ MINDFLOW_MODEL_STATIC = {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.EMBEDDING.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.EMBEDDING.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.EMBEDDING.value,
-    }
+    },
 }
 
-MindFlowModelUnion = Union[
-    MindFlowModelID,
-    MindFlowModelDefaults,
-    MindFlowModelName,
-    MindFlowModelType,
-    MindFlowModelDescription,
-]
+# MindFlowModelUnion = Union[
+#     MindFlowModelID,
+#     MindFlowModelDefaults,
+#     MindFlowModelName,
+#     MindFlowModelType,
+#     MindFlowModelDescription,
+# ]
 
 
-def get_mind_flow_model_static(
-    static: Type[MindFlowModelUnion], key: MindFlowModelUnion
-) -> MindFlowModelUnion:
-    return static.__members__[key.name]
+# def get_mind_flow_model_static(
+#     static: Type[MindFlowModelUnion], key: MindFlowModelUnion
+# ) -> MindFlowModelUnion:
+#     return static.__members__[key.name]

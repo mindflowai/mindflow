@@ -1,6 +1,7 @@
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.controller import DATABASE_CONTROLLER
 
+
 def run_login(openai_api_key):
     service_config = ServiceConfig.load("openai_config")
     if not service_config:

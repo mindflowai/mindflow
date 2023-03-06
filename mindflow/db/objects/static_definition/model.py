@@ -14,6 +14,7 @@ class ModelID(ExtendedEnum):
 
     TEXT_EMBEDDING_ADA_002 = "text-embedding-ada-002"
 
+
 class ModelParameterKey(ExtendedEnum):
     ID = "id"
     NAME = "name"
@@ -24,6 +25,7 @@ class ModelParameterKey(ExtendedEnum):
     TOKEN_COST = "token_cost"
     TOKEN_COST_UNIT = "token_cost_unit"
     DESCRIPTION = "description"
+
 
 class ModelService(ExtendedEnum):
     GPT_3_5_TURBO = "openai"
@@ -56,6 +58,7 @@ class ModelName(ExtendedEnum):
 
     TEXT_EMBEDDING_ADA_002 = "Text Embedding Ada 002"
 
+
 class ModelSoftTokenLimit(ExtendedEnum):
     GPT_3_5_TURBO = 500
     GPT_3_5_TURBO_0301 = 500
@@ -66,6 +69,7 @@ class ModelSoftTokenLimit(ExtendedEnum):
     # TEXT_ADA_001 = 500
     TEXT_EMBEDDING_ADA_002 = 8191
 
+
 class ModelHardTokenLimit(ExtendedEnum):
     GPT_3_5_TURBO = 4000
     GPT_3_5_TURBO_0301 = 4000
@@ -75,6 +79,7 @@ class ModelHardTokenLimit(ExtendedEnum):
     # TEXT_BABBAGE_001 = 2048
     # TEXT_ADA_001 = 2048
     TEXT_EMBEDDING_ADA_002 = 8191
+
 
 class ModelTokenCost(ExtendedEnum):
     GPT_3_5_TURBO = 0.002
@@ -115,6 +120,7 @@ class ModelTextCompletionOpenAI(ExtendedEnum):
     # TEXT_CURIE_001 = ModelID.TEXT_CURIE_001.value
     # TEXT_BABBAGE_001 = ModelID.TEXT_BABBAGE_001.value
     # TEXT_ADA_001 = ModelID.TEXT_ADA_001.value
+
 
 class ModelTextEmbeddingOpenAI(ExtendedEnum):
     TEXT_EMBEDDING_ADA_002 = ModelID.TEXT_EMBEDDING_ADA_002.value
@@ -165,18 +171,18 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    }
+    },
 }
 
 
-ModelUnion = Union[
-    ModelID,
-    ModelParameterKey,
-    ModelName,
-    ModelHardTokenLimit,
-    ModelDescription,
-]
+# ModelUnion = Union[
+#     ModelID,
+#     ModelParameterKey,
+#     ModelName,
+#     ModelHardTokenLimit,
+#     ModelDescription,
+# ]
 
 
-def get_model_static(static: Type[ModelUnion], key: ModelUnion) -> ModelUnion:
-    return static.__members__[key.name]
+# def get_model_static(static: Type[ModelUnion], key: ModelUnion) -> ModelUnion:
+#     return static.__members__[key.name]

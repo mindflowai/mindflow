@@ -22,6 +22,7 @@ class ServiceParameterKey(ExtendedEnum):
     DEFAULT_QUERY_MODEL = "default_query_model"
     DEFAULT_EMBEDDING_MODEL = "default_embedding_model"
 
+
 class ServiceConfigParameterKey(ExtendedEnum):
     API_KEY = "api_key"
     API_SECRET = "api_secret"
@@ -43,17 +44,22 @@ class ServiceName(ExtendedEnum):
 class ServiceURL(ExtendedEnum):
     OPENAI = ""
 
+
 class ServiceAPIURL(ExtendedEnum):
     OPENAI = ""
+
 
 class ServiceDefaultIndexModel(ExtendedEnum):
     OPENAI = ModelID.GPT_3_5_TURBO.value
 
+
 class ServiceDefaultQueryModel(ExtendedEnum):
     OPENAI = ModelID.GPT_3_5_TURBO.value
 
+
 class ServiceDefaultEmbeddingModel(ExtendedEnum):
     OPENAI = ModelID.TEXT_EMBEDDING_ADA_002.value
+
 
 ## Service Model Types
 class ServiceModelTypeTextEmbedding(ExtendedEnum):
@@ -81,17 +87,17 @@ SERVICE_STATIC = {
 }
 
 
-ServiceUnion = Union[
-    ServiceID,
-    ServiceParameterKey,
-    ServiceConfigParameterKey,
-    ServiceName,
-    ServiceURL,
-    ServiceModel,
-    ServiceModelTypeTextEmbedding,
-    ServiceModelTypeTextCompletion,
-]
+# ServiceUnion = Union[
+#     ServiceID,
+#     ServiceParameterKey,
+#     ServiceConfigParameterKey,
+#     ServiceName,
+#     ServiceURL,
+#     ServiceModel,
+#     ServiceModelTypeTextEmbedding,
+#     ServiceModelTypeTextCompletion,
+# ]
 
 
-def get_service_static(static: Type[ServiceUnion], key: ServiceUnion) -> ServiceUnion:
-    return static.__members__[key.name]
+# def get_service_static(static: Type[ServiceUnion], key: ServiceUnion) -> ServiceUnion:
+#     return static.__members__[key.name]

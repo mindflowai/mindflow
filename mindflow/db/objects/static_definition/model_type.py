@@ -18,14 +18,8 @@ class ModelTypeOpenAI(ExtendedEnum):
     TEXT_EMBEDDING = ModelType.TEXT_EMBEDDING.value
 
 
-ModelTypeUnion = Union[
-    ModelType,
-    ModelTypeName,
-    ModelTypeOpenAI,
-]
-
-
-def get_model_type_static(
-    static: ModelTypeUnion, key: ModelTypeUnion
-) -> ModelTypeUnion:
-    return static.__members__[key.name]
+# ModelTypeUnion = Union[
+#     ModelType,
+#     ModelTypeName,
+#     ModelTypeOpenAI,
+# ]

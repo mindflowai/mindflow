@@ -7,6 +7,7 @@ from mindflow.core.delete import run_delete
 
 import click
 
+
 @click.command(help="Delete your MindFlow index")
 @click.argument("document_paths", type=str, nargs=-1)
 def delete(document_paths: List[str]):

@@ -1,6 +1,6 @@
-
 from typing import List, Optional
 from mindflow.utils.enum import ExtendedEnum
+
 
 class Store(ExtendedEnum):
     STATIC = "static"
@@ -15,13 +15,12 @@ class Collection(ExtendedEnum):
     CONFIGURATIONS = "configurations"
     DOCUMENT = "document"
 
+
 class Database:
     def load(self, collection: str, object_id: str) -> Optional[dict]:
         raise NotImplementedError
 
-    def load_bulk(
-        self, collection: str, object_ids: List[str]
-    ) -> Optional[List[dict]]:
+    def load_bulk(self, collection: str, object_ids: List[str]) -> Optional[List[dict]]:
         raise NotImplementedError
 
     def delete(self, collection: str, object_id: str):

@@ -8,9 +8,9 @@ from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
-from alive_progress import alive_bar
+from alive_progress import alive_bar  # type: ignore
 from mindflow.db.controller import DATABASE_CONTROLLER
-from mindflow.db.objects.model import Model
+from mindflow.db.objects.model import ConfiguredModel
 
 from mindflow.resolving.resolve import return_if_indexable, resolve_all
 
@@ -23,18 +23,22 @@ from mindflow.utils.prompt_builders import build_context_prompt
 
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 
+
 def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
 
     import os
+
     document_paths = [os.path.abspath(path) for path in document_paths]
 
     settings = Settings()
-    completion_model: Model = settings.mindflow_models.index.model
-    
-    indexable_document_references: List[DocumentReference] = return_if_indexable(resolve_all(document_paths), refresh, force)
+    completion_model: ConfiguredModel = settings.mindflow_models.index.model
+
+    indexable_document_references: List[DocumentReference] = return_if_indexable(
+        resolve_all(document_paths), refresh, force
+    )
     if not indexable_document_references:
         print("No documents to index")
         return
@@ -50,7 +54,6 @@ def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
     with alive_bar(
         len(indexable_document_references), bar="blocks", spinner="twirls"
     ) as progress_bar:
-
         with ThreadPoolExecutor(max_workers=50) as executor:
             search_tree_futures: List[Future[dict]] = [
                 executor.submit(
@@ -71,8 +74,9 @@ def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
                 document.save()
                 del document_reference, search_tree_future
                 progress_bar()
-    
+
     DATABASE_CONTROLLER.databases.json.save_file()
+
 
 class Node:
     """
@@ -85,11 +89,19 @@ class Node:
     embedding: np.ndarray
     leaves: List["Node"]
 
-    def __init__(self, completion_model: Model, start: int, end: int, text: Optional[str] = None):
+    def __init__(
+        self,
+        completion_model: ConfiguredModel,
+        start: int,
+        end: int,
+        text: Optional[str] = None,
+    ):
         self.start = start
         self.end = end
         if text:
-            self.summary = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text))
+            self.summary = completion_model(
+                build_context_prompt(INDEX_PROMPT_PREFIX, text)
+            )
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -136,7 +148,9 @@ def count_tokens(text: str) -> int:
 
 
 # This function is used to split a string into chunks of a specified token limit using binary search
-def binary_split_raw_text_to_nodes(completion_model: Model, text: str) -> List[Node]:
+def binary_split_raw_text_to_nodes(
+    completion_model: ConfiguredModel, text: str
+) -> List[Node]:
     """
     Splits text into smaller chunks to not exceed the token limit.
     """
@@ -153,7 +167,9 @@ def binary_split_raw_text_to_nodes(completion_model: Model, text: str) -> List[N
     return nodes
 
 
-def binary_split_nodes_to_chunks(completion_model: Model, nodes: List[Node]) -> List[List[Node]]:
+def binary_split_nodes_to_chunks(
+    completion_model: ConfiguredModel, nodes: List[Node]
+) -> List[List[Node]]:
     """
     Split nodes into smaller chunks to not exceed the token limit.
     """
@@ -173,7 +189,7 @@ def binary_split_nodes_to_chunks(completion_model: Model, nodes: List[Node]) -> 
     return chunks
 
 
-def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
+def create_nodes(completion_model: ConfiguredModel, leaf_nodes: List[Node]) -> Node:
     """
     This function is used to iteratively create a nodes of our search tree
     """
@@ -185,8 +201,7 @@ def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
             > completion_model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
-                completion_model,
-                leaf_nodes[start:end]
+                completion_model, leaf_nodes[start:end]
             )
             for node_chunk in node_chunks:
                 stack.append((node_chunk, 0, len(node_chunk)))
@@ -205,11 +220,13 @@ def create_nodes(completion_model: Model, leaf_nodes: List[Node]) -> Node:
     return Node(completion_model, 0, 0)
 
 
-def create_text_search_tree(completion_model: Model, text: str) -> dict:
+def create_text_search_tree(completion_model: ConfiguredModel, text: str) -> dict:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
     if count_tokens(text) < completion_model.soft_token_limit:
         return Node(completion_model, 0, len(text), text).to_dict()
 
-    return create_nodes(completion_model, binary_split_raw_text_to_nodes(completion_model, text)).to_dict()
+    return create_nodes(
+        completion_model, binary_split_raw_text_to_nodes(completion_model, text)
+    ).to_dict()

@@ -3,18 +3,17 @@
 """
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
 from typing import Dict, List, Optional, Tuple
 
 import sys
 import numpy as np
 
 from mindflow.db.objects.document import Document, DocumentReference
-from mindflow.db.objects.model import Model
+from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
 
-from mindflow.utils.response import handle_response_text
 
 def run_query(document_paths: List[str], query: str):
     """
@@ -25,26 +24,44 @@ def run_query(document_paths: List[str], query: str):
     embedding_model = settings.mindflow_models.embedding.model
 
     document_references: List[DocumentReference] = resolve_all(document_paths)
-    messages = build_query_messages(query, select_content(query, document_references, completion_model.hard_token_limit, embedding_model))
+    messages = build_query_messages(
+        query,
+        select_content(
+            query,
+            document_references,
+            completion_model.hard_token_limit,
+            embedding_model,
+        ),
+    )
     response = completion_model(messages)
     return response
+
 
 def build_query_messages(query: str, content: str) -> List[Dict]:
     """
     This function is used to build the query messages for the prompt.
     """
     return [
-            {"role": "system", "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below."},
-            {"role": "user", "content": query},
-            {"role": "system", "content": content}
-        ]
+        {
+            "role": "system",
+            "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below.",
+        },
+        {"role": "user", "content": query},
+        {"role": "system", "content": content},
+    ]
 
-def select_content(query: str, document_references: List[DocumentReference], token_limit: int, embedding_model: Model) -> str:
+
+def select_content(
+    query: str,
+    document_references: List[DocumentReference],
+    token_limit: int,
+    embedding_model: ConfiguredModel,
+) -> str:
     """
     This function is used to generate a prompt based on a question or summarization task
     """
     embedding_ranked_document_chunks: List[
-        Tuple(DocumentChunk, float)
+        DocumentChunk
     ] = rank_document_chunks_by_embedding(query, document_references, embedding_model)
     if len(embedding_ranked_document_chunks) == 0:
         print(
@@ -74,7 +91,7 @@ class DocumentChunk:
     def from_search_tree(
         cls,
         document: Document,
-        embedding_model: Model,
+        embedding_model: ConfiguredModel,
     ) -> Tuple[List["DocumentChunk"], List[np.ndarray]]:
         """
         This function is used to split the document into chunks.
@@ -88,7 +105,9 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embeddings: List[np.ndarray] = [embedding_model(document.search_tree["summary"])]
+        embeddings: List[np.ndarray] = [
+            embedding_model(document.search_tree["summary"])
+        ]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -126,7 +145,11 @@ def trim_content(ranked_document_chunks: List[DocumentChunk], token_limit: int) 
     return selected_content
 
 
-def rank_document_chunks_by_embedding(query: str, document_references: List[DocumentReference], embedding_model: Model) -> List[DocumentChunk]:
+def rank_document_chunks_by_embedding(
+    query: str,
+    document_references: List[DocumentReference],
+    embedding_model: ConfiguredModel,
+) -> List[DocumentChunk]:
     """
     This function is used to select the most relevant content for the prompt.
     """
@@ -134,18 +157,20 @@ def rank_document_chunks_by_embedding(query: str, document_references: List[Docu
 
     ranked_document_chunks = []
     for i in range(0, len(document_references), 100):
-        document_ids = [
-            document.id for document in document_references[i : i + 100]
-        ]
+        document_ids = [document.id for document in document_references[i : i + 100]]
         documents: List[Optional[Document]] = Document.load_bulk(document_ids)
-        documents = [document for document in documents if document]
+        filtered_documents: List[Document] = [
+            document for document in documents if document is not None
+        ]
         if documents == []:
             continue
-        
+
         with ThreadPoolExecutor(max_workers=50) as executor:
             futures = [
-                executor.submit(DocumentChunk.from_search_tree, document, embedding_model)
-                for document in documents 
+                executor.submit(
+                    DocumentChunk.from_search_tree, document, embedding_model
+                )
+                for document in filtered_documents
             ]
             for future in as_completed(futures):
                 document_chunks, document_chunk_embeddings = future.result()
