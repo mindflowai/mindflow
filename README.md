@@ -4,6 +4,8 @@
 Inspired by our hatred for maintaining documentation, we developed MindFlow; A code search engine powered by [ChatGPT](https://openai.com/blog/chatgpt).
 MindFlow answers natural language questions about your repos and provides tools for streamlining your developer experience.
 
+We efficiently index your code repo by leveraging hierarchical embeddings and file/directory-wise summaries for files/directories and keep them updated with each file hash so you can save those precious API tokens!
+
 ## Getting Started
 
 Pre-requisite: You need to create an OpenAI API account, you can do so [here](https://openai.com/blog/openai-api).
