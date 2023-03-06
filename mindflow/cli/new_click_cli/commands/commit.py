@@ -7,4 +7,4 @@ def commit():
     """
     Commit command.
     """
-    run_commit()
+    print(run_commit())
