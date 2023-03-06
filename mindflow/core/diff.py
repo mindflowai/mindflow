@@ -14,17 +14,21 @@ import concurrent.futures
 
 from mindflow.utils.response import handle_response_text
 
-def run_diff(args: str):
+def run_diff(args: str) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
     command = ['git', 'diff'] + list(args)
+
+    if not has_changes(command):
+        return "No changes"
 
     settings = Settings()
     completion_model: Model = settings.mindflow_models.query.model
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
+    
     batched_parsed_diff_result = batch_git_diffs(parse_git_diff(diff_result), token_limit=completion_model.hard_token_limit)
 
     response: str = ""
@@ -44,6 +48,18 @@ def run_diff(args: str):
     return response
 
 import re
+
+
+def has_changes(diff_command: List[str]) -> bool:
+    """
+    Returns True if there are changes according to the given diff command, False otherwise.
+    """
+    # Check if there are any changes
+    try:
+        subprocess.check_output(diff_command + ["--quiet"])
+        return False
+    except subprocess.CalledProcessError:
+        return True
 
 def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
     file_diffs = []

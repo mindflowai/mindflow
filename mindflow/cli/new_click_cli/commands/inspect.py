@@ -13,4 +13,4 @@ def inspect(document_paths: List[str]):
     """
     This function is used to inspect your MindFlow index.
     """
-    run_inspect(document_paths)
+    print(run_inspect(document_paths))

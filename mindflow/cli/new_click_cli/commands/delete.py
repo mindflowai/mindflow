@@ -13,4 +13,4 @@ def delete(document_paths: List[str]):
     """
     This function is used to delete your MindFlow index.
     """
-    run_delete(document_paths)
+    print(run_delete(document_paths))
