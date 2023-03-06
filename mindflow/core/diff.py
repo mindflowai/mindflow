@@ -21,7 +21,7 @@ def run_diff():
     settings = Settings()
     completion_model: Model = settings.mindflow_models.query.model
 
-    command = ["git", "diff", "--cached"]
+    command = ["git", "diff"]
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
