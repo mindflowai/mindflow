@@ -57,4 +57,4 @@ def has_remote_branch() -> bool:
 
 def create_pull_request(title, body):
     command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]
-    subprocess.check_output(command).decode("utf-8")
+    print(subprocess.check_output(command).decode("utf-8"))
