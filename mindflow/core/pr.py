@@ -57,4 +57,10 @@ def has_remote_branch() -> bool:
 
 def create_pull_request(title, body):
     command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]
-    subprocess.check_output(command).decode("utf-8")
+    pr_result = subprocess.check_output(command).decode("utf-8")
+    if "https://" in pr_result:
+        print("Pull request created successfully")
+        print(pr_result)
+    else:
+        print("Failed to create pull request. Please raise an issue at: https://github.com/nollied/mindflow-cli/issues")
+        exit()
