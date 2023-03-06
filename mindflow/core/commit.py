@@ -12,8 +12,7 @@ def run_commit() -> str:
     settings = Settings()
 
     if not has_staged_files():
-        print("No staged files")
-        return
+        return "No staged files"
 
     # Execute the git diff command and retrieve the output as a string
     diff_output = run_diff(("--cached",))

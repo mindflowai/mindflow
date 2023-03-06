@@ -63,6 +63,9 @@ class JsonDatabase(Database):
         if isinstance(objects, dict):
             if object_id in objects:
                 del objects[object_id]
+            else: 
+                print("Object not found")
+                sys.exit(1)
 
     ### Delete objects from json from ID list and overwrite the file
     def delete_bulk(self, collection: str, object_ids: List[str]):
@@ -72,6 +75,9 @@ class JsonDatabase(Database):
         for object_id in object_ids:
             if JSON_DATABASE[collection].get(object_id, None):
                 del JSON_DATABASE[collection][object_id]
+            else:
+                print("Object not found")
+                sys.exit(1)
 
     def save(self, collection: str, value: dict):
         if not collection in JSON_DATABASE:

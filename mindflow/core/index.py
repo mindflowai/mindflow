@@ -17,7 +17,7 @@ from mindflow.resolving.resolve import return_if_indexable, resolve_all
 
 from mindflow.db.objects.document import Document, DocumentReference
 from mindflow.settings import Settings
-from mindflow.utils.document.read import read_document
+from mindflow.db.objects.document import read_document
 
 from mindflow.utils.prompt_builders import build_context_prompt
 
