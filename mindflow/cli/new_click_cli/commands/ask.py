@@ -15,4 +15,4 @@ def ask(prompt: str) -> str:
     """
     settings = Settings()
     # Prompt GPT through Mindflow API or locally
-    return settings.mindflow_models.query(prompt)
+    return settings.mindflow_models.query.model(prompt)

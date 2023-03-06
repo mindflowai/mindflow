@@ -4,6 +4,7 @@ from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject, StaticObject
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
+from mindflow.db.objects.static_definition.service import ServiceID
 
 class Model(StaticObject):
     """Model object."""
@@ -55,10 +56,8 @@ class ConfiguredModel:
                 if value not in [None, ""]:
                     setattr(self, key, value)
         
-        service_config = ServiceConfig.load(self.service)
+        service_config = ServiceConfig.load(f"{self.service}_config")
         self.api_key = service_config.api_key
-
-        self.__call__ = self.get_call()
     
     def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: list = ["\n\n"]): 
         openai.api_key = self.api_key
@@ -76,14 +75,14 @@ class ConfiguredModel:
             model=self.id,
             query=text
         )
-    
 
-    def get_call(self):
-        if self.service == "openai":
-            if self.id == ["gpt-3-5-turbo", "gpt-3-5-turbo-0301"]:
-                return self.openai_chat_completion
+    def __call__(self, prompt: str, *args, **kwargs):
+        print(self.id)
+        if self.service == ServiceID.OPENAI.value:
+            if self.id == [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
+                return self.openai_chat_completion(prompt, *args, **kwargs)
             else:
-                return self.openai_embedding
+                return self.openai_embedding(prompt, *args, **kwargs)
         else: 
             raise NotImplementedError(f"Service {self.service} not implemented.")
 

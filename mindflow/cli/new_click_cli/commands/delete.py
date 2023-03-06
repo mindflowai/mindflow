@@ -6,6 +6,8 @@ from typing import List
 from mindflow.db.objects.document import Document
 from mindflow.resolving.resolve import resolve_all
 
+import click
+
 @click.command(help="Delete your MindFlow index")
 @click.argument("document_paths", type=str, nargs=-1)
 def delete(document_paths: List[str]):
