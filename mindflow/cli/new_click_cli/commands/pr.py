@@ -7,4 +7,4 @@ def pr():
     """
     PR command.
     """
-    print(run_pr())
+    run_pr()
