@@ -11,5 +11,5 @@ from mindflow.core.diff import run_diff
 ), help="Wrapper around git diff that summarizes the output. Treat this command exactly like git diff, it supports all arguments that git diff provides.")
 @click.argument('args', nargs=-1, type=click.UNPROCESSED)
 def diff(args: Tuple[str]) -> str:
-    run_diff(args)
+    print(run_diff(args))
 

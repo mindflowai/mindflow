@@ -12,4 +12,4 @@ def ask(prompt: str) -> str:
     """
     This function is used to generate a prompt and then use it as a prompt for GPT bot.
     """
-    run_ask(prompt)
+    print(run_ask(prompt))

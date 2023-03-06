@@ -41,7 +41,6 @@ def run_diff(args: str):
         for future in concurrent.futures.as_completed(futures):
             response += future.result()
     
-    handle_response_text(response)
     return response
 
 import re

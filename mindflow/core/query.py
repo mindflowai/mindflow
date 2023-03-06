@@ -27,7 +27,7 @@ def run_query(document_paths: List[str], query: str):
     document_references: List[DocumentReference] = resolve_all(document_paths)
     messages = build_query_messages(query, select_content(query, document_references, completion_model.hard_token_limit, embedding_model))
     response = completion_model(messages)
-    handle_response_text(response)
+    return response
 
 def build_query_messages(query: str, content: str) -> List[Dict]:
     """
