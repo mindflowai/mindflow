@@ -61,40 +61,27 @@ class ConfiguredModel:
     
     def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: list = ["\n\n"]): 
         openai.api_key = self.api_key
-        openai.ChatCompletion.create(
+        return openai.ChatCompletion.create(
             model=self.id,
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
             stop=stop
-        )
+        )["choices"][0]["message"]["content"]
 
     def openai_embedding(self, text: str): 
         openai.api_key = self.api_key
-        openai.Embedding.create(
+        return openai.Embedding.create(
             model=self.id,
             query=text
-        )
+        )["data"][0]["embedding"]
 
-    def __call__(self, prompt: str, *args, **kwargs):
+    def __call__(self, prompt, *args, **kwargs):
         print(self.id)
         if self.service == ServiceID.OPENAI.value:
-            if self.id == [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
+            if self.id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
                 return self.openai_chat_completion(prompt, *args, **kwargs)
             else:
                 return self.openai_embedding(prompt, *args, **kwargs)
         else: 
             raise NotImplementedError(f"Service {self.service} not implemented.")
-
-class ConfiguredModels:
-    @property
-    def gpt_3_5_turbo(self):
-        return ConfiguredModel(ModelID.GPT_3_5_TURBO.value)
-
-    @property
-    def gpt_3_5_turbo_0301(self):
-        return ConfiguredModel(ModelID.GPT_3_5_TURBO_0301.value)
-    
-    @property
-    def text_embedding_ada_002(self):
-        return ConfiguredModel(ModelID.TEXT_EMBEDDING_ADA_002.value)

@@ -4,16 +4,15 @@ from mindflow.utils.enum import ExtendedEnum
 
 
 class ModelID(ExtendedEnum):
-    GPT_3_5_TURBO = "gpt_3_5_turbo"
-    GPT_3_5_TURBO_0301 = "gpt_3_5_turbo-0301"
+    GPT_3_5_TURBO = "gpt-3.5-turbo"
+    GPT_3_5_TURBO_0301 = "gpt-3.5-turbo-0301"
 
     # TEXT_DAVINCI_003 = "text-davinci-003"
     # TEXT_CURIE_001 = "text-curie-001"
     # TEXT_BABBAGE_001 = "text-babbage-001"
     # TEXT_ADA_001 = "text-ada-001"
 
-    TEXT_EMBEDDING_ADA_002 = "text_embedding_ada_002"
-
+    TEXT_EMBEDDING_ADA_002 = "text-embedding-ada-002"
 
 class ModelParameterKey(ExtendedEnum):
     ID = "id"
@@ -25,7 +24,6 @@ class ModelParameterKey(ExtendedEnum):
     TOKEN_COST = "token_cost"
     TOKEN_COST_UNIT = "token_cost_unit"
     DESCRIPTION = "description"
-
 
 class ModelService(ExtendedEnum):
     GPT_3_5_TURBO = "openai"
@@ -137,8 +135,8 @@ class ModelOpenAI(ExtendedEnum):
     TEXT_EMBEDDING_ADA_002 = ModelID.TEXT_EMBEDDING_ADA_002.value
 
 
-class ModelStatic(ExtendedEnum):
-    GPT_3_5_TURBO: dict = {
+MODEL_STATIC: dict = {
+    ModelID.GPT_3_5_TURBO.value: {
         ModelParameterKey.ID.value: ModelID.GPT_3_5_TURBO.value,
         ModelParameterKey.SERVICE.value: ModelService.GPT_3_5_TURBO.value,
         ModelParameterKey.NAME.value: ModelName.GPT_3_5_TURBO.value,
@@ -147,8 +145,8 @@ class ModelStatic(ExtendedEnum):
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.GPT_3_5_TURBO.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.GPT_3_5_TURBO.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    }
-    GPT_3_5_TURBO_0301: dict = {
+    },
+    ModelID.GPT_3_5_TURBO_0301.value: {
         ModelParameterKey.ID.value: ModelID.GPT_3_5_TURBO_0301.value,
         ModelParameterKey.NAME.value: ModelName.GPT_3_5_TURBO_0301.value,
         ModelParameterKey.SERVICE.value: ModelService.GPT_3_5_TURBO_0301.value,
@@ -157,49 +155,8 @@ class ModelStatic(ExtendedEnum):
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.GPT_3_5_TURBO_0301.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.GPT_3_5_TURBO_0301.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    }
-    # TEXT_DAVINCI_003: dict = {
-    #     ModelParameterKey.ID.value: ModelID.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.NAME.value: ModelName.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.SERVICE.value: ModelService.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
-    #     ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_DAVINCI_003.value,
-    #     ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    # }
-    # TEXT_CURIE_001: dict = {
-    #     ModelParameterKey.ID.value: ModelID.TEXT_CURIE_001.value,
-    #     ModelParameterKey.NAME.value: ModelName.TEXT_CURIE_001.value,
-    #     ModelParameterKey.SERVICE.value: ModelService.TEXT_CURIE_001.value,
-    #     ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
-    #     ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.TEXT_CURIE_001.value,
-    #     ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_CURIE_001.value,
-    #     ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_CURIE_001.value,
-    #     ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    # }
-    # TEXT_BABBAGE_001: dict = {
-    #     ModelParameterKey.ID.value: ModelID.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.NAME.value: ModelName.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.SERVICE.value: ModelService.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
-    #     ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_BABBAGE_001.value,
-    #     ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    # }
-    # TEXT_ADA_001: dict = {
-    #     ModelParameterKey.ID.value: ModelID.TEXT_ADA_001.value,
-    #     ModelParameterKey.NAME.value: ModelName.TEXT_ADA_001.value,
-    #     ModelParameterKey.SERVICE.value: ModelService.TEXT_ADA_001.value,
-    #     ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
-    #     ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.TEXT_ADA_001.value,
-    #     ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_ADA_001.value,
-    #     ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_ADA_001.value,
-    #     ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
-    # }
-
-    TEXT_EMBEDDING_ADA_002: dict = {
+    },
+    ModelID.TEXT_EMBEDDING_ADA_002.value: {
         ModelParameterKey.ID.value: ModelID.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.NAME.value: ModelName.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.SERVICE.value: ModelService.TEXT_EMBEDDING_ADA_002.value,
@@ -209,11 +166,11 @@ class ModelStatic(ExtendedEnum):
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
     }
+}
 
 
 ModelUnion = Union[
     ModelID,
-    ModelStatic,
     ModelParameterKey,
     ModelName,
     ModelHardTokenLimit,

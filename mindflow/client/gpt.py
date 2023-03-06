@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 import openai
 from mindflow.db.objects.model import Model
+from mindflow.db.objects.static_definition.model import ModelID
 
 from mindflow.utils.prompts import SEARCH_INDEX
 
@@ -26,7 +27,7 @@ class GPTEndpoints:
         """
         try:
             # print(f"Suffix: {suffix}")
-            if STATE.settings.mindflow_models.index.model.api in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
+            if STATE.settings.mindflow_models.index.model.api in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
                 response = self.configured_api.ChatCompletion.create(
                     model=STATE.settings.mindflow_models.index.model.api,
                     messages=[

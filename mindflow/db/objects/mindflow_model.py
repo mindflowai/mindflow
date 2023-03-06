@@ -2,7 +2,7 @@ import sys
 from typing import Dict, Optional
 from mindflow.db.objects.base import BaseObject, StaticObject
 from mindflow.db.db.database import Collection
-from mindflow.db.objects.model import ConfiguredModels, Model
+from mindflow.db.objects.model import Model, ConfiguredModel
 from mindflow.db.objects.service import ConfiguredServices
 from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
 
@@ -29,7 +29,7 @@ class ConfiguredMindFlowModel:
     defaults: Dict[str, str]
     model: Model
 
-    def __init__(self, mindflow_model_id: str, configured_services: ConfiguredServices, configured_models: ConfiguredModels): 
+    def __init__(self, mindflow_model_id: str, configured_services: ConfiguredServices): 
         self.id = mindflow_model_id
 
         mind_flow_model = MindFlowModel.load(mindflow_model_id)
@@ -47,7 +47,7 @@ class ConfiguredMindFlowModel:
         if model_id is None:
             model_id = self.get_default_model_id(mindflow_model_id, configured_services)  
 
-        self.model = getattr(configured_models, model_id)
+        self.model = ConfiguredModel(model_id)
     
     def get_default_model_id(self, mindflow_model_id: str, configured_services: ConfiguredServices) -> str:
         if hasattr(configured_services.openai, "api_key"):
@@ -64,21 +64,20 @@ class ConfiguredMindFlowModel:
         return model_id
 
 class ConfiguredMindFlowModels:
-    def __init__(self, configured_services: ConfiguredServices, configured_models: ConfiguredModels):
+    def __init__(self, configured_services: ConfiguredServices):
         self.configured_services = configured_services
-        self.configured_models = configured_models
     
     @property
     def index(self):
-        model = ConfiguredMindFlowModel(MindFlowModelID.INDEX.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.INDEX.value, self.configured_services)
         return model
 
     @property
     def query(self):
-        model = ConfiguredMindFlowModel(MindFlowModelID.QUERY.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.QUERY.value, self.configured_services)
         return model
 
     @property
     def embedding(self):
-        model = ConfiguredMindFlowModel(MindFlowModelID.EMBEDDING.value, self.configured_services, self.configured_models)
+        model = ConfiguredMindFlowModel(MindFlowModelID.EMBEDDING.value, self.configured_services)
         return model
