@@ -5,7 +5,7 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
-def run_commit():
+def run_commit() -> str:
     """
     Commit command.
     """
@@ -22,7 +22,8 @@ def run_commit():
     command = ["git", "commit", "-m"] + [response]
 
     # Execute the git diff command and retrieve the output as a string
-    subprocess.check_output(command).decode("utf-8")
+    output = subprocess.check_output(command).decode("utf-8")
+    return output
 
 def has_staged_files():
     try:
