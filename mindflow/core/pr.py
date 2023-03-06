@@ -29,7 +29,7 @@ def run_pr():
     pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
     pr_body = settings.mindflow_models.query.model(pr_body_prompt)
 
-    create_pull_request(pr_title, pr_body)
+    return create_pull_request(pr_title, pr_body)
 
 def needs_push() -> bool:
     """
@@ -55,6 +55,12 @@ def has_remote_branch() -> bool:
     except subprocess.CalledProcessError:
         return False
 
-def create_pull_request(title, body):
+def create_pull_request(title, body) -> str:
     command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]
-    print(subprocess.check_output(command).decode("utf-8"))
+    pr_result = subprocess.check_output(command).decode("utf-8")
+    if "https://" in pr_result:
+        print("Pull request created successfully")
+        return pr_result
+    else:
+        print("Failed to create pull request. Please raise an issue at: https://github.com/nollied/mindflow-cli/issues")
+        exit()
