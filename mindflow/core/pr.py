@@ -8,6 +8,11 @@ from mindflow.utils.prompts import PR_BODY_PREFIX, PR_TITLE_PREFIX
 
 
 def run_pr():
+
+    if not has_remote_branch():
+        print("No remote branch for current branch")
+        return
+    
     settings = Settings()
 
     # Determine the name of the default branch
@@ -20,12 +25,22 @@ def run_pr():
     pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
     pr_body = settings.mindflow_models.query.model(pr_body_prompt)
 
-    print(f"PR Title: {pr_title}")
-    print(f"PR Body: {pr_body}")
     create_pull_request(pr_title, pr_body)
+
+def has_remote_branch() -> bool:
+    """
+    Returns True if there is a remote branch for the current branch, False otherwise.
+    """
+    # Get the name of the current branch
+    current_branch = subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"]).decode("utf-8").strip()
+
+    # Check if there is a remote branch for the current branch
+    try:
+        subprocess.check_output(["git", "ls-remote", "--exit-code", "--heads", "origin", current_branch])
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 def create_pull_request(title, body):
     command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]
-    pr_result = subprocess.check_output(command).decode("utf-8")
-    print(pr_result)
-
+    subprocess.check_output(command).decode("utf-8")
