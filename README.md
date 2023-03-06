@@ -14,7 +14,7 @@ Please consider supporting us on our [patreon](https://www.patreon.com/MindFlowA
 
 Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do so [here](https://openai.com/blog/openai-api).
 
-1. Run `pip install mindflow,` or you can clone this repo and run `pip install -e path/to/mindflow.`
+1. Run `pip install mindflow,` or you can clone this repo and run `pip install -e path/to/mindflow`.
 2. Run `mf login {OPENAI_API_KEY}`; you can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
 3. Now, you're ready to start using MindFlow!
 
