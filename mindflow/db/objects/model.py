@@ -1,3 +1,4 @@
+from typing import Optional
 import openai
 
 from mindflow.db.db.database import Collection
@@ -59,7 +60,7 @@ class ConfiguredModel:
         service_config = ServiceConfig.load(f"{self.service}_config")
         self.api_key = service_config.api_key
     
-    def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: list = ["\n\n"]): 
+    def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: Optional[list] = None): 
         openai.api_key = self.api_key
         return openai.ChatCompletion.create(
             model=self.id,

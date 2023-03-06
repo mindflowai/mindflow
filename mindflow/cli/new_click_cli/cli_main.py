@@ -8,6 +8,7 @@ from mindflow.cli.new_click_cli.commands.diff import diff
 from mindflow.cli.new_click_cli.commands.index import index
 from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.cli.new_click_cli.commands.login import login
+from mindflow.cli.new_click_cli.commands.pr import pr
 from mindflow.cli.new_click_cli.commands.query import query
 
 @click.group()
@@ -21,6 +22,7 @@ mindflow_cli.add_command(diff)
 mindflow_cli.add_command(index)
 mindflow_cli.add_command(inspect)
 mindflow_cli.add_command(login)
+mindflow_cli.add_command(pr)
 mindflow_cli.add_command(query)
 
 if __name__ == '__main__':
