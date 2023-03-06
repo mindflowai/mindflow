@@ -42,6 +42,7 @@ def run_diff():
             response += future.result()
     
     handle_response_text(response)
+    return response
 
 import re
 
