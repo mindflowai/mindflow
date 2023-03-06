@@ -5,25 +5,25 @@ Inspired by the need for a more efficient and intelligent way to search code, co
 ## What it MindFlow
 MindFlow allows users to generate an index of documents using a powerful language models to provide insightful responses to questions you may have about your data. It offers a selection of models to play around with with the ability to configure each model.
 
-## Features
-- **Note:** MindFlow is currently in beta. How do you want MindFlow to work? Let us know! We are working on adding more features and improving the user experience. If you have any feedback, please leave an issue on the GitHub repo or join our Discord server (https://discord.gg/kfVxeNET). 
+## Getting Started
 
-- `mf ask <PROMPT>`:                            
-    - GPT in the command line. Use as normal!
-- `mf config`:
-    - Configure your models used to generate indexes, create embeddings, and generate responses.
-- `mf diff [<git diff args>]`:                  
-    - Runs a git diff command and summarizes the changes.
-- `mf index [document paths]`:            
-    - Generates an index of documents.
-- `mf query [document paths] <YOUR QUERY>`:  
-    - Queries documents using generated index. Can generate index with [-i] flag.
-- `mf delete [document paths]`:             
-    - Deletes generated index documents.
-- `mf refresh [document paths]`:            
-    - Refreshes documents if they have been changed. Add [-f] flag to force refresh.
-- `mf inspect [document paths]`:
-    - Inspect your document indices.
+Pre-requisite: You need to create an OpenAI API account, you can do so [here](https://openai.com/blog/openai-api).
+
+1. Run `pip install mindflow`, or you can clone this repo and run `pip install -e path/to/mindflow`.
+2. Run `mf login {OPENAI_API_KEY}`, you can find your openAI API key [here](https://platform.openai.com/account/api-keys).
+3. Now you're ready to start using MindFlow!
+
+## Basic Usage
+
+MindFlow allows you to directly interface with chatGPT from the command line. Try it with:
+- Run `mf ask "Hey, How's it going?"`
+
+You can also ask questions about source code repositories. You can either clone the mindflow repository and cd into it, or you can try it on one of your own code repositories:
+1. `mf index ./` 
+    - To index the entire repo, this will go through all files recursively and generate search indexes for them.
+    - :warning: Beware! Large code repositories may take a while and have a decent cost. It shouldn't be too expensive for normal repos, try it on a smaller one first.
+2. `mf query ./ "Please summarize this repository."`
+    - This will take the index you generated in the above step and use it as context for your question!
 
 ## Examples
 1. Query
