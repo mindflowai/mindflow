@@ -1,6 +1,10 @@
+import openai
+
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject, StaticObject
+from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
+from mindflow.db.objects.static_definition.service import ServiceID
 
 class Model(StaticObject):
     """Model object."""
@@ -28,7 +32,6 @@ class ModelConfig(BaseObject):
 
 class ConfiguredModel:
     id: str
-    api: str
     name: str
     service: str
     model_type: str
@@ -38,8 +41,9 @@ class ConfiguredModel:
 
     # Config
     soft_token_limit: int
+    api_key: str
 
-    def __init__(self, model_id: str):
+    def __init__(self, model_id: str, api_key: str = None):
         model = Model.load(model_id)
         model_config = ModelConfig.load(f"{model_id}_config")
         
@@ -51,32 +55,32 @@ class ConfiguredModel:
             for key, value in model_config.__dict__.items():
                 if value not in [None, ""]:
                     setattr(self, key, value)
-
-class ConfiguredModels:
-    @property
-    def gpt_3_5_turbo(self):
-        return ConfiguredModel(ModelID.GPT_3_5_TURBO.value)
-
-    @property
-    def gpt_3_5_turbo_0301(self):
-        return ConfiguredModel(ModelID.GPT_3_5_TURBO_0301.value)
-
-    @property
-    def text_davinci_003(self):
-        return ConfiguredModel(ModelID.TEXT_DAVINCI_003.value)
-
-    @property
-    def text_curie_001(self):
-        return ConfiguredModel(ModelID.TEXT_CURIE_001.value)
+        
+        service_config = ServiceConfig.load(f"{self.service}_config")
+        self.api_key = service_config.api_key
     
-    @property
-    def text_babbage_001(self):
-        return ConfiguredModel(ModelID.TEXT_BABBAGE_001.value)
-    
-    @property
-    def text_ada_001(self):
-        return ConfiguredModel(ModelID.TEXT_ADA_001.value)
-    
-    @property
-    def text_embedding_ada_002(self):
-        return ConfiguredModel(ModelID.TEXT_EMBEDDING_ADA_002.value)
+    def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: list = ["\n\n"]): 
+        openai.api_key = self.api_key
+        return openai.ChatCompletion.create(
+            model=self.id,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop
+        )["choices"][0]["message"]["content"]
+
+    def openai_embedding(self, text: str): 
+        openai.api_key = self.api_key
+        return openai.Embedding.create(
+            engine=self.id,
+            input=text
+        )["data"][0]["embedding"]
+
+    def __call__(self, prompt, *args, **kwargs):
+        if self.service == ServiceID.OPENAI.value:
+            if self.id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_3_5_TURBO_0301.value]:
+                return self.openai_chat_completion(prompt, *args, **kwargs)
+            else:
+                return self.openai_embedding(prompt, *args, **kwargs)
+        else: 
+            raise NotImplementedError(f"Service {self.service} not implemented.")

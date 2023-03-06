@@ -68,8 +68,8 @@ class ServiceModel(ExtendedEnum):
     OPENAI = ModelOpenAI
 
 
-class ServiceStatic(ExtendedEnum):
-    OPENAI: dict = {
+SERVICE_STATIC = {
+    ServiceID.OPENAI.value: {
         ServiceParameterKey.ID.value: ServiceID.OPENAI.value,
         ServiceParameterKey.NAME.value: ServiceName.OPENAI.value,
         ServiceParameterKey.URL.value: ServiceURL.OPENAI.value,
@@ -77,7 +77,8 @@ class ServiceStatic(ExtendedEnum):
         ServiceParameterKey.DEFAULT_INDEX_MODEL.value: ServiceDefaultIndexModel.OPENAI.value,
         ServiceParameterKey.DEFAULT_QUERY_MODEL.value: ServiceDefaultQueryModel.OPENAI.value,
         ServiceParameterKey.DEFAULT_EMBEDDING_MODEL.value: ServiceDefaultEmbeddingModel.OPENAI.value,
-    }
+    },
+}
 
 
 ServiceUnion = Union[

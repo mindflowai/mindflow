@@ -16,8 +16,7 @@ def ask_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Ask a question.",
     )
-    add_query_arg(parser)
-    add_return_prompt_arg(parser)
+    add_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
@@ -29,7 +28,6 @@ def commit_args() -> argparse.Namespace:
         description="Generate commit message and commit.",
     )
     add_commit_args_arg(parser)
-    add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
@@ -63,7 +61,6 @@ def diff_args() -> argparse.Namespace:
         description="Summarize your git diff.",
     )
     add_diff_args_arg(parser)
-    add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
@@ -100,7 +97,6 @@ def query_args() -> argparse.Namespace:
     add_document_paths_arg(parser)
     add_index_arg(parser)
     add_query_arg(parser)
-    add_return_prompt_arg(parser)
     add_skip_clipboard_arg(parser)
     return parser.parse_args(sys.argv[2:])
 
@@ -115,19 +111,6 @@ def refresh_args() -> argparse.Namespace:
     add_document_paths_arg(parser)
     add_force_arg(parser)
     return parser.parse_args(sys.argv[2:])
-
-
-# Argument setters
-def add_remote_arg(parser: argparse.ArgumentParser):
-    """
-    Add arguments for commands that require a remote Mindflow server.
-    """
-    parser.add_argument(
-        "-r",
-        "--remote",
-        action="store_true",
-        help="Use the remote Mindflow server.",
-    )
 
 
 def add_index_arg(parser: argparse.ArgumentParser):
@@ -152,6 +135,13 @@ def add_document_paths_arg(parser: argparse.ArgumentParser):
         help="A list of document paths to summarize (file path, API, web address).",
     )
 
+def add_prompt_arg(parser: argparse.ArgumentParser):
+    """
+    Add prompt argument..
+    """
+    parser.add_argument(
+        "prompt", type=str, help="Prompt you'd like to sent off to LLM."
+    )
 
 def add_query_arg(parser: argparse.ArgumentParser):
     """
@@ -166,31 +156,16 @@ def add_commit_args_arg(parser: argparse.ArgumentParser):
     """
     Add arguments for the commit command.
     """
-    parser.add_argument(
-        "commit_args",
-        nargs="*",
-        help="Contains all of the git commit args.",
-    )
+    pass
 
 
 def add_diff_args_arg(parser: argparse.ArgumentParser):
     """
     Add arguments for the diff command.
     """
-    parser.add_argument(
-        "diff_args",
-        nargs="*",
-        help="Contains all of the git diff args.",
-    )
-
-
-def add_return_prompt_arg(parser: argparse.ArgumentParser):
-    parser.add_argument(
-        "-p",
-        "--return-prompt",
-        action="store_true",
-        help="Generate prompt only.",
-    )
+    parser.add_argument('-r', '--revision', metavar='REV', help='Specify the revision to diff against')
+    parser.add_argument('-s', '--summary', action='store_true', help='Show summary of changes')
+    parser.add_argument('file', nargs='*', help='File or directory to diff')
 
 
 def add_skip_clipboard_arg(parser: argparse.ArgumentParser):

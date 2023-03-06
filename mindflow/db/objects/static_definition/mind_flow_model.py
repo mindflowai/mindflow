@@ -39,22 +39,23 @@ class MindFlowModelDescription(ExtendedEnum):
     INDEX = f"{MindFlowModelName.INDEX}:    Used to generate deep index from query. (Warning! Expensive and slow!)"
 
 
-class MindFlowModelStatic(ExtendedEnum):
-    QUERY: dict = {
+MINDFLOW_MODEL_STATIC = {
+    MindFlowModelID.QUERY.value: {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.QUERY.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.QUERY.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.QUERY.value,
-    }
-    INDEX: dict = {
+    },
+    MindFlowModelID.INDEX.value: {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.INDEX.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.INDEX.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.INDEX.value,
-    }
-    EMBEDDING: dict = {
+    },
+    MindFlowModelID.EMBEDDING.value: {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.EMBEDDING.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.EMBEDDING.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.EMBEDDING.value,
     }
+}
 
 MindFlowModelUnion = Union[
     MindFlowModelID,

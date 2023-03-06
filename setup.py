@@ -8,7 +8,8 @@ setup(
     name="mindflow",
     version="0.2.11",
     py_modules=["mindflow"],
-    entry_points={"console_scripts": ["mf = mindflow.main:main"]},
+    # entry_points={"console_scripts": ["mf = mindflow.main:main"]},
+    entry_points={"console_scripts": ["mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli"]},
     packages=find_packages(),
     install_requires=install_requires,
 )
