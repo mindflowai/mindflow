@@ -2,6 +2,7 @@ import openai
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject, StaticObject
+from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
 
 class Model(StaticObject):
@@ -15,8 +16,6 @@ class Model(StaticObject):
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
-
-    request: callable
 
     # Config
     soft_token_limit: int
@@ -32,7 +31,6 @@ class ModelConfig(BaseObject):
 
 class ConfiguredModel:
     id: str
-    api: str
     name: str
     service: str
     model_type: str
@@ -42,6 +40,7 @@ class ConfiguredModel:
 
     # Config
     soft_token_limit: int
+    api_key: str
 
     def __init__(self, model_id: str, api_key: str = None):
         model = Model.load(model_id)
@@ -56,12 +55,37 @@ class ConfiguredModel:
                 if value not in [None, ""]:
                     setattr(self, key, value)
         
+        service_config = ServiceConfig.load(self.service)
+        self.api_key = service_config.api_key
+
+        self.__call__ = self.get_call()
     
-    def configure_model(self, api_key: str):
+    def openai_chat_completion(self, messages: list, max_tokens: int = 500, temperature: float = 0.0, stop: list = ["\n\n"]): 
+        openai.api_key = self.api_key
+        openai.ChatCompletion.create(
+            model=self.id,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop
+        )
+
+    def openai_embedding(self, text: str): 
+        openai.api_key = self.api_key
+        openai.Embedding.create(
+            model=self.id,
+            query=text
+        )
+    
+
+    def get_call(self):
         if self.service == "openai":
-            openai.api_key = api_key
-            model = openai.Model.retrieve(id=self.api)
-            model
+            if self.id == ["gpt-3-5-turbo", "gpt-3-5-turbo-0301"]:
+                return self.openai_chat_completion
+            else:
+                return self.openai_embedding
+        else: 
+            raise NotImplementedError(f"Service {self.service} not implemented.")
 
 class ConfiguredModels:
     @property
@@ -71,22 +95,6 @@ class ConfiguredModels:
     @property
     def gpt_3_5_turbo_0301(self):
         return ConfiguredModel(ModelID.GPT_3_5_TURBO_0301.value)
-
-    @property
-    def text_davinci_003(self):
-        return ConfiguredModel(ModelID.TEXT_DAVINCI_003.value)
-
-    @property
-    def text_curie_001(self):
-        return ConfiguredModel(ModelID.TEXT_CURIE_001.value)
-    
-    @property
-    def text_babbage_001(self):
-        return ConfiguredModel(ModelID.TEXT_BABBAGE_001.value)
-    
-    @property
-    def text_ada_001(self):
-        return ConfiguredModel(ModelID.TEXT_ADA_001.value)
     
     @property
     def text_embedding_ada_002(self):

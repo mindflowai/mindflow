@@ -18,6 +18,7 @@ class ServiceConfig(BaseObject):
 
     _collection: Collection = Collection.CONFIGURATIONS
 
+
 class ConfiguredService:
     id: str
     name: str
@@ -39,6 +40,8 @@ class ConfiguredService:
             for key, value in service_config.__dict__.items():
                 if value not in [None, ""]:
                     setattr(self, key, value)
+        
+        
 
 class ConfiguredServices:
     @property
