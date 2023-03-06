@@ -5,7 +5,15 @@ import sys
 from typing import List, Optional
 from mindflow.db.db.database import Database
 
-MINDFLOW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mindflow")
+def _get_mindflow_dir():
+    if os.name == 'nt':  # Check if the OS is Windows
+        config_dir = os.getenv('APPDATA')
+    else:
+        config_dir = os.path.join(os.path.expanduser('~'), '.config')
+    mindflow_dir = os.path.join(config_dir, 'mindflow')
+    return mindflow_dir
+
+MINDFLOW_DIR = _get_mindflow_dir()
 if not os.path.exists(MINDFLOW_DIR):
     os.makedirs(MINDFLOW_DIR)
 

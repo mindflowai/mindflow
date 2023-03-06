@@ -16,6 +16,7 @@ def handle_response_text(text: str):
             pyperclip.copy(f"\n{text}")
             print("Response copied to clipboard!!!")
             return
-        except Exception as error:
-            raise Exception(f"Failed to copy to clipboard: {error}")
+        except Exception:
+            # raise Exception(f"Failed to copy to clipboard: {error}")
+            pass
     print(text)
