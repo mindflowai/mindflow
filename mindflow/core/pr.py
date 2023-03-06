@@ -7,7 +7,26 @@ from mindflow.utils.prompts import PR_BODY_PREFIX, PR_TITLE_PREFIX
 
 
 def run_pr():
-    if not has_remote_branch():
+    # Get the name of the current branch
+    current_branch = (
+        subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"])
+        .decode("utf-8")
+        .strip()
+    )
+
+    # Determine the name of the default branch
+    default_branch = (
+        subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
+        .decode()
+        .strip()
+        .split("/")[-1]
+    )
+
+    if current_branch == default_branch:
+        print("Cannot create pull request from default branch")
+        return
+    
+    if not has_remote_branch(current_branch):
         print("No remote branch for current branch")
         return
 
@@ -17,13 +36,6 @@ def run_pr():
 
     settings = Settings()
 
-    # Determine the name of the default branch
-    default_branch = (
-        subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
-        .decode()
-        .strip()
-        .split("/")[-1]
-    )
     diff_output = run_diff((default_branch,))
 
     pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
@@ -46,17 +58,10 @@ def needs_push() -> bool:
     return "Your branch is ahead of" in git_status
 
 
-def has_remote_branch() -> bool:
+def has_remote_branch(current_branch: str) -> bool:
     """
     Returns True if there is a remote branch for the current branch, False otherwise.
     """
-    # Get the name of the current branch
-    current_branch = (
-        subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"])
-        .decode("utf-8")
-        .strip()
-    )
-
     # Check if there is a remote branch for the current branch
     try:
         subprocess.check_output(
