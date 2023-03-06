@@ -5,8 +5,10 @@
 import click
 from mindflow.core.diff import run_diff
 
-@click.command(help="Wrapper around git diff that summarizes the output. Treat this command exactly like git diff, it supports all arguments that git diff provides.")
-@click.argument("args", type=str, nargs=-1)
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+), help="Wrapper around git diff that summarizes the output. Treat this command exactly like git diff, it supports all arguments that git diff provides.")
+@click.argument('args', nargs=-1, type=click.UNPROCESSED)
 def diff(args: str) -> str:
-    command = ['git', 'diff'] + list(args)
-    run_diff(command)
+    run_diff(args)
+

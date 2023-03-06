@@ -14,10 +14,12 @@ import concurrent.futures
 
 from mindflow.utils.response import handle_response_text
 
-def run_diff(command: str):
+def run_diff(args: str):
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
+    command = ['git', 'diff'] + list(args)
+
     settings = Settings()
     completion_model: Model = settings.mindflow_models.query.model
 
