@@ -32,7 +32,7 @@ You can also ask questions about your code repos. Run the following commands in 
 
 1. `mf index ./` 
     - To index the entire repo, this will go through all files recursively and generate search indexes for them.
-    - :warning: Beware! Large code repositories may take a while and have a decent cost. It shouldn't be too expensive for normal repos, try it on a smaller one first.
+    - :warning: Beware! Large code repositories may take a while and have a decent cost. It shouldn't be too expensive for normal repos, try it on a smaller one first. For context, the mindflow repo costs ~10 cents to index.
 2. `mf query ./ "Please summarize this repository."`
     - This will take the index you generated in the above step and use it as context for your question!
 
