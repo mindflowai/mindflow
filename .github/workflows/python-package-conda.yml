@@ -55,7 +55,7 @@ jobs:
 
     - name: Execute PyTest
       run: |
-        pytest --junitxml=junit/test-results.xml tests
+        pytest ./
       # Stop the workflow if any test fails
       if: ${{ job.status == 'success' }}
 
