@@ -10,7 +10,7 @@ from mindflow.utils.files.git import get_git_files
 from mindflow.utils.files.git import is_within_git_repo
 
 
-def extract_files(path: Union[str, os.PathLike]) -> List[str]:
+def extract_files(path) -> List[str]:
     """
     Extract all files from a directory.
     """

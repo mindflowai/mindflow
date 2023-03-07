@@ -75,7 +75,7 @@ def has_remote_branch(current_branch: str) -> bool:
 
 
 def create_pull_request(title, body):
-    command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]
+    command: List[str] = ["gh", "pr", "create", "--title", title, "--body", body]  # type: ignore
     pr_result = subprocess.check_output(command).decode("utf-8")
     if "https://" in pr_result:
         print("Pull request created successfully")
