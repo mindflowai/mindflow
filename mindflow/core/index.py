@@ -53,13 +53,13 @@ def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
         len(indexable_document_references), bar="blocks", spinner="twirls"
     ) as progress_bar:
         with ThreadPoolExecutor(max_workers=50) as executor:
-            search_tree_futures: List[Future[dict]] = [
+            search_tree_futures = [
                 executor.submit(
                     create_text_search_tree,
                     completion_model,
                     read_document(
                         document_reference.path, document_reference.document_type
-                    ),
+                    ),  # type: ignore
                 )
                 for document_reference in indexable_document_references
             ]

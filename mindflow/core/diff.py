@@ -74,15 +74,15 @@ def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
         if line.startswith("diff --git"):
             if current_diff is not None:
                 file_diffs.append(current_diff)
-            current_diff = {"file_name": None, "content": []}
+            current_diff = {"file_name": None, "content": []}  # type: ignore
             match = re.match(r"^diff --git a/(.+?) b/.+?$", line)
             if match:
-                current_diff["file_name"] = match.group(1)
+                current_diff["file_name"] = match.group(1)  # type: ignore
         if current_diff is not None:
             current_diff["content"].append(line)
     if current_diff is not None:
         file_diffs.append(current_diff)
-    return [(diff["file_name"], "\n".join(diff["content"])) for diff in file_diffs]
+    return [(diff["file_name"], "\n".join(diff["content"])) for diff in file_diffs]  # type: ignore
 
 
 def batch_git_diffs(
