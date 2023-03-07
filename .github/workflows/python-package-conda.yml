@@ -24,11 +24,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install black
+        pip install black mypy
         pip install -e .
 
     - name: Execute Lint
       run: |
         black --check .
+
+    - name: Execute MyPy
+      run: |
+        mypy .
 
   Build:
     needs: "Lint"
