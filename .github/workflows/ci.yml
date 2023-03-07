@@ -71,7 +71,7 @@ jobs:
   group-test:
     name: 🧪 Group Test
     runs-on: ubuntu-latest
-    needs: ${{ format('test.{0}', join(needs.test.*.outputs.matrix-completed, ',test.')) }}
+    needs: ${{ format('test.{0}', join(needs.test.outputs.matrix-completed, ',test.')) }}
     steps:
     - name: Notify Completion
       run: |
