@@ -9,7 +9,8 @@ on:
       - main
 
 jobs:
-  Lint:
+  lint:
+    name: 🧹 Lint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
@@ -34,8 +35,9 @@ jobs:
       run: |
         mypy --ignore-missing-imports ./
 
-  Build:
-    needs: "Lint"
+  test:
+    name: 🧪 Test
+    needs: lint
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
