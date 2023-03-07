@@ -68,10 +68,11 @@ jobs:
     outputs:
       matrix-completed: ${{ matrix.completed }}
 
-  test-group:
-    name: 🧪 Test All
+  group-test:
+    name: 🧪 Group Test
     runs-on: ubuntu-latest
-    needs: ${{ format('test.{0}', join(matrix.completed, ',test.')) }}
+    needs: ${{ format('test.{0}', join(needs.test.*.outputs.matrix-completed, ',test.')) }}
     steps:
-      - name: Notify completion
-        run: echo "Matrix test group completed"
+    - name: Notify Completion
+      run: |
+        echo "All matrix tests have completed successfully!"
