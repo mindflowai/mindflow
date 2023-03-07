@@ -28,6 +28,7 @@ def version():
 
     click.echo(__version__)
 
+
 mindflow_cli.add_command(add)
 mindflow_cli.add_command(push)
 mindflow_cli.add_command(chat)

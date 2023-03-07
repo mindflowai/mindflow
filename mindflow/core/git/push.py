@@ -1,6 +1,7 @@
 import subprocess
 from typing import Tuple
 
+
 def run_push(args: Tuple[str]):
     """
     Push command.
