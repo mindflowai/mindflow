@@ -1,4 +1,4 @@
-# MindFlow
+# :brain: MindFlow :ocean:
 ![Screenshot 2023-03-06 at 1 45 06 AM](https://user-images.githubusercontent.com/26421036/223074441-6cf9707e-f596-4b22-bbcc-78936d578123.png)
 
 
