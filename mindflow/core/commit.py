@@ -12,11 +12,12 @@ def run_commit() -> str:
     """
     settings = Settings()
 
-    if not has_staged_files():
-        return "No staged files"
-
     # Execute the git diff command and retrieve the output as a string
     diff_output = run_diff(("--cached",))
+
+    if diff_output == "No staged changes.":
+        return diff_output
+    
     response: str = settings.mindflow_models.query.model(
         build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
     )

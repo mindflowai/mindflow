@@ -13,15 +13,11 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
-
 def run_diff(args: Tuple[str]) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
     command = ["git", "diff"] + list(args)
-
-    if not has_changes(command):
-        return "No changes"
 
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
@@ -29,43 +25,39 @@ def run_diff(args: Tuple[str]) -> str:
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
 
+    if diff_result.strip() == "":
+        return "No staged changes."
+
     batched_parsed_diff_result = batch_git_diffs(
         parse_git_diff(diff_result), token_limit=completion_model.hard_token_limit
     )
 
     response: str = ""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        for batch in batched_parsed_diff_result:
-            content = ""
-            for file_name, diff_content in batch:
-                content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-            future: concurrent.futures.Future = executor.submit(
-                completion_model, build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
-            )
-            futures.append(future)
+    if len(batched_parsed_diff_result) == 1:
+        content = ""
+        for file_name, diff_content in batched_parsed_diff_result[0]:
+            content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
+        response = completion_model(build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content))
+    else:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for batch in batched_parsed_diff_result:
+                content = ""
+                for file_name, diff_content in batch:
+                    content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
+                future: concurrent.futures.Future = executor.submit(
+                    completion_model, build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
+                )
+                futures.append(future)
 
-        # Process the results as they become available
-        for future in concurrent.futures.as_completed(futures):
-            response += future.result()
+            # Process the results as they become available
+            for future in concurrent.futures.as_completed(futures):
+                response += future.result()
 
     return response
 
 
 import re
-
-
-def has_changes(diff_command: List[str]) -> bool:
-    """
-    Returns True if there are changes according to the given diff command, False otherwise.
-    """
-    # Check if there are any changes
-    try:
-        subprocess.check_output(diff_command + ["--quiet"])
-        return False
-    except subprocess.CalledProcessError:
-        return True
-
 
 def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
     file_diffs: List[Dict[str, List[str]]] = []

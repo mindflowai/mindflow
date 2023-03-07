@@ -1,6 +1,8 @@
 import subprocess
 from typing import List
 
+import concurrent.futures
+
 from mindflow.core.diff import run_diff
 from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
@@ -41,10 +43,14 @@ def run_pr():
     diff_output = run_diff((default_branch,))
 
     pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
-    pr_title = settings.mindflow_models.query.model(pr_title_prompt)
-
     pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
-    pr_body = settings.mindflow_models.query.model(pr_body_prompt)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_title = executor.submit(settings.mindflow_models.query.model, pr_title_prompt)
+        future_body = executor.submit(settings.mindflow_models.query.model, pr_body_prompt)
+    
+    pr_title = future_title.result()
+    pr_body = future_body.result()
 
     create_pull_request(pr_title, pr_body)
 
