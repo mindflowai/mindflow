@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
 # get version from mindflow/__init__.py
 with open("mindflow/__init__.py", "r") as f:
@@ -15,11 +16,13 @@ with open("README.md", "r") as fh:
 
 setup(
     name="mindflow",
-    python_requires='>=3.7.1',
+    python_requires=">=3.7.1",
     version=version,
     py_modules=["mindflow"],
     # entry_points={"console_scripts": ["mf = mindflow.main:main"]},
-    entry_points={"console_scripts": ["mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli"]},
+    entry_points={
+        "console_scripts": ["mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli"]
+    },
     packages=find_packages(),
     install_requires=install_requires,
     description="AI-powered search engine for your code!",

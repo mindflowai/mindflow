@@ -1,40 +1,66 @@
-name: Python Package using Conda
+name: 🧠 MindFlow 🌊
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  build-linux:
+  Lint:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Add conda to system path
+
+    - name: Install Dependencies
       run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-    - name: Install dependencies
-      run: |
-        # conda env update --file environment.yml --name base
-        git submodule update --init
+        python -m pip install --upgrade pip
+        pip install black
         pip install -e .
-    - name: Lint with flake8
+
+    - name: Execute Lint
       run: |
-        conda install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        black --check .
+
+  Build:
+    needs: "Lint"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: [3.7, 3.8, 3.9, 3.10.4]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
       run: |
-        conda install pytest
-        pytest
+        python -m pip install --upgrade pip
+        pip install pytest
+        pip install -e .
+
+    - name: Execute PyTest
+      run: |
+        pytest ./
+      # Stop the workflow if any test fails
+      if: ${{ job.status == 'success' }}
+
+    # - name: Upload test results
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Test results
+    #     path: junit/test-results.xml

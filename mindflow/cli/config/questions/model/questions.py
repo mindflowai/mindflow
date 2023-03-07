@@ -1,23 +1,15 @@
 from mindflow.cli.config.menu import menu
-from mindflow.db.objects.static_definition.mind_flow_model import (
-    MindFlowModelID,
-    MindFlowModelName,
-)
-from mindflow.db.objects.static_definition.model import (
-    ModelConfigParameterKey,
-    ModelConfigParameterName,
-    ModelID,
-    ModelName,
-)
-from mindflow.db.objects.static_definition.service import (
-    ServiceID,
-    ServiceModel,
-    get_service_static,
-)
-from mindflow.db.objects.static_definition.service import (
-    ModelTextCompletionOpenAI,
-    ModelTextEmbeddingOpenAI,
-)
+from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
+from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelName
+from mindflow.db.objects.static_definition.model import ModelConfigParameterKey
+from mindflow.db.objects.static_definition.model import ModelConfigParameterName
+from mindflow.db.objects.static_definition.model import ModelID
+from mindflow.db.objects.static_definition.model import ModelName
+from mindflow.db.objects.static_definition.service import get_service_static
+from mindflow.db.objects.static_definition.service import ModelTextCompletionOpenAI
+from mindflow.db.objects.static_definition.service import ModelTextEmbeddingOpenAI
+from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.db.objects.static_definition.service import ServiceModel
 
 
 def ask_mind_flow_model_type() -> MindFlowModelID:

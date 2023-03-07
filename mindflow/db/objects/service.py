@@ -1,5 +1,6 @@
 from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject, StaticObject
+from mindflow.db.objects.base import BaseObject
+from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.static_definition.service import ServiceID
 
 

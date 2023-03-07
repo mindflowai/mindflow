@@ -2,25 +2,23 @@
 `generate` command
 """
 from asyncio import Future
-from copy import deepcopy
-
-from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+from typing import List
+from typing import Optional
+
 import numpy as np
-
 from alive_progress import alive_bar  # type: ignore
+
 from mindflow.db.controller import DATABASE_CONTROLLER
-from mindflow.db.objects.model import ConfiguredModel
-
-from mindflow.resolving.resolve import return_if_indexable, resolve_all
-
-
-from mindflow.db.objects.document import Document, DocumentReference
-from mindflow.settings import Settings
+from mindflow.db.objects.document import Document
+from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.document import read_document
-
+from mindflow.db.objects.model import ConfiguredModel
+from mindflow.resolving.resolve import resolve_all
+from mindflow.resolving.resolve import return_if_indexable
+from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
-
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 
 

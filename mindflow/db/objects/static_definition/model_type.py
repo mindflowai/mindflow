@@ -1,4 +1,5 @@
 from typing import Union
+
 from mindflow.utils.enum import ExtendedEnum
 
 

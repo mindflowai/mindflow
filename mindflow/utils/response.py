@@ -1,7 +1,6 @@
 """
 Handle response text from Mindflow API.
 """
-
 # import pyperclip
 
 

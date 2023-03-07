@@ -1,5 +1,6 @@
 import hashlib
 from typing import Optional
+
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.static_definition.document import DocumentType

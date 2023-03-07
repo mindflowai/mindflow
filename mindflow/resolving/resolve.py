@@ -1,9 +1,9 @@
 """
 Module for resolving documents to text.
 """
-
 import sys
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
 from mindflow.db.objects.document import DocumentReference
 from mindflow.resolving.resolvers.file_resolver import FileResolver

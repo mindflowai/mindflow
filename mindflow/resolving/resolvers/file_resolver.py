@@ -2,13 +2,14 @@
 File/Directory Resolver
 """
 import os
+from typing import List
+from typing import Optional
+from typing import Union
 
-from typing import List, Optional, Union
-
-from mindflow.resolving.resolvers.base_resolver import BaseResolver
-from mindflow.db.objects.document import Document, DocumentReference
+from mindflow.db.objects.document import Document
+from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.static_definition.document import DocumentType
-
+from mindflow.resolving.resolvers.base_resolver import BaseResolver
 from mindflow.utils.files.extract import extract_files
 
 

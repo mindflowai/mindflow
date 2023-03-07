@@ -1,8 +1,8 @@
 """
 Base Resolver Class
 """
-
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
 from mindflow.db.objects.document import DocumentReference
 

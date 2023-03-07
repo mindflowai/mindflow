@@ -1,11 +1,10 @@
-from typing import Type, Union
-from mindflow.db.objects.static_definition.model import (
-    ModelID,
-    ModelTextEmbeddingOpenAI,
-    ModelTextCompletionOpenAI,
-    ModelOpenAI,
-)
+from typing import Type
+from typing import Union
 
+from mindflow.db.objects.static_definition.model import ModelID
+from mindflow.db.objects.static_definition.model import ModelOpenAI
+from mindflow.db.objects.static_definition.model import ModelTextCompletionOpenAI
+from mindflow.db.objects.static_definition.model import ModelTextEmbeddingOpenAI
 from mindflow.utils.enum import ExtendedEnum
 
 

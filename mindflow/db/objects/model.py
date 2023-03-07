@@ -1,9 +1,11 @@
 from typing import Optional
+
 import openai
 from traitlets import Callable
 
 from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject, StaticObject
+from mindflow.db.objects.base import BaseObject
+from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID

@@ -1,8 +1,8 @@
 """
 `query` command
 """
-
 from typing import List
+
 import click
 
 from mindflow.core.query import run_query

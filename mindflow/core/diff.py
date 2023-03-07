@@ -1,16 +1,17 @@
 """
 `diff` command
 """
+import concurrent.futures
 import subprocess
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
-
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
-
-import concurrent.futures
 
 
 def run_diff(args: Tuple[str]) -> str:
