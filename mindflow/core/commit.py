@@ -14,12 +14,13 @@ def run_commit(args: Tuple[str], message_overwrite: str = None) -> str:
     """
     settings = Settings()
 
-    if not has_staged_files():
-        return "No staged files"
-
     if message_overwrite is None:
         # Execute the git diff command and retrieve the output as a string
         diff_output = run_diff(("--cached",))
+
+        if diff_output == "No staged changes.":
+            return diff_output
+
         response: str = settings.mindflow_models.query.model(
             build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
         )
@@ -34,11 +35,3 @@ def run_commit(args: Tuple[str], message_overwrite: str = None) -> str:
     # Execute the git diff command and retrieve the output as a string
     output = subprocess.check_output(command).decode("utf-8")
     return output
-
-
-def has_staged_files():
-    try:
-        subprocess.check_call(["git", "diff", "--cached", "--quiet"])
-        return False  # no staged files
-    except subprocess.CalledProcessError:
-        return True  # there are staged files
