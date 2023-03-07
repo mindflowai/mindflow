@@ -23,6 +23,9 @@ def run_commit(args: Tuple[str]) -> str:
         build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
     )
 
+    # add co-authorship to commit message
+    response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"
+
     command = ["git", "commit", "-m"] + [response] + list(args)
 
     # Execute the git diff command and retrieve the output as a string
