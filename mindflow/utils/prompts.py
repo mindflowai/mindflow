@@ -18,6 +18,6 @@ INDEX_PROMPT_PREFIX = "Pretend you are a search engine trying to provide an info
          the full content and purpose of this file."
 COMMIT_PROMPT_PREFIX = "Please provide a commit message for the following changes. Only respond with the commit message and nothing else."
 PR_TITLE_PREFIX = "Please provide a title for the following pull request using this git diff summary. Only respond with the title and nothing else."
-PR_BODY_PREFIX = "Please provide a body for the following pull request using this git diff summary. I'd like it to include, bulleted summaries of \
-    changes and titles to give a coherent picture of what has changed. Only respond with the body and nothing else."
+PR_BODY_PREFIX = "Please provide a body for the following pull request using this git diff summary. I want you to keep it high level, and give core \
+      themes and reasons for changes. Try to include some titles and bullet points. Only respond with the body and nothing else."
 QUERY = "Please answer the following query like a helpful virtual assistant using the context provided below: "
