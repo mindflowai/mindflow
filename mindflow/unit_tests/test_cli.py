@@ -1,6 +1,6 @@
-import mindflow
-
 from click.testing import CliRunner
+
+import mindflow
 from mindflow.cli.new_click_cli.cli_main import mindflow_cli
 
 
