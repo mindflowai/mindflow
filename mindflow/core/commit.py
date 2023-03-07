@@ -8,7 +8,7 @@ from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 from typing import Tuple
 
 
-def run_commit(args: Tuple[str]) -> str:
+def run_commit(args: Tuple[str], message_overwrite: str=None) -> str:
     """
     Commit command.
     """
@@ -17,14 +17,17 @@ def run_commit(args: Tuple[str]) -> str:
     if not has_staged_files():
         return "No staged files"
 
-    # Execute the git diff command and retrieve the output as a string
-    diff_output = run_diff(("--cached",))
-    response: str = settings.mindflow_models.query.model(
-        build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
-    )
+    if message_overwrite is None:
+        # Execute the git diff command and retrieve the output as a string
+        diff_output = run_diff(("--cached",))
+        response: str = settings.mindflow_models.query.model(
+            build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
+        )
 
-    # add co-authorship to commit message
-    response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"
+        # add co-authorship to commit message
+        response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"
+    else:
+        response = message_overwrite
 
     command = ["git", "commit", "-m"] + [response] + list(args)
 
