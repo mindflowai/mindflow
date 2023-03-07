@@ -8,7 +8,7 @@ from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 from typing import Tuple
 
 
-def run_commit(args: Tuple[str], message_overwrite: str=None) -> str:
+def run_commit(args: Tuple[str], message_overwrite: str = None) -> str:
     """
     Commit command.
     """
