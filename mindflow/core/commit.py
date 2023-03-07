@@ -17,7 +17,7 @@ def run_commit() -> str:
 
     if diff_output == "No staged changes.":
         return diff_output
-    
+
     response: str = settings.mindflow_models.query.model(
         build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
     )

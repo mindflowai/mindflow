@@ -13,6 +13,7 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
+
 def run_diff(args: Tuple[str]) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
@@ -37,7 +38,9 @@ def run_diff(args: Tuple[str]) -> str:
         content = ""
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-        response = completion_model(build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content))
+        response = completion_model(
+            build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
+        )
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -46,7 +49,8 @@ def run_diff(args: Tuple[str]) -> str:
                 for file_name, diff_content in batch:
                     content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
                 future: concurrent.futures.Future = executor.submit(
-                    completion_model, build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
+                    completion_model,
+                    build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content),
                 )
                 futures.append(future)
 
@@ -58,6 +62,7 @@ def run_diff(args: Tuple[str]) -> str:
 
 
 import re
+
 
 def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
     file_diffs: List[Dict[str, List[str]]] = []

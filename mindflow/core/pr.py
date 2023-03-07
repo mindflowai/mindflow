@@ -46,9 +46,13 @@ def run_pr():
     pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_title = executor.submit(settings.mindflow_models.query.model, pr_title_prompt)
-        future_body = executor.submit(settings.mindflow_models.query.model, pr_body_prompt)
-    
+        future_title = executor.submit(
+            settings.mindflow_models.query.model, pr_title_prompt
+        )
+        future_body = executor.submit(
+            settings.mindflow_models.query.model, pr_body_prompt
+        )
+
     pr_title = future_title.result()
     pr_body = future_body.result()
 
