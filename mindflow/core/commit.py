@@ -5,8 +5,10 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
+from typing import Tuple
 
-def run_commit(user_confirm: bool = False) -> str:
+
+def run_commit(args: Tuple[str]) -> str:
     """
     Commit command.
     """
@@ -21,12 +23,7 @@ def run_commit(user_confirm: bool = False) -> str:
         build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
     )
 
-    if user_confirm:
-        import click
-        click.echo(f"\n-----------------\n{response}\n-----------------\n")
-        click.confirm(f"Commit with the above message?", abort=True)
-
-    command = ["git", "commit", "-m"] + [response]
+    command = ["git", "commit", "-m"] + [response] + list(args)
 
     # Execute the git diff command and retrieve the output as a string
     output = subprocess.check_output(command).decode("utf-8")
