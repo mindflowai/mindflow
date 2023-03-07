@@ -1,7 +1,6 @@
+import concurrent.futures
 import subprocess
 from typing import List
-
-import concurrent.futures
 
 from mindflow.core.diff import run_diff
 from mindflow.settings import Settings

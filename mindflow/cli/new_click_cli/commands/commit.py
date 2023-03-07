@@ -1,8 +1,9 @@
+from typing import Tuple, Optional
+
 import click
 
-from typing import Tuple
-from mindflow.core.commit import run_commit
 from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.core.commit import run_commit
 
 
 @passthrough_command(help="Generate a git commit response by feeding git diff to gpt")
@@ -12,7 +13,7 @@ from mindflow.cli.new_click_cli.util import passthrough_command
     help="Don't use mindflow to generate a commit message, use this one instead.",
     default=None,
 )
-def commit(args: Tuple[str], message: str = None):
+def commit(args: Tuple[str], message: Optional[str] = None):
     """
     Commit command.
     """

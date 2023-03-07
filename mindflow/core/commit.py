@@ -1,14 +1,13 @@
 import subprocess
+from typing import Tuple, Optional
 
 from mindflow.core.diff import run_diff
 from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
-from typing import Tuple
 
-
-def run_commit(args: Tuple[str], message_overwrite: str = None) -> str:
+def run_commit(args: Tuple[str], message_overwrite: Optional[str] = None) -> str:
     """
     Commit command.
     """

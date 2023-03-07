@@ -3,8 +3,8 @@
 """
 from typing import Tuple
 
-from mindflow.core.diff import run_diff
 from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.core.diff import run_diff
 
 
 @passthrough_command(
