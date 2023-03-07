@@ -27,11 +27,3 @@ def run_commit() -> str:
     # Execute the git diff command and retrieve the output as a string
     output = subprocess.check_output(command).decode("utf-8")
     return output
-
-
-def has_staged_files():
-    try:
-        subprocess.check_call(["git", "diff", "--cached", "--quiet"])
-        return False  # no staged files
-    except subprocess.CalledProcessError:
-        return True  # there are staged files
