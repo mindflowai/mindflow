@@ -8,4 +8,4 @@ def commit():
     """
     Commit command.
     """
-    print(run_commit())
+    print(run_commit(user_confirm=True))

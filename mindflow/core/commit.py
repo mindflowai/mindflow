@@ -6,7 +6,7 @@ from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
 
-def run_commit() -> str:
+def run_commit(user_confirm: bool = False) -> str:
     """
     Commit command.
     """
@@ -20,6 +20,11 @@ def run_commit() -> str:
     response: str = settings.mindflow_models.query.model(
         build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
     )
+
+    if user_confirm:
+        import click
+        click.echo(f"\n-----------------\n{response}\n-----------------\n")
+        click.confirm(f"Commit with the above message?", abort=True)
 
     command = ["git", "commit", "-m"] + [response]
 
