@@ -1,6 +1,6 @@
 import click
 
-from mindflow.cli.new_click_cli.commands.ask import ask
+from mindflow.cli.new_click_cli.commands.chat import chat
 from mindflow.cli.new_click_cli.commands.commit import commit
 from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.cli.new_click_cli.commands.diff import diff
@@ -26,7 +26,7 @@ def version():
     click.echo(__version__)
 
 
-mindflow_cli.add_command(ask)
+mindflow_cli.add_command(chat)
 mindflow_cli.add_command(commit)
 mindflow_cli.add_command(delete)
 mindflow_cli.add_command(diff)

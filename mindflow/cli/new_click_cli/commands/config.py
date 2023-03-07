@@ -3,7 +3,7 @@
 """
 import click
 
-from mindflow.cli.config.main import set_configuration
+from mindflow.cli.config import set_configuration
 
 
 @click.command(help="Advanced setup custom mindflow configurations.")

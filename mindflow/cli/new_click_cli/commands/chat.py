@@ -3,13 +3,13 @@
 """
 import click
 
-from mindflow.core.ask import run_ask
+from mindflow.core.chat import run_chat
 
 
 @click.command(help="")
 @click.argument("prompt", type=str)
-def ask(prompt: str):
+def chat(prompt: str):
     """
     This function is used to generate a prompt and then use it as a prompt for GPT bot.
     """
-    print(run_ask(prompt))
+    print(run_chat(prompt))

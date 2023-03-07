@@ -1,8 +1,7 @@
 from mindflow.settings import Settings
-from mindflow.utils.response import handle_response_text
 
 
-def run_ask(prompt: str) -> str:
+def run_chat(prompt: str) -> str:
     """
     This function is used to generate a prompt and then use it as a prompt for GPT bot.
     """
