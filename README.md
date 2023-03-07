@@ -21,7 +21,7 @@ Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do
 ## Basic Usage
 
 ### Interact with ChatGPT Using the CLI
-The simplest way to use MindFlow is to run a command like this: `mf ask "What is quantum physics?"` which literally interfaces directly with chatGPT from the command line. You should get a response similar to the following:
+The simplest way to use MindFlow is to run a command like this: `mf chat "What is quantum physics?"` which literally interfaces directly with chatGPT from the command line. You should get a response similar to the following:
 
 ```
 Quantum physics is the branch of physics that studies the behavior of matter and energy at the scale of atoms and subatomic particles. It is a fundamental theory that describes the laws of nature governing the behavior of matter and energy at the smallest scales. In contrast to classical physics, which describes the behavior of macroscopic objects, quantum physics deals with the properties of individual particles, such as electrons, protons, and photons, and how they interact with each other.
@@ -32,7 +32,7 @@ Quantum physics has many practical applications in fields such as electronics, c
 ```
 
 ### Query Your Code
-You can also ask questions about your code repos. Run the following commands in any cloned git repo:
+You can also chat about your code repos! Run the following commands in any cloned git repo:
 
 1. `mf index ./` 
     - To index the entire repo, this will go through all files and generate search indexes.
@@ -44,7 +44,7 @@ You should see a response that looks something like this:
 
 
 ```
-This Python file contains various functions and commands for the MindFlow CLI (Command Line Interface). It includes commands such as `ask,` `commit,` `config,` `delete,` `diff,` `index,` `inspect,` `query,` and `refresh.` The `ask` command is used to generate a prompt and then use it as a prompt for the GPT bot. The `commit` command creates a git commit response by feeding git diff to GPT. The `config` command is used to configure a model. The `delete` command deletes a document from the MindFlow index. The `diff` command shows the difference between two git commits. The `index` command creates or updates the MindFlow index. The `inspect` command is used to inspect the MindFlow index. The `query` command runs a query against the MindFlow index. Finally, the `refresh` command refreshes the MindFlow index.
+This Python file contains various functions and commands for the MindFlow CLI (Command Line Interface). It includes commands such as `chat,` `commit,` `config,` `delete,` `diff,` `index,` `inspect,` `query,` and `refresh.` The `chat` command is used to generate a prompt and then use it as a prompt for the GPT bot. The `commit` command creates a git commit response by feeding git diff to GPT. The `config` command is used to configure a model. The `delete` command deletes a document from the MindFlow index. The `diff` command shows the difference between two git commits. The `index` command creates or updates the MindFlow index. The `inspect` command is used to inspect the MindFlow index. The `query` command runs a query against the MindFlow index. Finally, the `refresh` command refreshes the MindFlow index.
 ```
 
 ### Git Diff Summaries
