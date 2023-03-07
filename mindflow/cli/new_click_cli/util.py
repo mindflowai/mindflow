@@ -24,3 +24,10 @@ def passthrough_command(*command_args, **command_kwargs):
         return func
 
     return _decorator
+
+
+# search integers in ascending order, and then drop every nth one
+def drop_every_nth(seq, n):
+    for i, x in enumerate(seq):
+        if (i + 1) % n != 0:
+            yield x
