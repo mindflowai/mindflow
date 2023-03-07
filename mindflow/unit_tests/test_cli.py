@@ -9,3 +9,11 @@ def test_version():
     result = runner.invoke(mindflow_cli, ["version"])
     assert result.exit_code == 0
     assert result.output == f"{mindflow.__version__}\n"
+
+
+def test_chat():
+    runner = CliRunner()
+    result = runner.invoke(mindflow_cli, ["chat", "Whats up Mindflow?"])
+
+    assert result.exit_code == 0
+    assert result.output == "Chat with Mindflow!\n"
