@@ -4,36 +4,39 @@ import os
 IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
 
 
-def parse_git_diff_file(diff_file):
+def parse_git_diff(diff_str: str):
     diffs = {}
     current_file = None
     current_diff = []
 
-    with open(diff_file, "r") as f:
-        for line in f:
-            if line.startswith("diff --git"):
-                # Starting a new file
-                if current_file:
-                    # Add the previous diff to the dictionary
-                    diffs[current_file] = "".join(current_diff)
+    excluded_files = []
 
-                current_file = line.split()[-1]
-                current_ext = os.path.splitext(current_file)[1]
+    for line in diff_str.splitlines(keepends=True):
+        if line.startswith("diff --git"):
+            # Starting a new file
+            if current_file:
+                # Add the previous diff to the dictionary
+                diffs[current_file] = "".join(current_diff)
 
-                if current_ext in IGNORE_FILE_EXTENSIONS:
-                    # Ignore this file
-                    current_file = None
-                    current_diff = []
-                    continue
+            current_file = line.split()[-1]
+            current_ext = os.path.splitext(current_file)[1]
 
-                current_diff = [line]
-            else:
-                # skip lines if we are ignoring this file (TODO - this is a bit hacky)
-                if current_file:
-                    current_diff.append(line)
+            if current_ext in IGNORE_FILE_EXTENSIONS:
+                excluded_files.append(current_file)
 
-        # Add the last diff to the dictionary
-        if current_file:
-            diffs[current_file] = "".join(current_diff)
+                # Ignore this file
+                current_file = None
+                current_diff = []
+                continue
 
-    return diffs
+            current_diff = [line]
+        else:
+            # skip lines if we are ignoring this file (TODO - this is a bit hacky)
+            if current_file:
+                current_diff.append(line)
+
+    # Add the last diff to the dictionary
+    if current_file:
+        diffs[current_file] = "".join(current_diff)
+
+    return diffs, excluded_files
