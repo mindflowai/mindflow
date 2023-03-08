@@ -2,7 +2,6 @@
 Base Resolver Class
 """
 from typing import List
-from typing import Optional
 
 from mindflow.db.objects.document import DocumentReference
 
@@ -11,12 +10,6 @@ class BaseResolver:
     """
     Base class for resolvers
     """
-
-    @staticmethod
-    def read_document(document_path: str) -> Optional[str]:
-        """
-        Read a document.
-        """
 
     @staticmethod
     def should_resolve(document_path: str) -> bool:

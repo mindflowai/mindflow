@@ -1,7 +1,6 @@
 """
 `generate` command
 """
-from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from typing import List
