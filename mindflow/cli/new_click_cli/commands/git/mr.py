@@ -28,7 +28,7 @@ def mr():
     help="Don't use mindflow to generate a pr body, use this one instead.",
     default=None,
 )
-def create(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None):
+def create(args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None):
     """
     PR command.
     """
@@ -36,15 +36,15 @@ def create(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         click.echo(
             f"Warning: Using message '{title}' instead of mindflow generated message."
         )
-        click.echo("It's recommended that you don't use the -m/--message flag.")
+        click.echo("It's recommended that you don't use the -t/--title flag.")
     
-    if body is not None:
+    if description is not None:
         click.echo(
-            f"Warning: Using message '{body}' instead of mindflow generated message."
+            f"Warning: Using message '{description}' instead of mindflow generated message."
         )
-        click.echo("It's recommended that you don't use the -m/--message flag.")
+        click.echo("It's recommended that you don't use the -d/--description flag.")
 
-    run_mr(args, title_overwrite=title, body_overwrite=body)
+    run_mr(args, title=title, description=description)
 
 
 mr.add_command(create)

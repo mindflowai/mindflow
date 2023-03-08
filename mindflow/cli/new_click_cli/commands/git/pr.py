@@ -36,13 +36,13 @@ def create(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         click.echo(
             f"Warning: Using message '{title}' instead of mindflow generated message."
         )
-        click.echo("It's recommended that you don't use the -m/--message flag.")
+        click.echo("It's recommended that you don't use the -t/--title flag.")
     
     if body is not None:
         click.echo(
             f"Warning: Using message '{body}' instead of mindflow generated message."
         )
-        click.echo("It's recommended that you don't use the -m/--message flag.")
+        click.echo("It's recommended that you don't use the -d/--description flag.")
 
     run_pr(args, title=title, body=body)
 

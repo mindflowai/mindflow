@@ -8,7 +8,24 @@ def run_mr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
     base_branch = get_flag_value(args, ['--target-branch', '-b'])
     head_branch = get_flag_value(args, ['--source-branch', '-s'])
 
-    if not is_valid_pr(get_flag_value(args, base_branch, head_branch)):
+    if base_branch is None:
+        # Determine the name of the default branch
+        base_branch = (
+            subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
+            .decode()
+            .strip()
+            .split("/")[-1]
+        )
+    
+    if head_branch is None:
+        # Get the name of the current branch
+        head_branch = (
+            subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"])
+            .decode("utf-8")
+            .strip()
+        )
+
+    if not is_valid_pr(base_branch, head_branch):
         return
 
     if not title or not body:
@@ -17,7 +34,7 @@ def run_mr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
     create_merge_request(args, title, body)
 
 def create_merge_request(args: Tuple[str], title: str, body: str):
-    command: List[str] = ["glab", "pr", "create"] + + list(args) + ["--title", title, "--description", body] # type: ignore
+    command: List[str] = ["glab", "pr", "create"] + list(args) + ["--title", title, "--description", body] # type: ignore
     pr_result = subprocess.check_output(command).decode("utf-8")
     if "https://" in pr_result:
         print("Merge request created successfully")
