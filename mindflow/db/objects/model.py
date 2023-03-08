@@ -56,10 +56,7 @@ class ConfiguredModel(Callable):
     soft_token_limit: int
     api_key: str
 
-    # MindFlow Model That instantiated this model
-    _mindflow_model_id: str = None
-
-    def __init__(self, model_id: str, mindflow_model_id: str):
+    def __init__(self, model_id: str):
         model = Model.load(model_id)
         model_config = ModelConfig.load(f"{model_id}_config")
 

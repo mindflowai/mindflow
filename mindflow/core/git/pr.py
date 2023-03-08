@@ -83,7 +83,7 @@ def create_title_and_body(
         title_response: Union[ModelError, str] = future_title.result()
         body_response: Union[ModelError, str] = future_body.result()
     else:
-        if title_response is None:
+        if title is None:
             pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
             title_response: Union[
                 ModelError, str

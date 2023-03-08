@@ -39,16 +39,17 @@ def run_diff(args: Tuple[str]) -> str:
 
     batched_parsed_diff_result = batch_git_diffs(diff_dict, completion_model)
 
-    response: str = ""
+    diff_summary: str = ""
     if len(batched_parsed_diff_result) == 1:
         content = ""
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-        response: Union[ModelError, str] = completion_model(
+        diff_response: Union[ModelError, str] = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
         )
-        if isinstance(response, ModelError):
-            print(response.diff_message)
+        if isinstance(diff_response, ModelError):
+            return diff_response.diff_message
+        diff_summary += diff_response
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -64,17 +65,16 @@ def run_diff(args: Tuple[str]) -> str:
 
             # Process the results as they become available
             for future in concurrent.futures.as_completed(futures):
-                partial_response: Union[ModelError, str] = future.result()
-                if isinstance(partial_response, ModelError):
-                    print(partial_response.diff_partial_message)
-                    continue
+                diff_partial_response: Union[ModelError, str] = future.result()
+                if isinstance(diff_partial_response, ModelError):
+                    return diff_partial_response.diff_partial_message
 
-                response += partial_response
+                diff_summary += diff_partial_response
 
     if len(excluded_filenames) > 0:
-        response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
+        diff_summary += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
 
-    return response
+    return diff_summary
 
 
 import re
