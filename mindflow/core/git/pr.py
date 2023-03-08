@@ -68,6 +68,8 @@ def create_title_and_body(
 
     diff_output = run_diff((base_branch,))
 
+    title_response: Union[ModelError, str]
+    body_response: Union[ModelError, str]
     if title is None and body is None:
         pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
         pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
@@ -80,19 +82,15 @@ def create_title_and_body(
                 settings.mindflow_models.query.model, pr_body_prompt
             )
 
-        title_response: Union[ModelError, str] = future_title.result()
-        body_response: Union[ModelError, str] = future_body.result()
+        title_response = future_title.result()
+        body_response = future_body.result()
     else:
         if title is None:
             pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
-            title_response: Union[
-                ModelError, str
-            ] = settings.mindflow_models.query.model(pr_title_prompt)
+            title_response = settings.mindflow_models.query.model(pr_title_prompt)
         if body is None:
             pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
-            body_response: Union[
-                ModelError, str
-            ] = settings.mindflow_models.query.model(pr_body_prompt)
+            body_response = settings.mindflow_models.query.model(pr_body_prompt)
 
     if isinstance(title_response, ModelError):
         print(title_response.pr_message)
@@ -101,8 +99,8 @@ def create_title_and_body(
         print(body_response.pr_message)
         return None
 
-    title = title_response if title is None else title
-    body = body_response if body is None else body
+    title = title if title is not None else title_response
+    body = body if body is not None else body_response
     return title, body
 
 
