@@ -1,0 +1,94 @@
+diff --git a/diff.txt b/diff.txt
+index de79139..e69de29 100644
+--- a/diff.txt
++++ b/diff.txt
+@@ -1,38 +0,0 @@
+-diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py
+-new file mode 100644
+-index 0000000..33a588f
+---- /dev/null
+-+++ b/mindflow/utils/diff_parser.py
+-@@ -0,0 +1,31 @@
+-+
+-+
+-+
+-+def parse_git_diff_file(diff_file):
+-+    diffs = {}
+-+    current_file = None
+-+    current_diff = []
+-+
+-+    with open(diff_file, "r") as f:
+-+        for line in f:
+-+            if line.startswith("diff --git"):
+-+                # Starting a new file
+-+                if current_file:
+-+                    # Add the previous diff to the dictionary
+-+                    diffs[current_file] = "".join(current_diff)
+-+                current_file = line.split()[-1]
+-+                current_diff = [line]
+-+            else:
+-+                current_diff.append(line)
+-+
+-+        # Add the last diff to the dictionary
+-+        if current_file:
+-+            diffs[current_file] = "".join(current_diff)
+-+
+-+    return diffs
+-+
+-+
+-+diffs = parse_git_diff_file("diff.txt")
+-+for filename, diff in diffs.items():
+-+    print(f"Diff for {filename}:")
+-+    print(diff)
+-\ No newline at end of file
+diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py
+index 33a588f..bfb9b92 100644
+--- a/mindflow/utils/diff_parser.py
++++ b/mindflow/utils/diff_parser.py
+@@ -1,4 +1,8 @@
+ 
++import os
++
++# NOTE: make sure to have a the "." in the file extension (if applicable)
++IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
+ 
+ 
+ def parse_git_diff_file(diff_file):
+@@ -13,10 +17,21 @@ def parse_git_diff_file(diff_file):
+                 if current_file:
+                     # Add the previous diff to the dictionary
+                     diffs[current_file] = "".join(current_diff)
++
+                 current_file = line.split()[-1]
++                current_ext = os.path.splitext(current_file)[1]
++
++                if current_ext in IGNORE_FILE_EXTENSIONS:
++                    # Ignore this file
++                    current_file = None
++                    current_diff = []
++                    continue
++
+                 current_diff = [line]
+             else:
+-                current_diff.append(line)
++                # skip lines if we are ignoring this file (TODO - this is a bit hacky)
++                if current_file:
++                    current_diff.append(line)
+ 
+         # Add the last diff to the dictionary
+         if current_file:
+@@ -25,7 +40,9 @@ def parse_git_diff_file(diff_file):
+     return diffs
+ 
+ 
++
+ diffs = parse_git_diff_file("diff.txt")
+-for filename, diff in diffs.items():
+-    print(f"Diff for {filename}:")
+-    print(diff)
+\ No newline at end of file
++# for filename, diff in diffs.items():
++#     print(f"Diff for {filename}:")
++#     print(diff)
++print(list(diffs.keys()))
+\ No newline at end of file
