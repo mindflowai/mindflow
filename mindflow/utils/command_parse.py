@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional
 
+
 def get_flag_value(args: Tuple[str], flag: List[str]) -> Optional[str]:
     """
     Gets the value of a flag in a list of arguments.
