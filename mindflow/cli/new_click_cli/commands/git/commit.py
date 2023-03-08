@@ -7,6 +7,12 @@ from mindflow.core.git.commit import run_commit
 
 
 @passthrough_command(help="Generate a git commit response by feeding git diff to gpt")
+# @overloaded_option(
+#     "-m",
+#     "--message",
+#     help="Don't use mindflow to generate a commit message, use this one instead.",
+#     default=None,
+# )
 @click.option(
     "-m",
     "--message",
@@ -17,7 +23,6 @@ def commit(args: Tuple[str], message: Optional[str] = None):
     """
     Commit command.
     """
-
     if message is not None:
         click.echo(
             f"Warning: Using message '{message}' instead of mindflow generated message."

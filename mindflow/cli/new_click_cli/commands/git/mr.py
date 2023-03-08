@@ -2,13 +2,13 @@ from typing import Optional, Tuple
 
 import click
 from mindflow.cli.new_click_cli.util import passthrough_command
-from mindflow.core.git.pr import run_pr
+from mindflow.core.git.mr import run_mr
 
 
 @click.group()
-def pr():
+def mr():
     """
-    PR command.
+    MR command.
     """
     pass
 
@@ -23,8 +23,8 @@ def pr():
     default=None,
 )
 @click.option(
-    "-b",
-    "--body",
+    "-d",
+    "--description",
     help="Don't use mindflow to generate a pr body, use this one instead.",
     default=None,
 )
@@ -44,7 +44,7 @@ def create(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         )
         click.echo("It's recommended that you don't use the -m/--message flag.")
 
-    run_pr(args, title=title, body=body)
+    run_mr(args, title_overwrite=title, body_overwrite=body)
 
 
-pr.add_command(create)
+mr.add_command(create)

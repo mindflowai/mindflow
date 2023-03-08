@@ -1,7 +1,32 @@
 import os
 
 # NOTE: make sure to have a the "." in the file extension (if applicable)
-IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
+# NOTE: these are things that WON'T already be git ignored.
+IGNORE_FILE_EXTENSIONS = [
+    ".pyc",
+    ".ipynb",
+    ".ipynb_checkpoints",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".svg",
+    ".gif",
+    ".mp4",
+    ".mp3",
+    ".mov",
+    ".wav",
+    ".avi",
+    ".zip",
+    ".tar",
+    ".gzip",
+    ".pth",
+    ".pt",
+    ".exe",
+    ".jar",
+    ".csv",  # maybe not?
+    ".bmp",
+    ".emg",
+]
 
 
 def parse_git_diff(diff_str: str):
