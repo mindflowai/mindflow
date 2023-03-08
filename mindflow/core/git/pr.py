@@ -10,9 +10,7 @@ from mindflow.utils.prompts import PR_BODY_PREFIX
 from mindflow.utils.prompts import PR_TITLE_PREFIX
 
 
-def run_pr(
-    args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None
-):
+def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None):
     base_branch = get_flag_value(args, ["--base", "-B"])
     head_branch = get_flag_value(args, ["--head", "-H"])
 
