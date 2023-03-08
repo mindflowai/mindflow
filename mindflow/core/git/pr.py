@@ -37,10 +37,10 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
 
     if not title or not body:
         tital_body_tuple = create_title_and_body(base_branch, title, body)
-    
+
     if not tital_body_tuple:
         return
-    
+
     title, body = tital_body_tuple
     create_pull_request(args, title, body)
 
@@ -85,18 +85,22 @@ def create_title_and_body(
     else:
         if title_response is None:
             pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
-            title_response: Union[ModelError, str] = settings.mindflow_models.query.model(pr_title_prompt)
+            title_response: Union[
+                ModelError, str
+            ] = settings.mindflow_models.query.model(pr_title_prompt)
         if body is None:
             pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
-            body_response: Union[ModelError, str] = settings.mindflow_models.query.model(pr_body_prompt)
-    
+            body_response: Union[
+                ModelError, str
+            ] = settings.mindflow_models.query.model(pr_body_prompt)
+
     if isinstance(title_response, ModelError):
         print(title_response.pr_message)
         return None
     if isinstance(body_response, ModelError):
         print(body_response.pr_message)
         return None
-    
+
     title = title_response if title is None else title
     body = body_response if body is None else body
     return title, body

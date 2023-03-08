@@ -43,7 +43,7 @@ def run_query(document_paths: List[str], query: str):
     response: Union[ModelError, str] = completion_model(messages)
     if isinstance(response, ModelError):
         return response.query_message
-    
+
     return response
 
 
@@ -79,7 +79,9 @@ def select_content(
         )
         sys.exit(1)
 
-    selected_content = trim_content(embedding_ranked_document_chunks, completion_model, query)
+    selected_content = trim_content(
+        embedding_ranked_document_chunks, completion_model, query
+    )
 
     return selected_content
 
@@ -115,14 +117,14 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embedding_response: Union[ModelError, np.ndarray] = embedding_model(document.search_tree["summary"])
+        embedding_response: Union[ModelError, np.ndarray] = embedding_model(
+            document.search_tree["summary"]
+        )
         if isinstance(embedding_response, ModelError):
             print(embedding_response.embedding_message)
             return [], []
-        
-        embeddings: List[np.ndarray] = [
-            embedding_response
-        ]
+
+        embeddings: List[np.ndarray] = [embedding_response]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -131,7 +133,9 @@ class DocumentChunk:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding_response: Union[np.ndarray, ModelError] = embedding_model(
+                    rolling_summary_embedding_response: Union[
+                        np.ndarray, ModelError
+                    ] = embedding_model(
                         "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
                     )
                     if isinstance(rolling_summary_embedding_response, ModelError):

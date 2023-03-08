@@ -108,7 +108,6 @@ class Node:
             else:
                 self.summary = response
 
-
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
 

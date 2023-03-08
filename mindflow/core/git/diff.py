@@ -37,9 +37,7 @@ def run_diff(args: Tuple[str]) -> str:
     if len(diff_dict) <= 0:
         return "No staged changes."
 
-    batched_parsed_diff_result = batch_git_diffs(
-        diff_dict, completion_model
-    )
+    batched_parsed_diff_result = batch_git_diffs(diff_dict, completion_model)
 
     response: str = ""
     if len(batched_parsed_diff_result) == 1:
@@ -70,9 +68,8 @@ def run_diff(args: Tuple[str]) -> str:
                 if isinstance(partial_response, ModelError):
                     print(partial_response.diff_partial_message)
                     continue
-                
-                response += partial_response
 
+                response += partial_response
 
     if len(excluded_filenames) > 0:
         response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
@@ -90,13 +87,19 @@ def batch_git_diffs(
     current_batch: List = []
     current_batch_text = ""
     for file_name, diff_content in file_diffs.items():
-        if get_token_count(model, diff_content) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+        if (
+            get_token_count(model, diff_content)
+            > model.hard_token_limit - MinimumReservedLength.DIFF.value
+        ):
             ## Split the diff into chunks that are less than the token limit
             chunks = [diff_content]
             while True:
                 new_chunks = []
                 for chunk in chunks:
-                    if get_token_count(model, chunk) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+                    if (
+                        get_token_count(model, chunk)
+                        > model.hard_token_limit - MinimumReservedLength.DIFF.value
+                    ):
                         half_len = len(chunk) // 2
                         left_half = chunk[:half_len]
                         right_half = chunk[half_len:]
@@ -109,14 +112,20 @@ def batch_git_diffs(
 
             ## Add the chunks to the batch or multiple batches
             for chunk in chunks:
-                if get_token_count(model, current_batch_text+chunk) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+                if (
+                    get_token_count(model, current_batch_text + chunk)
+                    > model.hard_token_limit - MinimumReservedLength.DIFF.value
+                ):
                     batches.append(current_batch)
                     current_batch = []
                     current_batch_text = ""
                 current_batch.append((file_name, chunk))
                 current_batch_text += chunk
 
-        elif get_token_count(model, current_batch_text+diff_content) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+        elif (
+            get_token_count(model, current_batch_text + diff_content)
+            > model.hard_token_limit - MinimumReservedLength.DIFF.value
+        ):
             batches.append(current_batch)
             current_batch = [(file_name, diff_content)]
             current_batch_text = diff_content
