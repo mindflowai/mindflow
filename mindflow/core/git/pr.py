@@ -13,6 +13,23 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
     base_branch = get_flag_value(args, ['--base', '-B'])
     head_branch = get_flag_value(args, ['--head', '-H'])
 
+    if base_branch is None:
+        # Determine the name of the default branch
+        base_branch = (
+            subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
+            .decode()
+            .strip()
+            .split("/")[-1]
+        )
+    
+    if head_branch is None:
+        # Get the name of the current branch
+        head_branch = (
+            subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"])
+            .decode("utf-8")
+            .strip()
+        )
+
     if not is_valid_pr(base_branch, head_branch):
         return
 
@@ -22,23 +39,6 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
     create_pull_request(args, title, body)
 
 def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]) -> bool:
-    if head_branch is None:
-        # Get the name of the current branch
-        head_branch = (
-            subprocess.check_output(["git", "symbolic-ref", "--short", "HEAD"])
-            .decode("utf-8")
-            .strip()
-        )
-    
-    if base_branch is None:
-        # Determine the name of the default branch
-        base_branch = (
-            subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
-            .decode()
-            .strip()
-            .split("/")[-1]
-        )
-
     if head_branch == base_branch:
         print("Cannot create pull request from default branch")
         return False
