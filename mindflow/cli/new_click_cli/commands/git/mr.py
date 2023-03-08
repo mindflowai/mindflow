@@ -13,9 +13,7 @@ def mr():
     pass
 
 
-@passthrough_command(
-    help="Generate a git pr response by feeding git diff to gpt"
-)
+@passthrough_command(help="Generate a git pr response by feeding git diff to gpt")
 @click.option(
     "-t",
     "--title",
@@ -28,7 +26,9 @@ def mr():
     help="Don't use mindflow to generate a pr body, use this one instead.",
     default=None,
 )
-def create(args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None):
+def create(
+    args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
+):
     """
     PR command.
     """
@@ -37,7 +37,7 @@ def create(args: Tuple[str], title: Optional[str] = None, description: Optional[
             f"Warning: Using message '{title}' instead of mindflow generated message."
         )
         click.echo("It's recommended that you don't use the -t/--title flag.")
-    
+
     if description is not None:
         click.echo(
             f"Warning: Using message '{description}' instead of mindflow generated message."

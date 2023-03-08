@@ -9,9 +9,12 @@ from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import PR_BODY_PREFIX
 from mindflow.utils.prompts import PR_TITLE_PREFIX
 
-def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None) -> str:
-    base_branch = get_flag_value(args, ['--base', '-B'])
-    head_branch = get_flag_value(args, ['--head', '-H'])
+
+def run_pr(
+    args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None
+) -> str:
+    base_branch = get_flag_value(args, ["--base", "-B"])
+    head_branch = get_flag_value(args, ["--head", "-H"])
 
     if base_branch is None:
         # Determine the name of the default branch
@@ -21,7 +24,7 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
             .strip()
             .split("/")[-1]
         )
-    
+
     if head_branch is None:
         # Get the name of the current branch
         head_branch = (
@@ -38,6 +41,7 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
 
     create_pull_request(args, title, body)
 
+
 def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]) -> bool:
     if head_branch == base_branch:
         print("Cannot create pull request from default branch")
@@ -53,7 +57,10 @@ def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]) -> bool:
 
     return True
 
-def create_title_and_body(base_branch, title: Optional[str], body: Optional[str]) -> Tuple[str, str]:
+
+def create_title_and_body(
+    base_branch, title: Optional[str], body: Optional[str]
+) -> Tuple[str, str]:
     settings = Settings()
 
     diff_output = run_diff((base_branch,))
@@ -109,7 +116,7 @@ def has_remote_branch(head_branch: str) -> bool:
 
 
 def create_pull_request(args: Tuple[str], title: str, body: str):
-    command: List[str] = ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body] # type: ignore
+    command: List[str] = ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body]  # type: ignore
     pr_result = subprocess.check_output(command).decode("utf-8")
     if "https://" in pr_result:
         print("Pull request created successfully")

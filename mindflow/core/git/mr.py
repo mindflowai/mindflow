@@ -4,9 +4,12 @@ from typing import Optional, Tuple, List
 from mindflow.core.git.pr import create_title_and_body, is_valid_pr
 from mindflow.utils.command_parse import get_flag_value
 
-def run_mr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None) -> str:
-    base_branch = get_flag_value(args, ['--target-branch', '-b'])
-    head_branch = get_flag_value(args, ['--source-branch', '-s'])
+
+def run_mr(
+    args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
+) -> str:
+    base_branch = get_flag_value(args, ["--target-branch", "-b"])
+    head_branch = get_flag_value(args, ["--source-branch", "-s"])
 
     if base_branch is None:
         # Determine the name of the default branch
@@ -16,7 +19,7 @@ def run_mr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
             .strip()
             .split("/")[-1]
         )
-    
+
     if head_branch is None:
         # Get the name of the current branch
         head_branch = (
@@ -28,13 +31,14 @@ def run_mr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
     if not is_valid_pr(base_branch, head_branch):
         return
 
-    if not title or not body:
-        title, body = create_title_and_body(base_branch, title, body)
+    if not title or not description:
+        title, description = create_title_and_body(base_branch, title, description)
 
-    create_merge_request(args, title, body)
+    create_merge_request(args, title, description)
 
-def create_merge_request(args: Tuple[str], title: str, body: str):
-    command: List[str] = ["glab", "pr", "create"] + list(args) + ["--title", title, "--description", body] # type: ignore
+
+def create_merge_request(args: Tuple[str], title: str, description: str):
+    command: List[str] = ["glab", "mr", "create"] + list(args) + ["--title", title, "--description", description]  # type: ignore
     pr_result = subprocess.check_output(command).decode("utf-8")
     if "https://" in pr_result:
         print("Merge request created successfully")
