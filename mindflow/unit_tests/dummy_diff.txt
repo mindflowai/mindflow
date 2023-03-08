@@ -1,0 +1,347 @@
+diff --git a/mindflow/core/git/diff.py b/mindflow/core/git/diff.py
+index 4931684..e8e414b 100644
+--- a/mindflow/core/git/diff.py
++++ b/mindflow/core/git/diff.py
+@@ -13,6 +13,8 @@ from mindflow.settings import Settings
+ from mindflow.utils.prompt_builders import build_context_prompt
+ from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
+ 
++from mindflow.utils.diff_parser import parse_git_diff, IGNORE_FILE_EXTENSIONS
++
+ 
+ def run_diff(args: Tuple[str]) -> str:
+     """
+@@ -25,12 +27,17 @@ def run_diff(args: Tuple[str]) -> str:
+ 
+     # Execute the git diff command and retrieve the output as a string
+     diff_result = subprocess.check_output(command).decode("utf-8")
+-
+     if diff_result.strip() == "":
+         return "No staged changes."
+ 
++    
++    diff_dict, excluded_filenames = parse_git_diff(diff_result)
++
++    if len(diff_dict) <= 0:
++        return "No staged changes."
++
+     batched_parsed_diff_result = batch_git_diffs(
+-        parse_git_diff(diff_result), token_limit=completion_model.hard_token_limit
++        diff_dict, token_limit=completion_model.hard_token_limit
+     )
+ 
+     response: str = ""
+@@ -58,37 +65,22 @@ def run_diff(args: Tuple[str]) -> str:
+             for future in concurrent.futures.as_completed(futures):
+                 response += future.result()
+ 
++    if len(excluded_filenames) > 0:
++        response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
++
+     return response
+ 
+ 
+ import re
+ 
+ 
+-def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
+-    file_diffs: List[Dict[str, List[str]]] = []
+-    current_diff: Optional[Dict[str, List[str]]] = None
+-    for line in diff_output.split("\n"):
+-        if line.startswith("diff --git"):
+-            if current_diff is not None:
+-                file_diffs.append(current_diff)
+-            current_diff = {"file_name": None, "content": []}  # type: ignore
+-            match = re.match(r"^diff --git a/(.+?) b/.+?$", line)
+-            if match:
+-                current_diff["file_name"] = match.group(1)  # type: ignore
+-        if current_diff is not None:
+-            current_diff["content"].append(line)
+-    if current_diff is not None:
+-        file_diffs.append(current_diff)
+-    return [(diff["file_name"], "\n".join(diff["content"])) for diff in file_diffs]  # type: ignore
+-
+-
+ def batch_git_diffs(
+-    file_diffs: List[Tuple[str, str]], token_limit: int
++    file_diffs: List[Dict[str, str]], token_limit: int
+ ) -> List[List[Tuple[str, str]]]:
+     batches = []
+     current_batch: List = []
+     current_batch_size = 0
+-    for file_name, diff_content in file_diffs:
++    for file_name, diff_content in file_diffs.items():
+         if len(diff_content) > token_limit:
+             chunks = [
+                 diff_content[i : i + token_limit]
+diff --git a/mindflow/test.ipynb b/mindflow/test.ipynb
+deleted file mode 100644
+index 19d8f22..0000000
+--- a/mindflow/test.ipynb
++++ /dev/null
+@@ -1,52 +0,0 @@
+-{
+- "cells": [
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": [
+-    "asdfasdf\n",
+-    "\n"
+-   ]
+-  },
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": []
+-  },
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": []
+-  },
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": [
+-    "asdfasdf"
+-   ]
+-  },
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": []
+-  }
+- ],
+- "metadata": {
+-  "language_info": {
+-   "name": "python"
+-  },
+-  "orig_nbformat": 4
+- },
+- "nbformat": 4,
+- "nbformat_minor": 2
+-}
+diff --git a/mindflow/unit_tests/dummy_diff.txt b/mindflow/unit_tests/dummy_diff.txt
+index e3afdd6..e69de29 100644
+--- a/mindflow/unit_tests/dummy_diff.txt
++++ b/mindflow/unit_tests/dummy_diff.txt
+@@ -1,94 +0,0 @@
+-diff --git a/diff.txt b/diff.txt
+-index de79139..e69de29 100644
+---- a/diff.txt
+-+++ b/diff.txt
+-@@ -1,38 +0,0 @@
+--diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py
+--new file mode 100644
+--index 0000000..33a588f
+----- /dev/null
+--+++ b/mindflow/utils/diff_parser.py
+--@@ -0,0 +1,31 @@
+--+
+--+
+--+
+--+def parse_git_diff_file(diff_file):
+--+    diffs = {}
+--+    current_file = None
+--+    current_diff = []
+--+
+--+    with open(diff_file, "r") as f:
+--+        for line in f:
+--+            if line.startswith("diff --git"):
+--+                # Starting a new file
+--+                if current_file:
+--+                    # Add the previous diff to the dictionary
+--+                    diffs[current_file] = "".join(current_diff)
+--+                current_file = line.split()[-1]
+--+                current_diff = [line]
+--+            else:
+--+                current_diff.append(line)
+--+
+--+        # Add the last diff to the dictionary
+--+        if current_file:
+--+            diffs[current_file] = "".join(current_diff)
+--+
+--+    return diffs
+--+
+--+
+--+diffs = parse_git_diff_file("diff.txt")
+--+for filename, diff in diffs.items():
+--+    print(f"Diff for {filename}:")
+--+    print(diff)
+--\ No newline at end of file
+-diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py
+-index 33a588f..bfb9b92 100644
+---- a/mindflow/utils/diff_parser.py
+-+++ b/mindflow/utils/diff_parser.py
+-@@ -1,4 +1,8 @@
+- 
+-+import os
+-+
+-+# NOTE: make sure to have a the "." in the file extension (if applicable)
+-+IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
+- 
+- 
+- def parse_git_diff_file(diff_file):
+-@@ -13,10 +17,21 @@ def parse_git_diff_file(diff_file):
+-                 if current_file:
+-                     # Add the previous diff to the dictionary
+-                     diffs[current_file] = "".join(current_diff)
+-+
+-                 current_file = line.split()[-1]
+-+                current_ext = os.path.splitext(current_file)[1]
+-+
+-+                if current_ext in IGNORE_FILE_EXTENSIONS:
+-+                    # Ignore this file
+-+                    current_file = None
+-+                    current_diff = []
+-+                    continue
+-+
+-                 current_diff = [line]
+-             else:
+--                current_diff.append(line)
+-+                # skip lines if we are ignoring this file (TODO - this is a bit hacky)
+-+                if current_file:
+-+                    current_diff.append(line)
+- 
+-         # Add the last diff to the dictionary
+-         if current_file:
+-@@ -25,7 +40,9 @@ def parse_git_diff_file(diff_file):
+-     return diffs
+- 
+- 
+-+
+- diffs = parse_git_diff_file("diff.txt")
+--for filename, diff in diffs.items():
+--    print(f"Diff for {filename}:")
+--    print(diff)
+-\ No newline at end of file
+-+# for filename, diff in diffs.items():
+-+#     print(f"Diff for {filename}:")
+-+#     print(diff)
+-+print(list(diffs.keys()))
+-\ No newline at end of file
+diff --git a/mindflow/unit_tests/test_utils.py b/mindflow/unit_tests/test_utils.py
+index cacf274..4f1b9fc 100644
+--- a/mindflow/unit_tests/test_utils.py
++++ b/mindflow/unit_tests/test_utils.py
+@@ -1,8 +1,14 @@
+-from mindflow.utils.diff_parser import parse_git_diff_file
++from mindflow.utils.diff_parser import parse_git_diff
+ 
+ 
+ def test_diff_parser():
+-    diffs = parse_git_diff_file("mindflow/unit_tests/dummy_diff.txt")
++
++    diff = open("mindflow/unit_tests/dummy_diff.txt", "r").read()
++    diffs, excluded_files = parse_git_diff(diff)
++
++    assert excluded_files == "b/"
++
++    print(list(diffs.keys()))
+ 
+     expected = {
+         "b/diff.txt": 'diff --git a/diff.txt b/diff.txt\nindex de79139..e69de29 100644\n--- a/diff.txt\n+++ b/diff.txt\n@@ -1,38 +0,0 @@\n-diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py\n-new file mode 100644\n-index 0000000..33a588f\n---- /dev/null\n-+++ b/mindflow/utils/diff_parser.py\n-@@ -0,0 +1,31 @@\n-+\n-+\n-+\n-+def parse_git_diff_file(diff_file):\n-+    diffs = {}\n-+    current_file = None\n-+    current_diff = []\n-+\n-+    with open(diff_file, "r") as f:\n-+        for line in f:\n-+            if line.startswith("diff --git"):\n-+                # Starting a new file\n-+                if current_file:\n-+                    # Add the previous diff to the dictionary\n-+                    diffs[current_file] = "".join(current_diff)\n-+                current_file = line.split()[-1]\n-+                current_diff = [line]\n-+            else:\n-+                current_diff.append(line)\n-+\n-+        # Add the last diff to the dictionary\n-+        if current_file:\n-+            diffs[current_file] = "".join(current_diff)\n-+\n-+    return diffs\n-+\n-+\n-+diffs = parse_git_diff_file("diff.txt")\n-+for filename, diff in diffs.items():\n-+    print(f"Diff for {filename}:")\n-+    print(diff)\n-\\ No newline at end of file\n',
+diff --git a/mindflow/utils/diff_parser.py b/mindflow/utils/diff_parser.py
+index c9d0d27..1d7b094 100644
+--- a/mindflow/utils/diff_parser.py
++++ b/mindflow/utils/diff_parser.py
+@@ -4,36 +4,59 @@ import os
+ IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
+ 
+ 
+-def parse_git_diff_file(diff_file):
++def parse_git_diff(diff_str: str):
+     diffs = {}
+     current_file = None
+     current_diff = []
+ 
+-    with open(diff_file, "r") as f:
+-        for line in f:
+-            if line.startswith("diff --git"):
+-                # Starting a new file
+-                if current_file:
+-                    # Add the previous diff to the dictionary
+-                    diffs[current_file] = "".join(current_diff)
+-
+-                current_file = line.split()[-1]
+-                current_ext = os.path.splitext(current_file)[1]
+-
+-                if current_ext in IGNORE_FILE_EXTENSIONS:
+-                    # Ignore this file
+-                    current_file = None
+-                    current_diff = []
+-                    continue
+-
+-                current_diff = [line]
+-            else:
+-                # skip lines if we are ignoring this file (TODO - this is a bit hacky)
+-                if current_file:
+-                    current_diff.append(line)
+-
+-        # Add the last diff to the dictionary
+-        if current_file:
+-            diffs[current_file] = "".join(current_diff)
+-
+-    return diffs
++    excluded_files = []
++
++    for line in diff_str.splitlines(keepends=True):
++        if line.startswith("diff --git"):
++            # Starting a new file
++            if current_file:
++                # Add the previous diff to the dictionary
++                diffs[current_file] = "".join(current_diff)
++
++            current_file = line.split()[-1]
++            current_ext = os.path.splitext(current_file)[1]
++
++            if current_ext in IGNORE_FILE_EXTENSIONS:
++                excluded_files.append(current_file)
++
++                # Ignore this file
++                current_file = None
++                current_diff = []
++                continue
++
++            current_diff = [line]
++        else:
++            # skip lines if we are ignoring this file (TODO - this is a bit hacky)
++            if current_file:
++                current_diff.append(line)
++
++    # Add the last diff to the dictionary
++    if current_file:
++        diffs[current_file] = "".join(current_diff)
++
++    return diffs, excluded_files
++
++
++# Old implementation:
++# def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
++#     file_diffs: List[Dict[str, List[str]]] = []
++#     current_diff: Optional[Dict[str, List[str]]] = None
++#     for line in diff_output.split("\n"):
++#         if line.startswith("diff --git"):
++#             if current_diff is not None:
++#                 file_diffs.append(current_diff)
++#             current_diff = {"file_name": None, "content": []}  # type: ignore
++#             match = re.match(r"^diff --git a/(.+?) b/.+?$", line)
++#             if match:
++#                 current_diff["file_name"] = match.group(1)  # type: ignore
++#         if current_diff is not None:
++#             current_diff["content"].append(line)
++#     if current_diff is not None:
++#         file_diffs.append(current_diff)
++#     return [(diff["file_name"], "\n".join(diff["content"])) for diff in file_diffs]  # type: ignore
++

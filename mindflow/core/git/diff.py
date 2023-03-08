@@ -13,6 +13,8 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
+from mindflow.utils.diff_parser import parse_git_diff, IGNORE_FILE_EXTENSIONS
+
 
 def run_diff(args: Tuple[str]) -> str:
     """
@@ -25,12 +27,16 @@ def run_diff(args: Tuple[str]) -> str:
 
     # Execute the git diff command and retrieve the output as a string
     diff_result = subprocess.check_output(command).decode("utf-8")
-
     if diff_result.strip() == "":
         return "No staged changes."
 
+    diff_dict, excluded_filenames = parse_git_diff(diff_result)
+
+    if len(diff_dict) <= 0:
+        return "No staged changes."
+
     batched_parsed_diff_result = batch_git_diffs(
-        parse_git_diff(diff_result), token_limit=completion_model.hard_token_limit
+        diff_dict, token_limit=completion_model.hard_token_limit
     )
 
     response: str = ""
@@ -58,37 +64,22 @@ def run_diff(args: Tuple[str]) -> str:
             for future in concurrent.futures.as_completed(futures):
                 response += future.result()
 
+    if len(excluded_filenames) > 0:
+        response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
+
     return response
 
 
 import re
 
 
-def parse_git_diff(diff_output: str) -> List[Tuple[str, str]]:
-    file_diffs: List[Dict[str, List[str]]] = []
-    current_diff: Optional[Dict[str, List[str]]] = None
-    for line in diff_output.split("\n"):
-        if line.startswith("diff --git"):
-            if current_diff is not None:
-                file_diffs.append(current_diff)
-            current_diff = {"file_name": None, "content": []}  # type: ignore
-            match = re.match(r"^diff --git a/(.+?) b/.+?$", line)
-            if match:
-                current_diff["file_name"] = match.group(1)  # type: ignore
-        if current_diff is not None:
-            current_diff["content"].append(line)
-    if current_diff is not None:
-        file_diffs.append(current_diff)
-    return [(diff["file_name"], "\n".join(diff["content"])) for diff in file_diffs]  # type: ignore
-
-
 def batch_git_diffs(
-    file_diffs: List[Tuple[str, str]], token_limit: int
+    file_diffs: Dict[str, str], token_limit: int
 ) -> List[List[Tuple[str, str]]]:
     batches = []
     current_batch: List = []
     current_batch_size = 0
-    for file_name, diff_content in file_diffs:
+    for file_name, diff_content in file_diffs.items():
         if len(diff_content) > token_limit:
             chunks = [
                 diff_content[i : i + token_limit]
