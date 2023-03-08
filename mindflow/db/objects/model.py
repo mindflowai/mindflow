@@ -4,7 +4,15 @@ import openai
 import numpy as np
 from traitlets import Callable
 
-import tiktoken
+try:
+    import tiktoken
+except ImportError:
+    print(
+        "tiktoken not not available in python<=v3.8. Estimation of tokens will be less precise, which may impact performance and quality of responses."
+    )
+    print("Upgrade to python v3.8 or higher for better results.")
+    pass
+
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
@@ -12,7 +20,7 @@ from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
-from mindflow.utils.errors import ModelError, EmbeddingModelError
+from mindflow.utils.errors import ModelError
 
 
 class Model(StaticObject):
@@ -47,7 +55,12 @@ class ConfiguredModel(Callable):
     name: str
     service: str
     model_type: str
-    tokenizer: tiktoken.Encoding
+
+    try:
+        tokenizer: tiktoken.Encoding
+    except NameError:
+        pass
+
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
@@ -69,8 +82,11 @@ class ConfiguredModel(Callable):
                 if value not in [None, ""]:
                     setattr(self, key, value)
 
-        if self.service == ServiceID.OPENAI.value:
-            self.tokenizer = tiktoken.encoding_for_model(self.id)
+        try:
+            if self.service == ServiceID.OPENAI.value:
+                self.tokenizer = tiktoken.encoding_for_model(self.id)
+        except NameError:
+            pass
 
         service_config = ServiceConfig.load(f"{self.service}_config")
         self.api_key = service_config.api_key
