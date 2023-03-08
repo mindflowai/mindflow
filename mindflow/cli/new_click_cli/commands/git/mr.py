@@ -8,7 +8,7 @@ from mindflow.core.git.mr import run_mr
 @click.group()
 def mr():
     """
-    MR command.
+    MindFlow powered GitLab Merge Request manager.
     """
     pass
 
@@ -43,6 +43,24 @@ def create(
             f"Warning: Using message '{description}' instead of mindflow generated message."
         )
         click.echo("It's recommended that you don't use the -d/--description flag.")
+
+    # check if the `glab` command is available
+    # try:
+    #     # try running the glab command in the shell, if it fails, an exception will be raised
+    #     click.echo("Checking if `glab` is installed...")
+    #     subprocess.check_output(["glab", "--version"])
+
+    # except click.exceptions.MissingParameter:
+    #     
+    #     exit()
+
+    import subprocess
+
+    try:
+        subprocess.check_output(['glab', '--version'])
+    except Exception:
+        click.echo("The `glab` command is not available. Please install it here: https://docs.gitlab.com/ee/integration/glab/")
+        exit()
 
     run_mr(args, title=title, description=description)
 

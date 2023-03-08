@@ -11,12 +11,13 @@ from typing import Tuple
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
-from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
+from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX, GIT_DIFF_PROMPT_PREFIX_SHORT
 
 from mindflow.utils.diff_parser import parse_git_diff, IGNORE_FILE_EXTENSIONS
+from mindflow.utils.prompts import PR_BODY_PREFIX, PR_TITLE_PREFIX
 
 
-def run_diff(args: Tuple[str]) -> str:
+def run_diff(args: Tuple[str], summarize: bool = False, note_exclusions: bool = False) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
@@ -39,13 +40,15 @@ def run_diff(args: Tuple[str]) -> str:
         diff_dict, token_limit=completion_model.hard_token_limit
     )
 
+    prompt_prefix = GIT_DIFF_PROMPT_PREFIX_SHORT if summarize else GIT_DIFF_PROMPT_PREFIX
+
     response: str = ""
     if len(batched_parsed_diff_result) == 1:
         content = ""
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         response = completion_model(
-            build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
+            build_context_prompt(prompt_prefix, content)
         )
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -56,7 +59,7 @@ def run_diff(args: Tuple[str]) -> str:
                     content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
                 future: concurrent.futures.Future = executor.submit(
                     completion_model,
-                    build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content),
+                    build_context_prompt(prompt_prefix, content),
                 )
                 futures.append(future)
 
@@ -64,8 +67,12 @@ def run_diff(args: Tuple[str]) -> str:
             for future in concurrent.futures.as_completed(futures):
                 response += future.result()
 
-    if len(excluded_filenames) > 0:
-        response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
+    if summarize:
+        pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, response)
+        response = settings.mindflow_models.query.model(pr_body_prompt)
+
+    if note_exclusions and len(excluded_filenames) > 0:
+        response += f"\n\nNOTE: The following files were excluded: {', '.join(excluded_filenames)}"
 
     return response
 

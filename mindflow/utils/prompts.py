@@ -12,12 +12,23 @@ GIT_DIFF_PROMPT_PREFIX = "The following is a git diff from my code repository. \
                     - change3 \
             }\
         with a new line for each file and change."
+GIT_DIFF_PROMPT_PREFIX_SHORT = "The following is a git diff from my code repository. \
+    Please summarize the changes in the file in a couple sentences. Keep it breif and dense and include it's filename. \
+    "
+
 INDEX_PROMPT_PREFIX = "Pretend you are a search engine trying to provide an information rich \
     yet condensed string that can serve as an index for the contents or the purpose \
     of a file. I want you to respond in as few words as possible while still conveying \
          the full content and purpose of this file."
+
 COMMIT_PROMPT_PREFIX = "Please provide a commit message for the following changes. Only respond with the commit message and nothing else."
+
 PR_TITLE_PREFIX = "Please provide a title for the following pull request using this git diff summary. Only respond with the title and nothing else."
-PR_BODY_PREFIX = "Please provide a body for the following pull request using this git diff summary. I want you to keep it high level, and give core \
-      themes and reasons for changes. Try to include some titles and bullet points. Only respond with the body and nothing else."
+
+# PR_BODY_PREFIX = "Please provide a body for the following pull request using this git diff summary. I want you to keep it high level, and give core \
+#       themes and reasons for changes. Try to include some titles and bullet points. Only respond with the body and nothing else."
+PR_BODY_PREFIX = " \
+    The following contains change descriptions. Summarize these into 1-3 paragraphs. Keep it concise and make it sound somewhat casual. \
+    "
+
 QUERY = "Please answer the following query like a helpful virtual assistant using the context provided below: "
