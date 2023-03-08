@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 import click
 from mindflow.cli.new_click_cli.util import passthrough_command
 from mindflow.core.git.mr import run_mr
+import subprocess
 
 
 @click.group()
@@ -43,18 +44,6 @@ def create(
             f"Warning: Using message '{description}' instead of mindflow generated message."
         )
         click.echo("It's recommended that you don't use the -d/--description flag.")
-
-    # check if the `glab` command is available
-    # try:
-    #     # try running the glab command in the shell, if it fails, an exception will be raised
-    #     click.echo("Checking if `glab` is installed...")
-    #     subprocess.check_output(["glab", "--version"])
-
-    # except click.exceptions.MissingParameter:
-    #     
-    #     exit()
-
-    import subprocess
 
     try:
         subprocess.check_output(['glab', '--version'])
