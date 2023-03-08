@@ -130,7 +130,9 @@ class DocumentChunk:
         return chunks, embeddings
 
 
-def trim_content(ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel) -> str:
+def trim_content(
+    ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel
+) -> str:
     """
     This function is used to select the most relevant content for the prompt.
     """
@@ -146,11 +148,14 @@ def trim_content(ranked_document_chunks: List[DocumentChunk], model: ConfiguredM
                 left, right = 0, len(text)
                 while left <= right:
                     mid = (left + right) // 2
-                    if get_token_count(model, selected_content + text[:mid]) <= model.hard_token_limit:
+                    if (
+                        get_token_count(model, selected_content + text[:mid])
+                        <= model.hard_token_limit
+                    ):
                         left = mid + 1
                     else:
                         right = mid - 1
-                
+
                 # Add the selected text to the selected content
                 selected_content += text[:right]
 

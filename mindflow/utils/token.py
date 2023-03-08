@@ -8,6 +8,7 @@ def get_token_count(model: ConfiguredModel, text: str) -> int:
     """
     return len(model.tokenizer.encode(text))
 
+
 def get_batch_token_count(model: ConfiguredModel, texts: List[str]) -> int:
     """
     This function is used to get the token count of a list of strings.

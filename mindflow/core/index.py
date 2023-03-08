@@ -147,7 +147,10 @@ def binary_split_raw_text_to_nodes(
     stack = [(0, len(text))]
     while stack:
         start, end = stack.pop()
-        if get_token_count(completion_model, text[start:end]) < completion_model.soft_token_limit:
+        if (
+            get_token_count(completion_model, text[start:end])
+            < completion_model.soft_token_limit
+        ):
             nodes.append(Node(completion_model, start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
@@ -167,7 +170,9 @@ def binary_split_nodes_to_chunks(
     while stack:
         nodes, start, end = stack.pop()
         if (
-            get_batch_token_count(completion_model, [node.summary for node in nodes[start:end]])
+            get_batch_token_count(
+                completion_model, [node.summary for node in nodes[start:end]]
+            )
             < completion_model.soft_token_limit
         ):
             chunks.append(nodes[start:end])
@@ -186,7 +191,10 @@ def create_nodes(completion_model: ConfiguredModel, leaf_nodes: List[Node]) -> N
     while stack:
         leaf_nodes, start, end = stack.pop()
         if (
-             get_batch_token_count(completion_model, [leaf_node.summary for leaf_node in leaf_nodes[start:end]])
+            get_batch_token_count(
+                completion_model,
+                [leaf_node.summary for leaf_node in leaf_nodes[start:end]],
+            )
             > completion_model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(

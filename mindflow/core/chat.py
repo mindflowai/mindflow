@@ -9,8 +9,11 @@ def run_chat(prompt: str) -> str:
     """
     settings = Settings()
     completion_model = settings.mindflow_models.query.model
-    
-    if get_token_count(completion_model, CHAT_PROMPT_PREFIX+prompt) > completion_model.hard_token_limit:
+
+    if (
+        get_token_count(completion_model, CHAT_PROMPT_PREFIX + prompt)
+        > completion_model.hard_token_limit
+    ):
         print("The prompt is too long. Please try again with a shorter prompt.")
         return ""
 
