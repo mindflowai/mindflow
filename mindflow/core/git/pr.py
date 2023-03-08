@@ -12,7 +12,7 @@ from mindflow.utils.prompts import PR_TITLE_PREFIX
 
 def run_pr(
     args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None
-) -> str:
+):
     base_branch = get_flag_value(args, ["--base", "-B"])
     head_branch = get_flag_value(args, ["--head", "-H"])
 
@@ -42,7 +42,7 @@ def run_pr(
     create_pull_request(args, title, body)
 
 
-def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]) -> bool:
+def is_valid_pr(head_branch: str, base_branch: str) -> bool:
     if head_branch == base_branch:
         print("Cannot create pull request from default branch")
         return False

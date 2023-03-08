@@ -7,7 +7,7 @@ from mindflow.utils.command_parse import get_flag_value
 
 def run_mr(
     args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
-) -> str:
+):
     base_branch = get_flag_value(args, ["--target-branch", "-b"])
     head_branch = get_flag_value(args, ["--source-branch", "-s"])
 
