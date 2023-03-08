@@ -3,16 +3,19 @@
 """
 import concurrent.futures
 import subprocess
-from typing import Dict, Optional
+from typing import Dict, Union
 from typing import List
 from typing import Tuple
 
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.settings import Settings
+from mindflow.utils.constants import MinimumReservedLength
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.diff_parser import parse_git_diff
+from mindflow.utils.token import get_token_count
 
 
 def run_diff(args: Tuple[str]) -> str:
@@ -35,7 +38,7 @@ def run_diff(args: Tuple[str]) -> str:
         return "No staged changes."
 
     batched_parsed_diff_result = batch_git_diffs(
-        diff_dict, token_limit=completion_model.hard_token_limit
+        diff_dict, completion_model
     )
 
     response: str = ""
@@ -43,11 +46,11 @@ def run_diff(args: Tuple[str]) -> str:
         content = ""
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-        response = completion_model(
+        response: Union[ModelError, str] = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
         )
-        if response is None:
-            print("Warning: model failed to return response for diff. Please raise issue on github if this persists: https://github.com/nollied/mindflow-cli/issues")
+        if isinstance(response, ModelError):
+            print(response.diff_message)
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -63,10 +66,10 @@ def run_diff(args: Tuple[str]) -> str:
 
             # Process the results as they become available
             for future in concurrent.futures.as_completed(futures):
-                partial_response: Optional[str] = future.result()
-                if partial_response is None:
-                    print("Warning: model failed to return response for part of, or entire, diff. Please raise issue on github if this persists: https://github.com/nollied/mindflow-cli/issues")
-                    partial_response = ""
+                partial_response: Union[ModelError, str] = future.result()
+                if isinstance(partial_response, ModelError):
+                    print(partial_response.diff_partial_message)
+                    continue
                 
                 response += partial_response
 
@@ -81,31 +84,45 @@ import re
 
 
 def batch_git_diffs(
-    file_diffs: Dict[str, str], token_limit: int
+    file_diffs: Dict[str, str], model: ConfiguredModel
 ) -> List[List[Tuple[str, str]]]:
     batches = []
     current_batch: List = []
-    current_batch_size = 0
+    current_batch_text = ""
     for file_name, diff_content in file_diffs.items():
-        if len(diff_content) > token_limit:
-            chunks = [
-                diff_content[i : i + token_limit]
-                for i in range(0, len(diff_content), token_limit)
-            ]
+        if get_token_count(model, diff_content) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+            ## Split the diff into chunks that are less than the token limit
+            chunks = [diff_content]
+            while True:
+                new_chunks = []
+                for chunk in chunks:
+                    if get_token_count(model, chunk) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
+                        half_len = len(chunk) // 2
+                        left_half = chunk[:half_len]
+                        right_half = chunk[half_len:]
+                        new_chunks.extend([left_half, right_half])
+                    else:
+                        new_chunks.append(chunk)
+                if new_chunks == chunks:
+                    break
+                chunks = new_chunks
+
+            ## Add the chunks to the batch or multiple batches
             for chunk in chunks:
-                if current_batch_size + len(chunk) > token_limit * 2:
+                if get_token_count(model, current_batch_text+chunk) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
                     batches.append(current_batch)
                     current_batch = []
-                    current_batch_size = 0
+                    current_batch_text = ""
                 current_batch.append((file_name, chunk))
-                current_batch_size += len(chunk)
-        elif current_batch_size + len(diff_content) > token_limit * 2:
+                current_batch_text += chunk
+
+        elif get_token_count(model, current_batch_text+diff_content) > model.hard_token_limit - MinimumReservedLength.DIFF.value:
             batches.append(current_batch)
             current_batch = [(file_name, diff_content)]
-            current_batch_size = len(diff_content)
+            current_batch_text = diff_content
         else:
             current_batch.append((file_name, diff_content))
-            current_batch_size += len(diff_content)
+            current_batch_text += diff_content
     if current_batch:
         batches.append(current_batch)
     return batches

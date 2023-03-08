@@ -4,7 +4,7 @@
 import sys
 from concurrent.futures import as_completed
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
+from typing import Dict, Union
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -17,6 +17,8 @@ from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
+from mindflow.utils.constants import MinimumReservedLength
+from mindflow.utils.errors import ModelError
 from mindflow.utils.token import get_token_count
 
 
@@ -38,7 +40,10 @@ def run_query(document_paths: List[str], query: str):
             embedding_model,
         ),
     )
-    response = completion_model(messages)
+    response: Union[ModelError, str] = completion_model(messages)
+    if isinstance(response, ModelError):
+        return response.query_message
+    
     return response
 
 
@@ -74,7 +79,7 @@ def select_content(
         )
         sys.exit(1)
 
-    selected_content = trim_content(embedding_ranked_document_chunks, completion_model)
+    selected_content = trim_content(embedding_ranked_document_chunks, completion_model, query)
 
     return selected_content
 
@@ -110,8 +115,13 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
+        embedding_response: Union[ModelError, np.ndarray] = embedding_model(document.search_tree["summary"])
+        if isinstance(embedding_response, ModelError):
+            print(embedding_response.embedding_message)
+            return [], []
+        
         embeddings: List[np.ndarray] = [
-            embedding_model(document.search_tree["summary"])
+            embedding_response
         ]
         rolling_summary: List[str] = []
         while stack:
@@ -121,17 +131,20 @@ class DocumentChunk:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding = embedding_model(
+                    rolling_summary_embedding_response: Union[np.ndarray, ModelError] = embedding_model(
                         "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
                     )
-                    embeddings.append(rolling_summary_embedding)
+                    if isinstance(rolling_summary_embedding_response, ModelError):
+                        print(rolling_summary_embedding_response.embedding_message)
+                        continue
+                    embeddings.append(rolling_summary_embedding_response)
             rolling_summary.pop()
 
         return chunks, embeddings
 
 
 def trim_content(
-    ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel
+    ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel, query: str
 ) -> str:
     """
     This function is used to select the most relevant content for the prompt.
@@ -149,8 +162,8 @@ def trim_content(
                 while left <= right:
                     mid = (left + right) // 2
                     if (
-                        get_token_count(model, selected_content + text[:mid])
-                        <= model.hard_token_limit
+                        get_token_count(model, query + selected_content + text[:mid])
+                        <= model.hard_token_limit - MinimumReservedLength.QUERY.value
                     ):
                         left = mid + 1
                     else:
@@ -158,7 +171,6 @@ def trim_content(
 
                 # Add the selected text to the selected content
                 selected_content += text[:right]
-
     return selected_content
 
 

@@ -1,10 +1,11 @@
 import concurrent.futures
 import subprocess
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from mindflow.core.git.diff import run_diff
 from mindflow.settings import Settings
 from mindflow.utils.command_parse import get_flag_value
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import PR_BODY_PREFIX
 from mindflow.utils.prompts import PR_TITLE_PREFIX
@@ -79,19 +80,25 @@ def create_title_and_body(
                 settings.mindflow_models.query.model, pr_body_prompt
             )
 
-        title = future_title.result()
-        body = future_body.result()
+        title_response: Union[ModelError, str] = future_title.result()
+        body_response: Union[ModelError, str] = future_body.result()
     else:
-        if title is None:
+        if title_response is None:
             pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output)
-            title = settings.mindflow_models.query.model(pr_title_prompt)
+            title_response: Union[ModelError, str] = settings.mindflow_models.query.model(pr_title_prompt)
         if body is None:
             pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
-            body = settings.mindflow_models.query.model(pr_body_prompt)
+            body_response: Union[ModelError, str] = settings.mindflow_models.query.model(pr_body_prompt)
     
-    if title is None or body is None:
-        print("Unable to generate a pull request title and body. Please try again - this may be a temporary issue with the OpenAI API. If the problem persists, please raise an issue at: https://github.com/nollied/mindflow-cli/issues")
+    if isinstance(title_response, ModelError):
+        print(title_response.pr_message)
         return None
+    if isinstance(body_response, ModelError):
+        print(body_response.pr_message)
+        return None
+    
+    title = title_response if title is None else title
+    body = body_response if body is None else body
     return title, body
 
 

@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 import openai
+import numpy as np
 from traitlets import Callable
 
 import tiktoken
@@ -9,9 +10,9 @@ from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.utils.errors import ModelError, EmbeddingModelError
 
 
 class Model(StaticObject):
@@ -80,10 +81,10 @@ class ConfiguredModel(Callable):
     def openai_chat_completion(
         self,
         messages: list,
-        max_tokens: int = 500,
         temperature: float = 0.0,
+        max_tokens: Optional[int] = None,
         stop: Optional[list] = None,
-    ) -> Optional[str]:
+    ) -> Union[str, ModelError]:
         try:
             openai.api_key = self.api_key
             return openai.ChatCompletion.create(
@@ -93,17 +94,17 @@ class ConfiguredModel(Callable):
                 max_tokens=max_tokens,
                 stop=stop,
             )["choices"][0]["message"]["content"]
-        except Exception as e:
-            return None
+        except ModelError as e:
+            return e
 
-    def openai_embedding(self, text: str) -> Optional[list]:
+    def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
         try:
             openai.api_key = self.api_key
             return openai.Embedding.create(engine=self.id, input=text)["data"][0][
                 "embedding"
             ]
-        except Exception as e:
-            return None
+        except ModelError as e:
+            return e
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:

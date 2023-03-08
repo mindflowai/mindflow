@@ -4,7 +4,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 import logging
-from typing import List
+from typing import List, Union
 from typing import Optional
 
 import numpy as np
@@ -18,6 +18,7 @@ from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.resolving.resolve import return_if_indexable
 from mindflow.settings import Settings
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_batch_token_count, get_token_count
@@ -98,12 +99,14 @@ class Node:
         self.start = start
         self.end = end
         if text:
-            self.summary: Optional[str] = completion_model(
+            response: Union[str, ModelError] = completion_model(
                 build_context_prompt(INDEX_PROMPT_PREFIX, text)
             )
-            if self.summary is None:
+            if isinstance(response, ModelError):
                 self.summary = ""
-                logging.warning("Unable to generate summary for node.")
+                print(response.index_message)
+            else:
+                self.summary = response
 
 
     def set_leaves(self, leaves: List["Node"]) -> None:

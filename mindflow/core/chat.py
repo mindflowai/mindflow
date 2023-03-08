@@ -1,5 +1,6 @@
 from typing import Optional
 from mindflow.settings import Settings
+from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.prompts import CHAT_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count
 
@@ -13,7 +14,7 @@ def run_chat(prompt: str) -> str:
 
     if (
         get_token_count(completion_model, CHAT_PROMPT_PREFIX + prompt)
-        > completion_model.hard_token_limit
+        > completion_model.hard_token_limit - MinimumReservedLength.CHAT.value
     ):
         print("The prompt is too long. Please try again with a shorter prompt.")
         return ""
