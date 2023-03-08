@@ -74,7 +74,7 @@ import re
 
 
 def batch_git_diffs(
-    file_diffs: List[Dict[str, str]], token_limit: int
+    file_diffs: Dict[str, str], token_limit: int
 ) -> List[List[Tuple[str, str]]]:
     batches = []
     current_batch: List = []

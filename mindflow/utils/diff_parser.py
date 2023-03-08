@@ -7,7 +7,7 @@ IGNORE_FILE_EXTENSIONS = [".pyc", ".ipynb", ".ipynb_checkpoints"]
 def parse_git_diff(diff_str: str):
     diffs = {}
     current_file = None
-    current_diff = []
+    current_diff = []  # type: ignore
 
     excluded_files = []
 
