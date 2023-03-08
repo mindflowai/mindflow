@@ -4,6 +4,7 @@ from mindflow.cli.new_click_cli.commands.git.add import add
 from mindflow.cli.new_click_cli.commands.git.push import push
 from mindflow.cli.new_click_cli.commands.git.commit import commit
 from mindflow.cli.new_click_cli.commands.git.diff import diff
+from mindflow.cli.new_click_cli.commands.git.mr import mr
 from mindflow.cli.new_click_cli.commands.git.pr import pr
 
 from mindflow.cli.new_click_cli.commands.chat import chat
@@ -38,6 +39,7 @@ mindflow_cli.add_command(diff)
 mindflow_cli.add_command(index)
 mindflow_cli.add_command(inspect)
 mindflow_cli.add_command(login)
+mindflow_cli.add_command(mr)
 mindflow_cli.add_command(pr)
 mindflow_cli.add_command(query)
 
