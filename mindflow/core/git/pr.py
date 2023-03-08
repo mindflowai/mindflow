@@ -21,7 +21,7 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
 
     create_pull_request(args, title, body)
 
-def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]):
+def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]) -> bool:
     if head_branch is None:
         # Get the name of the current branch
         head_branch = (
@@ -41,15 +41,17 @@ def is_valid_pr(head_branch: Optional[str], base_branch: Optional[str]):
 
     if head_branch == base_branch:
         print("Cannot create pull request from default branch")
-        return
+        return False
 
     if not has_remote_branch(head_branch):
         print("No remote branch for current branch")
-        return
+        return False
 
     if needs_push():
         print("Current branch needs to be pushed to remote repository")
-        return
+        return False
+
+    return True
 
 def create_title_and_body(base_branch, title: Optional[str], body: Optional[str]) -> Tuple[str, str]:
     settings = Settings()
