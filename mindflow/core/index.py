@@ -3,6 +3,7 @@
 """
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
+import logging
 from typing import List
 from typing import Optional
 
@@ -97,9 +98,13 @@ class Node:
         self.start = start
         self.end = end
         if text:
-            self.summary = completion_model(
+            self.summary: Optional[str] = completion_model(
                 build_context_prompt(INDEX_PROMPT_PREFIX, text)
             )
+            if self.summary is None:
+                self.summary = ""
+                logging.warning("Unable to generate summary for node.")
+
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves

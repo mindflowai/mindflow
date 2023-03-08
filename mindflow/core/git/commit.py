@@ -20,9 +20,11 @@ def run_commit(args: Tuple[str], message_overwrite: Optional[str] = None) -> str
         if diff_output == "No staged changes.":
             return diff_output
 
-        response: str = settings.mindflow_models.query.model(
+        response: Optional[str] = settings.mindflow_models.query.model(
             build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
         )
+        if response is None:
+            return "Unable to generate a commit message. Please try again - this may be a temporary issue with the OpenAI API. If the problem persists, please raise an issue at: https://github.com/nollied/mindflow-cli/issues"
 
         # add co-authorship to commit message
         response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"

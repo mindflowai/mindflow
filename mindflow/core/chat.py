@@ -1,3 +1,4 @@
+from typing import Optional
 from mindflow.settings import Settings
 from mindflow.utils.prompts import CHAT_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count
@@ -18,7 +19,7 @@ def run_chat(prompt: str) -> str:
         return ""
 
     # Prompt GPT through Mindflow API or locally
-    response: str = completion_model(
+    response: Optional[str] = completion_model(
         [
             {
                 "role": "system",
@@ -27,4 +28,7 @@ def run_chat(prompt: str) -> str:
             {"role": "user", "content": prompt},
         ]
     )
+
+    if response is None:
+        return "Unable to generate response. Please try again. If the problem persists, please raise an issue at: https://github.com/nollied/mindflow-cli/issues."
     return response

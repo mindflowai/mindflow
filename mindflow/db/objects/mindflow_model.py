@@ -57,7 +57,7 @@ class ConfiguredMindFlowModel:
         if model_id is None:
             model_id = self.get_default_model_id(mindflow_model_id, configured_services)
 
-        self.model = ConfiguredModel(model_id)
+        self.model = ConfiguredModel(model_id, mindflow_model_id)
 
     def get_default_model_id(
         self, mindflow_model_id: str, configured_services: ConfiguredServices

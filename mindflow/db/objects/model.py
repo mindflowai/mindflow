@@ -9,6 +9,7 @@ from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
+from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
 
@@ -54,7 +55,10 @@ class ConfiguredModel(Callable):
     soft_token_limit: int
     api_key: str
 
-    def __init__(self, model_id: str):
+    # MindFlow Model That instantiated this model
+    _mindflow_model_id: str = None
+
+    def __init__(self, model_id: str, mindflow_model_id: str):
         model = Model.load(model_id)
         model_config = ModelConfig.load(f"{model_id}_config")
 
@@ -79,21 +83,27 @@ class ConfiguredModel(Callable):
         max_tokens: int = 500,
         temperature: float = 0.0,
         stop: Optional[list] = None,
-    ):
-        openai.api_key = self.api_key
-        return openai.ChatCompletion.create(
-            model=self.id,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stop=stop,
-        )["choices"][0]["message"]["content"]
+    ) -> Optional[str]:
+        try:
+            openai.api_key = self.api_key
+            return openai.ChatCompletion.create(
+                model=self.id,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stop=stop,
+            )["choices"][0]["message"]["content"]
+        except Exception as e:
+            return None
 
-    def openai_embedding(self, text: str):
-        openai.api_key = self.api_key
-        return openai.Embedding.create(engine=self.id, input=text)["data"][0][
-            "embedding"
-        ]
+    def openai_embedding(self, text: str) -> Optional[list]:
+        try:
+            openai.api_key = self.api_key
+            return openai.Embedding.create(engine=self.id, input=text)["data"][0][
+                "embedding"
+            ]
+        except Exception as e:
+            return None
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:

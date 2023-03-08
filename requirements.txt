@@ -2,6 +2,7 @@ alive-progress
 click
 numpy
 openai==0.27.0
+tiktoken==0.3.0
 pytest
 scikit-learn
 tqdm

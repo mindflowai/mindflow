@@ -3,9 +3,8 @@
 """
 import concurrent.futures
 import subprocess
-from typing import Dict
+from typing import Dict, Optional
 from typing import List
-from typing import Optional
 from typing import Tuple
 
 from mindflow.db.objects.model import ConfiguredModel
@@ -13,7 +12,7 @@ from mindflow.settings import Settings
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
-from mindflow.utils.diff_parser import parse_git_diff, IGNORE_FILE_EXTENSIONS
+from mindflow.utils.diff_parser import parse_git_diff
 
 
 def run_diff(args: Tuple[str]) -> str:
@@ -47,6 +46,8 @@ def run_diff(args: Tuple[str]) -> str:
         response = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
         )
+        if response is None:
+            print("Warning: model failed to return response for diff. Please raise issue on github if this persists: https://github.com/nollied/mindflow-cli/issues")
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -62,7 +63,13 @@ def run_diff(args: Tuple[str]) -> str:
 
             # Process the results as they become available
             for future in concurrent.futures.as_completed(futures):
-                response += future.result()
+                partial_response: Optional[str] = future.result()
+                if partial_response is None:
+                    print("Warning: model failed to return response for part of, or entire, diff. Please raise issue on github if this persists: https://github.com/nollied/mindflow-cli/issues")
+                    partial_response = ""
+                
+                response += partial_response
+
 
     if len(excluded_filenames) > 0:
         response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
