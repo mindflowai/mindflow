@@ -3,6 +3,8 @@ from typing import Optional
 import openai
 from traitlets import Callable
 
+import tiktoken
+
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.base import StaticObject
@@ -43,6 +45,7 @@ class ConfiguredModel(Callable):
     name: str
     service: str
     model_type: str
+    tokenizer: tiktoken.Encoding
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
@@ -63,6 +66,9 @@ class ConfiguredModel(Callable):
             for key, value in model_config.__dict__.items():
                 if value not in [None, ""]:
                     setattr(self, key, value)
+
+        if self.service == ServiceID.OPENAI.value:
+            self.tokenizer = tiktoken.encoding_for_model(self.id)
 
         service_config = ServiceConfig.load(f"{self.service}_config")
         self.api_key = service_config.api_key

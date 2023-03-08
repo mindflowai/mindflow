@@ -1,5 +1,3 @@
-from typing import Union
-
 from mindflow.db.db.database import Collection
 from mindflow.db.db.database import Database
 from mindflow.db.objects.static_definition.mind_flow_model import MINDFLOW_MODEL_STATIC

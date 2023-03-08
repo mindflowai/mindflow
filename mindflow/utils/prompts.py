@@ -16,6 +16,7 @@ INDEX_PROMPT_PREFIX = "Pretend you are a search engine trying to provide an info
     yet condensed string that can serve as an index for the contents or the purpose \
     of a file. I want you to respond in as few words as possible while still conveying \
          the full content and purpose of this file."
+CHAT_PROMPT_PREFIX = "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below."
 COMMIT_PROMPT_PREFIX = "Please provide a commit message for the following changes. Only respond with the commit message and nothing else."
 PR_TITLE_PREFIX = "Please provide a title for the following pull request using this git diff summary. Only respond with the title and nothing else."
 PR_BODY_PREFIX = "Please provide a body for the following pull request using this git diff summary. I want you to keep it high level, and give core \

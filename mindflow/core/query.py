@@ -17,6 +17,7 @@ from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
+from mindflow.utils.token import get_token_count
 
 
 def run_query(document_paths: List[str], query: str):
@@ -33,7 +34,7 @@ def run_query(document_paths: List[str], query: str):
         select_content(
             query,
             document_references,
-            completion_model.hard_token_limit,
+            completion_model,
             embedding_model,
         ),
     )
@@ -58,7 +59,7 @@ def build_query_messages(query: str, content: str) -> List[Dict]:
 def select_content(
     query: str,
     document_references: List[DocumentReference],
-    token_limit: int,
+    completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
 ) -> str:
     """
@@ -73,7 +74,7 @@ def select_content(
         )
         sys.exit(1)
 
-    selected_content = trim_content(embedding_ranked_document_chunks, token_limit)
+    selected_content = trim_content(embedding_ranked_document_chunks, completion_model)
 
     return selected_content
 
@@ -129,22 +130,29 @@ class DocumentChunk:
         return chunks, embeddings
 
 
-def trim_content(ranked_document_chunks: List[DocumentChunk], token_limit: int) -> str:
+def trim_content(ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel) -> str:
     """
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = token_limit * 3
 
     for document_chunk in ranked_document_chunks:
         if document_chunk:
             with open(document_chunk.path, "r", encoding="utf-8") as file:
                 file.seek(document_chunk.start)
                 text = file.read(document_chunk.end - document_chunk.start)
-                if len(selected_content + text) > char_limit:
-                    selected_content += text[: char_limit - len(selected_content)]
-                    break
-                selected_content += text
+
+                # Perform a binary search to find the maximum amount of text that fits within the token limit
+                left, right = 0, len(text)
+                while left <= right:
+                    mid = (left + right) // 2
+                    if get_token_count(model, selected_content + text[:mid]) <= model.hard_token_limit:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+                
+                # Add the selected text to the selected content
+                selected_content += text[:right]
 
     return selected_content
 
