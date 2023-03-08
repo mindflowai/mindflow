@@ -32,7 +32,12 @@ def run_mr(
         return
 
     if not title or not description:
-        title, description = create_title_and_body(base_branch, title, description)
+        tital_description_tuple = create_title_and_body(base_branch, title, description)
+    
+    if not tital_description_tuple:
+        return
+    
+    title, description = tital_description_tuple
 
     create_merge_request(args, title, description)
 

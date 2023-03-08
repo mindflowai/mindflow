@@ -35,8 +35,12 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         return
 
     if not title or not body:
-        title, body = create_title_and_body(base_branch, title, body)
-
+        tital_body_tuple = create_title_and_body(base_branch, title, body)
+    
+    if not tital_body_tuple:
+        return
+    
+    title, body = tital_body_tuple
     create_pull_request(args, title, body)
 
 
@@ -58,7 +62,7 @@ def is_valid_pr(head_branch: str, base_branch: str) -> bool:
 
 def create_title_and_body(
     base_branch, title: Optional[str], body: Optional[str]
-) -> Tuple[str, str]:
+) -> Optional[Tuple[str, str]]:
     settings = Settings()
 
     diff_output = run_diff((base_branch,))
@@ -84,7 +88,10 @@ def create_title_and_body(
         if body is None:
             pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output)
             body = settings.mindflow_models.query.model(pr_body_prompt)
-
+    
+    if title is None or body is None:
+        print("Unable to generate a pull request title and body. Please try again - this may be a temporary issue with the OpenAI API. If the problem persists, please raise an issue at: https://github.com/nollied/mindflow-cli/issues")
+        return None
     return title, body
 
 
