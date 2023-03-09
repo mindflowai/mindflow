@@ -1,7 +1,7 @@
 """
 Base Resolver Class
 """
-from typing import List
+from typing import List, Dict
 
 from mindflow.db.objects.document import DocumentReference
 
@@ -18,7 +18,7 @@ class BaseResolver:
         """
         return False
 
-    def resolve(self, document_path: str) -> List[DocumentReference]:
+    def resolve(self, document_path: str) -> List[Dict]:
         """
         Resolve a document path to text.
         """

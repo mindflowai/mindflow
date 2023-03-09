@@ -3,8 +3,8 @@
 """
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-import logging
-from typing import List, Union
+
+from typing import Dict, List, Union
 from typing import Optional
 
 import numpy as np
@@ -16,15 +16,18 @@ from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.document import read_document
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
-from mindflow.resolving.resolve import return_if_indexable
 from mindflow.settings import Settings
 from mindflow.utils.errors import ModelError
+from mindflow.utils.helpers import (
+    print_total_size,
+    print_total_tokens_and_ask_to_continue,
+)
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_batch_token_count, get_token_count
 
 
-def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
+def run_index(document_paths: List[str], refresh: bool) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
@@ -36,20 +39,25 @@ def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
 
+    ## Resolve documents to document references
+    resolved: List[Dict] = resolve_all(document_paths)
+    document_references: List[DocumentReference] = DocumentReference.from_resolved(
+        resolved, completion_model
+    )
+
+    ## Filter out documents that are already indexed
     indexable_document_references: List[DocumentReference] = return_if_indexable(
-        resolve_all(document_paths), refresh, force
+        document_references, refresh
     )
     if not indexable_document_references:
         print("No documents to index")
         return
 
-    total_size = sum(
-        [
-            document_reference.size
-            for document_reference in indexable_document_references
-        ]
+    print_total_size(indexable_document_references)
+    print_total_tokens_and_ask_to_continue(
+        indexable_document_references, completion_model
     )
-    print(f"Total content size: MB {total_size / 1024 / 1024:.2f}")
+
     # build search trees in parallel
     with alive_bar(
         len(indexable_document_references), bar="blocks", spinner="twirls"
@@ -76,6 +84,24 @@ def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
                 progress_bar()
 
     DATABASE_CONTROLLER.databases.json.save_file()
+
+
+def return_if_indexable(
+    document_references: List[DocumentReference], refresh: bool
+) -> List[DocumentReference]:
+    return [
+        document_reference
+        for document_reference in document_references
+        if index_document(document_reference, refresh)
+    ]
+
+
+def index_document(document_reference: DocumentReference, refresh: bool) -> bool:
+    if not hasattr(document_reference, "hash") or not document_reference.hash:
+        return True
+    if refresh:
+        return True
+    return document_reference.hash != document_reference.new_hash
 
 
 class Node:

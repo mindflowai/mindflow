@@ -13,10 +13,12 @@ def run_inspect(document_paths: List[str]) -> str:
     """
     This function is used to inspect your MindFlow index.
     """
-    document_paths = [document.path for document in resolve_all(document_paths)]
+    resolved_paths = [
+        resolved_path["path"] for resolved_path in resolve_all(document_paths)
+    ]
     inspect_output = json.dumps(
         DATABASE_CONTROLLER.databases.json.load_bulk(
-            Collection.DOCUMENT.value, document_paths
+            Collection.DOCUMENT.value, resolved_paths
         ),
         indent=4,
     )

@@ -13,7 +13,6 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
 
 from mindflow.db.objects.document import Document
-from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
@@ -30,12 +29,12 @@ def run_query(document_paths: List[str], query: str):
     completion_model = settings.mindflow_models.query.model
     embedding_model = settings.mindflow_models.embedding.model
 
-    document_references: List[DocumentReference] = resolve_all(document_paths)
+    resolved: List[Dict] = resolve_all(document_paths)
     messages = build_query_messages(
         query,
         select_content(
             query,
-            document_references,
+            resolved,
             completion_model,
             embedding_model,
         ),
@@ -63,7 +62,7 @@ def build_query_messages(query: str, content: str) -> List[Dict]:
 
 def select_content(
     query: str,
-    document_references: List[DocumentReference],
+    resolved: List[Dict],
     completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
 ) -> str:
@@ -72,7 +71,7 @@ def select_content(
     """
     embedding_ranked_document_chunks: List[
         DocumentChunk
-    ] = rank_document_chunks_by_embedding(query, document_references, embedding_model)
+    ] = rank_document_chunks_by_embedding(query, resolved, embedding_model)
     if len(embedding_ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
@@ -180,7 +179,7 @@ def trim_content(
 
 def rank_document_chunks_by_embedding(
     query: str,
-    document_references: List[DocumentReference],
+    resolved: List[Dict],
     embedding_model: ConfiguredModel,
 ) -> List[DocumentChunk]:
     """
@@ -189,8 +188,8 @@ def rank_document_chunks_by_embedding(
     prompt_embeddings = np.array(embedding_model(query)).reshape(1, -1)
 
     ranked_document_chunks = []
-    for i in range(0, len(document_references), 100):
-        document_ids = [document.id for document in document_references[i : i + 100]]
+    for i in range(0, len(resolved), 100):
+        document_ids = [resolved_ref["path"] for resolved_ref in resolved[i : i + 100]]
         documents: List[Optional[Document]] = Document.load_bulk(document_ids)
         filtered_documents: List[Document] = [
             document for document in documents if document is not None
