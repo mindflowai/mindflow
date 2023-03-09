@@ -108,7 +108,7 @@ class DocumentReference(BaseObject):
         if not hasattr(self, "hash") or not self.hash:
             return True
         return self.hash != self.new_hash
-    
+
 
 def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-ascii"]):
     # check if file is readable
@@ -119,7 +119,7 @@ def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-a
             continue
 
         return text
-    
+
     return None
 
 
