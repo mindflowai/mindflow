@@ -2,12 +2,8 @@
 File/Directory Resolver
 """
 import os
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Dict, List, Union
 
-from mindflow.db.objects.document import Document
-from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.static_definition.document import DocumentType
 from mindflow.resolving.resolvers.base_resolver import BaseResolver
 from mindflow.utils.files.extract import extract_files
@@ -25,23 +21,11 @@ class FileResolver(BaseResolver):
         """
         return os.path.isfile(document_path) or os.path.isdir(document_path)
 
-    def resolve(self, document_path: str) -> List[DocumentReference]:
+    def resolve(self, document_path: str) -> List[Dict]:
         """
         Extract text from files.
         """
-        document_references: List[DocumentReference] = []
-        for path in extract_files(document_path):
-            document_reference: Optional[DocumentReference] = None
-            document = Document.load(path)
-
-            if document:
-                document_reference = document.to_document_reference()
-            else:
-                document_reference = DocumentReference.from_path(
-                    path, DocumentType.FILE
-                )
-
-            if document_reference:
-                document_references.append(document_reference)
-
-        return document_references
+        return [
+            {"id": path, "path": path, "document_type": DocumentType.FILE.value}
+            for path in extract_files(document_path)
+        ]

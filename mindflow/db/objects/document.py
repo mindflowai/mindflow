@@ -1,9 +1,11 @@
 import hashlib
-from typing import Optional
+from typing import Dict, List, Optional
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
+from mindflow.db.objects.model import ConfiguredModel
 from mindflow.db.objects.static_definition.document import DocumentType
+from mindflow.utils.token import get_token_count
 
 
 class Document(BaseObject):
@@ -26,19 +28,12 @@ class Document(BaseObject):
         """
         Create document reference
         """
-        document_text: Optional[str] = read_document(self.id, self.document_type)
-        if not document_text:
-            raise Exception("Document text not found")
-
-        document_text_bytes = document_text.encode("utf-8")
         return DocumentReference(
             {
                 "id": self.id,
                 "path": self.path,
                 "document_type": self.document_type,
-                "size": len(document_text_bytes),
-                "hash": hashlib.sha256(document_text_bytes).hexdigest(),
-                "old_hash": self.hash,
+                "hash": self.hash,
             }
         )
 
@@ -51,9 +46,11 @@ class DocumentReference(BaseObject):
     id: str
     path: str
     document_type: str
+
     size: int
-    hash: str
-    old_hash: Optional[str]
+    hash: Optional[str]
+    new_hash: str
+    tokens: int
 
     def to_document(
         self,
@@ -67,32 +64,50 @@ class DocumentReference(BaseObject):
                 "path": self.path,
                 "document_type": self.document_type,
                 "size": self.size,
-                "hash": self.hash,
+                "hash": self.new_hash,
             }
         )
 
     @classmethod
-    def from_path(
-        cls,
-        document_path: str,
-        document_type: DocumentType,
-    ) -> Optional["DocumentReference"]:
+    def from_resolved(
+        cls, resolved: List[Dict], model: ConfiguredModel
+    ) -> List["DocumentReference"]:
         """
-        Create document reference from path
+        Create document reference from resolved
         """
-        document_text: Optional[str] = read_document(document_path, document_type.value)
-        if not document_text:
-            return None
-        document_text_bytes = document_text.encode()
-        return cls(
-            {
-                "id": document_path,
-                "path": document_path,
-                "document_type": document_type.value,
-                "size": len(document_text_bytes),
-                "hash": hashlib.sha256(document_text_bytes).hexdigest(),
-            }
-        )
+        document_references: List[DocumentReference] = []
+        for resolved_ref in resolved:
+            document_reference = cls(resolved_ref)
+            document = Document.load(resolved_ref["path"])
+            if document:
+                document_reference.hash = document.hash
+
+            document_text: Optional[str] = read_document(
+                document_reference.id, document_reference.document_type
+            )
+            if not document_text:
+                print(f"Unable to read document text: {document_reference.id}")
+                continue
+
+            document_text_bytes = document_text.encode("utf-8")
+
+            document_reference.new_hash = hashlib.sha256(
+                document_text_bytes
+            ).hexdigest()
+            document_reference.size = len(document_text_bytes)
+            document_reference.tokens = get_token_count(model, document_text)
+
+            document_references.append(document_reference)
+
+        return document_references
+
+    def is_new(self) -> bool:
+        """
+        Check if document is new
+        """
+        if not hasattr(self, "hash") or not self.hash:
+            return True
+        return self.hash != self.new_hash
 
 
 def read_document(document_path: str, document_type: str) -> Optional[str]:

@@ -12,11 +12,11 @@ def run_delete(document_paths: List[str]):
     """
     This function is used to delete your MindFlow index.
     """
-    documents_references = [
-        document_reference.path for document_reference in resolve_all(document_paths)
+    resolved_paths = [
+        resolved_path["path"] for resolved_path in resolve_all(document_paths)
     ]
     documents_to_delete = [
-        document.path for document in Document.load_bulk(documents_references)
+        document.path for document in Document.load_bulk(resolved_paths)
     ]
 
     if len(documents_to_delete) == 0:
