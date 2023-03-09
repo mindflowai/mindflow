@@ -82,11 +82,11 @@ class Conversation:
     def total_tokens(self):
         return sum([message["_tokens"] for message in self.messages])
 
-    def add_message(self, message: str, role: str = "user"):
+    def add_message(self, content: str, role: str = "user"):
         message = {
             "role": role,
-            "content": message,
-            "_tokens": estimate_tokens([], message),
+            "content": content,
+            "_tokens": estimate_tokens([], content),
         }
 
         if message["_tokens"] > self.token_limit:
