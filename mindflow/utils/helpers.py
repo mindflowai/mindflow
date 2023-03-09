@@ -16,7 +16,9 @@ def print_total_size(document_references: List[DocumentReference]):
 
 
 def print_total_tokens_and_ask_to_continue(
-    document_references: List[DocumentReference], completion_model: ConfiguredModel, usd_threshold: float = 0.5
+    document_references: List[DocumentReference],
+    completion_model: ConfiguredModel,
+    usd_threshold: float = 0.5,
 ):
     """
     Print total tokens of documents

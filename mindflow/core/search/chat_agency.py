@@ -25,11 +25,11 @@ def estimate_tokens(document_paths: List[str], query: str, return_texts: bool = 
 
         if not os.path.exists(document_path):
             raise FileNotFoundError(f"Could not find file at {document_path}")
-        
+
         file_text = {open(document_path, "r").read()}
         text = f"```{file_text}```"
         texts.append(text)
-        
+
     tokens = get_batch_token_count(get_chat_model(), texts)
     if return_texts:
         return tokens, texts
@@ -39,16 +39,18 @@ def estimate_tokens(document_paths: List[str], query: str, return_texts: bool = 
 DEFAULT_SYSTEM_PROMPT = "You are a senior software engineer responding to another software engineer's chat messages regarding your codebase, make sure to be polite and helpful, and provide thorough answers with example code when necessary."
 
 
-
-
 class Conversation:
-    def __init__(self, conversation_id: int = 0, system_prompt: str=DEFAULT_SYSTEM_PROMPT):
+    def __init__(
+        self, conversation_id: int = 0, system_prompt: str = DEFAULT_SYSTEM_PROMPT
+    ):
         self.conversation_id = conversation_id
         self.system_prompt = system_prompt
         self.system_prompt_tokens = estimate_tokens([], system_prompt)
         self.chat_model = get_chat_model()
 
-        self.conversation_filename = os.path.join(get_mindflow_dir(), f"current_conversation_{self.conversation_id}.json")
+        self.conversation_filename = os.path.join(
+            get_mindflow_dir(), f"current_conversation_{self.conversation_id}.json"
+        )
 
         # Load existing conversation from file if it exists
         if os.path.exists(self.conversation_filename):
@@ -58,25 +60,39 @@ class Conversation:
                 assert convo[0]["role"] == "system"
 
                 convo[0]["content"] = self.system_prompt  # update system prompt
-                convo[0]["_tokens"] = self.system_prompt_tokens  # update system prompt tokens
-                
+                convo[0][
+                    "_tokens"
+                ] = self.system_prompt_tokens  # update system prompt tokens
+
                 self.messages = convo
         else:
-            self.messages = [{"role": "system", "content": system_prompt, "_tokens": self.system_prompt_tokens}]
+            self.messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                    "_tokens": self.system_prompt_tokens,
+                }
+            ]
 
     @property
     def token_limit(self):
         return self.chat_model.hard_token_limit
-    
+
     @property
     def total_tokens(self):
         return sum([message["_tokens"] for message in self.messages])
 
     def add_message(self, message: str, role: str = "user"):
-        message = {"role": role, "content": message, "_tokens": estimate_tokens([], message)}
+        message = {
+            "role": role,
+            "content": message,
+            "_tokens": estimate_tokens([], message),
+        }
 
         if message["_tokens"] > self.token_limit:
-            raise ValueError(f"Message exceeds hard token limit of {self.token_limit} tokens!")
+            raise ValueError(
+                f"Message exceeds hard token limit of {self.token_limit} tokens!"
+            )
 
         self.messages.append(message)
         self._prune()
@@ -93,10 +109,12 @@ class Conversation:
         for message in self.messages[1:]:
             if message["role"] == "system":
                 raise ValueError()
-            
+
         # make sure the tokens don't sum to more than the hard token limit
         if self.total_tokens > self.token_limit:
-            raise ValueError(f"Too many tokens! Got {self.total_tokens} tokens, but the hard token limit is {self.token_limit}!")
+            raise ValueError(
+                f"Too many tokens! Got {self.total_tokens} tokens, but the hard token limit is {self.token_limit}!"
+            )
 
     def _prune(self):
         # remove earlier messages until we are below the hard token limit
@@ -112,7 +130,7 @@ class Conversation:
                 break
 
         if reached_limit:
-            keep_messages = self.messages[i+1:]
+            keep_messages = self.messages[i + 1 :]
             self.messages.clear()
             self.messages.append(system_message)
             self.messages.extend(keep_messages)
@@ -143,22 +161,24 @@ def run_agent_query(document_paths: List[str], user_query: str):
 
     chat_model = get_chat_model()
     if tokens > chat_model.hard_token_limit:
-        raise NotImplementedError(f"{tokens} is too large (for now), max is {chat_model.hard_token_limit}.")
-    
+        raise NotImplementedError(
+            f"{tokens} is too large (for now), max is {chat_model.hard_token_limit}."
+        )
+
     user_query = "\n".join(texts)
 
     convo.add_message(user_query)
 
     response = chat_model(convo.get_prompt())
-    
+
     # response = chat_model([
-        # ,
-        # {"role": "user", "content": user_query},
+    # ,
+    # {"role": "user", "content": user_query},
     # ])
 
     if response is None:
         return "Unable to generate response. Please try again and if the problem persists, please raise an issue at: https://github.com/nollied/mindflow/issues."
-    
+
     # track the response
     convo.add_message(response, role="assistant")
 

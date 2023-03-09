@@ -10,6 +10,7 @@ from mindflow.core.index import run_index
 from mindflow.core.query import run_query
 from mindflow.core.search.chat_agency import run_agent_query, Conversation
 
+
 def _parse_chat_prompt_args(prompt_args: Tuple[str]):
     # takes a list of strings and returns a string along with any filenames/directories that were passed.
     # note: if the user passes a string that contains a bunch of text, with a filename/directory in the middle,
@@ -26,7 +27,9 @@ def _parse_chat_prompt_args(prompt_args: Tuple[str]):
     return prompt, paths
 
 
-@click.command(help="Interact with ChatGPT, you can reference files and directories by passing them as arguments. Example: `mf chat \"Please summarize this file\" path/to/file.txt`")
+@click.command(
+    help='Interact with ChatGPT, you can reference files and directories by passing them as arguments. Example: `mf chat "Please summarize this file" path/to/file.txt`'
+)
 @click.option("-s", "--skip-index", type=bool, default=False, is_flag=True)
 @click.argument("prompt_args", nargs=-1, type=str, required=True)
 def chat(prompt_args: Tuple[str], skip_index: bool):
@@ -42,7 +45,9 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
 
     if has_dirs:
         if skip_index:
-            click.echo("Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths.")
+            click.echo(
+                "Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths."
+            )
         else:
             run_index(paths, refresh=False, verbose=False)
             click.echo("")
