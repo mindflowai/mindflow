@@ -1,10 +1,10 @@
 """
 `generate` command
 """
-from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-from typing import List
+import logging
+from typing import List, Union
 from typing import Optional
 
 import numpy as np
@@ -18,8 +18,10 @@ from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.resolving.resolve import return_if_indexable
 from mindflow.settings import Settings
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
+from mindflow.utils.token import get_batch_token_count, get_token_count
 
 
 def run_index(document_paths: List[str], refresh: bool, force: bool) -> None:
@@ -97,9 +99,14 @@ class Node:
         self.start = start
         self.end = end
         if text:
-            self.summary = completion_model(
+            response: Union[str, ModelError] = completion_model(
                 build_context_prompt(INDEX_PROMPT_PREFIX, text)
             )
+            if isinstance(response, ModelError):
+                self.summary = ""
+                print(response.index_message)
+            else:
+                self.summary = response
 
     def set_leaves(self, leaves: List["Node"]) -> None:
         self.leaves = leaves
@@ -136,15 +143,6 @@ class Node:
         return node_dict
 
 
-def count_tokens(text: str) -> int:
-    """
-    Counts/estimates the number of tokens this text will consume by GPT.
-    """
-    # tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
-    # count = len(tokenizer(text)['input_ids'])
-    return len(text) // 4  # Token Estimation for speed
-
-
 # This function is used to split a string into chunks of a specified token limit using binary search
 def binary_split_raw_text_to_nodes(
     completion_model: ConfiguredModel, text: str
@@ -156,7 +154,10 @@ def binary_split_raw_text_to_nodes(
     stack = [(0, len(text))]
     while stack:
         start, end = stack.pop()
-        if count_tokens(text[start:end]) < completion_model.soft_token_limit:
+        if (
+            get_token_count(completion_model, text[start:end])
+            < completion_model.soft_token_limit
+        ):
             nodes.append(Node(completion_model, start, end, text[start:end]))
         else:
             mid = ((end - start) // 2) + start
@@ -176,7 +177,9 @@ def binary_split_nodes_to_chunks(
     while stack:
         nodes, start, end = stack.pop()
         if (
-            sum(count_tokens(node.summary) for node in nodes[start:end])
+            get_batch_token_count(
+                completion_model, [node.summary for node in nodes[start:end]]
+            )
             < completion_model.soft_token_limit
         ):
             chunks.append(nodes[start:end])
@@ -195,7 +198,10 @@ def create_nodes(completion_model: ConfiguredModel, leaf_nodes: List[Node]) -> N
     while stack:
         leaf_nodes, start, end = stack.pop()
         if (
-            sum(count_tokens(leaf_node.summary) for leaf_node in leaf_nodes[start:end])
+            get_batch_token_count(
+                completion_model,
+                [leaf_node.summary for leaf_node in leaf_nodes[start:end]],
+            )
             > completion_model.soft_token_limit
         ):
             node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
@@ -222,7 +228,7 @@ def create_text_search_tree(completion_model: ConfiguredModel, text: str) -> dic
     """
     This function is used to create a tree of responses from the OpenAI API
     """
-    if count_tokens(text) < completion_model.soft_token_limit:
+    if get_token_count(completion_model, text) < completion_model.soft_token_limit:
         return Node(completion_model, 0, len(text), text).to_dict()
 
     return create_nodes(

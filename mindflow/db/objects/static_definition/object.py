@@ -1,6 +1,3 @@
-from typing import Type
-from typing import Union
-
 from mindflow.db.objects.document import Document
 from mindflow.db.objects.mindflow_model import MindFlowModel
 from mindflow.db.objects.mindflow_model import MindFlowModelConfig

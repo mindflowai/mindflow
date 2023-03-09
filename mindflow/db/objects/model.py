@@ -1,7 +1,18 @@
-from typing import Optional
+from typing import Optional, Union
 
 import openai
+import numpy as np
 from traitlets import Callable
+
+try:
+    import tiktoken
+except ImportError:
+    print(
+        "tiktoken not not available in python<=v3.8. Estimation of tokens will be less precise, which may impact performance and quality of responses."
+    )
+    print("Upgrade to python v3.8 or higher for better results.")
+    pass
+
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
@@ -9,6 +20,7 @@ from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.utils.errors import ModelError
 
 
 class Model(StaticObject):
@@ -43,6 +55,12 @@ class ConfiguredModel(Callable):
     name: str
     service: str
     model_type: str
+
+    try:
+        tokenizer: tiktoken.Encoding
+    except NameError:
+        pass
+
     hard_token_limit: int
     token_cost: int
     token_cost_unit: str
@@ -64,30 +82,42 @@ class ConfiguredModel(Callable):
                 if value not in [None, ""]:
                     setattr(self, key, value)
 
+        try:
+            if self.service == ServiceID.OPENAI.value:
+                self.tokenizer = tiktoken.encoding_for_model(self.id)
+        except NameError:
+            pass
+
         service_config = ServiceConfig.load(f"{self.service}_config")
         self.api_key = service_config.api_key
 
     def openai_chat_completion(
         self,
         messages: list,
-        max_tokens: int = 500,
         temperature: float = 0.0,
+        max_tokens: Optional[int] = None,
         stop: Optional[list] = None,
-    ):
-        openai.api_key = self.api_key
-        return openai.ChatCompletion.create(
-            model=self.id,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stop=stop,
-        )["choices"][0]["message"]["content"]
+    ) -> Union[str, ModelError]:
+        try:
+            openai.api_key = self.api_key
+            return openai.ChatCompletion.create(
+                model=self.id,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stop=stop,
+            )["choices"][0]["message"]["content"]
+        except ModelError as e:
+            return e
 
-    def openai_embedding(self, text: str):
-        openai.api_key = self.api_key
-        return openai.Embedding.create(engine=self.id, input=text)["data"][0][
-            "embedding"
-        ]
+    def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
+        try:
+            openai.api_key = self.api_key
+            return openai.Embedding.create(engine=self.id, input=text)["data"][0][
+                "embedding"
+            ]
+        except ModelError as e:
+            return e
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:

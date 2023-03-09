@@ -4,7 +4,7 @@
 import sys
 from concurrent.futures import as_completed
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
+from typing import Dict, Union
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -17,6 +17,9 @@ from mindflow.db.objects.document import DocumentReference
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
+from mindflow.utils.constants import MinimumReservedLength
+from mindflow.utils.errors import ModelError
+from mindflow.utils.token import get_token_count
 
 
 def run_query(document_paths: List[str], query: str):
@@ -33,11 +36,14 @@ def run_query(document_paths: List[str], query: str):
         select_content(
             query,
             document_references,
-            completion_model.hard_token_limit,
+            completion_model,
             embedding_model,
         ),
     )
-    response = completion_model(messages)
+    response: Union[ModelError, str] = completion_model(messages)
+    if isinstance(response, ModelError):
+        return response.query_message
+
     return response
 
 
@@ -58,7 +64,7 @@ def build_query_messages(query: str, content: str) -> List[Dict]:
 def select_content(
     query: str,
     document_references: List[DocumentReference],
-    token_limit: int,
+    completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
 ) -> str:
     """
@@ -73,7 +79,9 @@ def select_content(
         )
         sys.exit(1)
 
-    selected_content = trim_content(embedding_ranked_document_chunks, token_limit)
+    selected_content = trim_content(
+        embedding_ranked_document_chunks, completion_model, query
+    )
 
     return selected_content
 
@@ -109,9 +117,14 @@ class DocumentChunk:
                 document.search_tree["end"],
             )
         ]
-        embeddings: List[np.ndarray] = [
-            embedding_model(document.search_tree["summary"])
-        ]
+        embedding_response: Union[ModelError, np.ndarray] = embedding_model(
+            document.search_tree["summary"]
+        )
+        if isinstance(embedding_response, ModelError):
+            print(embedding_response.embedding_message)
+            return [], []
+
+        embeddings: List[np.ndarray] = [embedding_response]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -120,32 +133,48 @@ class DocumentChunk:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
                     chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding = embedding_model(
+                    rolling_summary_embedding_response: Union[
+                        np.ndarray, ModelError
+                    ] = embedding_model(
                         "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
                     )
-                    embeddings.append(rolling_summary_embedding)
+                    if isinstance(rolling_summary_embedding_response, ModelError):
+                        print(rolling_summary_embedding_response.embedding_message)
+                        continue
+                    embeddings.append(rolling_summary_embedding_response)
             rolling_summary.pop()
 
         return chunks, embeddings
 
 
-def trim_content(ranked_document_chunks: List[DocumentChunk], token_limit: int) -> str:
+def trim_content(
+    ranked_document_chunks: List[DocumentChunk], model: ConfiguredModel, query: str
+) -> str:
     """
     This function is used to select the most relevant content for the prompt.
     """
     selected_content: str = ""
-    char_limit: int = token_limit * 3
 
     for document_chunk in ranked_document_chunks:
         if document_chunk:
             with open(document_chunk.path, "r", encoding="utf-8") as file:
                 file.seek(document_chunk.start)
                 text = file.read(document_chunk.end - document_chunk.start)
-                if len(selected_content + text) > char_limit:
-                    selected_content += text[: char_limit - len(selected_content)]
-                    break
-                selected_content += text
 
+                # Perform a binary search to find the maximum amount of text that fits within the token limit
+                left, right = 0, len(text)
+                while left <= right:
+                    mid = (left + right) // 2
+                    if (
+                        get_token_count(model, query + selected_content + text[:mid])
+                        <= model.hard_token_limit - MinimumReservedLength.QUERY.value
+                    ):
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+
+                # Add the selected text to the selected content
+                selected_content += text[:right]
     return selected_content
 
 

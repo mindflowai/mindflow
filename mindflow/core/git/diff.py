@@ -3,17 +3,19 @@
 """
 import concurrent.futures
 import subprocess
-from typing import Dict
+from typing import Dict, Union
 from typing import List
-from typing import Optional
 from typing import Tuple
 
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.settings import Settings
+from mindflow.utils.constants import MinimumReservedLength
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
-from mindflow.utils.diff_parser import parse_git_diff, IGNORE_FILE_EXTENSIONS
+from mindflow.utils.diff_parser import parse_git_diff
+from mindflow.utils.token import get_token_count
 
 
 def run_diff(args: Tuple[str]) -> str:
@@ -35,18 +37,19 @@ def run_diff(args: Tuple[str]) -> str:
     if len(diff_dict) <= 0:
         return "No staged changes."
 
-    batched_parsed_diff_result = batch_git_diffs(
-        diff_dict, token_limit=completion_model.hard_token_limit
-    )
+    batched_parsed_diff_result = batch_git_diffs(diff_dict, completion_model)
 
-    response: str = ""
+    diff_summary: str = ""
     if len(batched_parsed_diff_result) == 1:
         content = ""
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
-        response = completion_model(
+        diff_response: Union[ModelError, str] = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
         )
+        if isinstance(diff_response, ModelError):
+            return diff_response.diff_message
+        diff_summary += diff_response
     else:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -62,43 +65,73 @@ def run_diff(args: Tuple[str]) -> str:
 
             # Process the results as they become available
             for future in concurrent.futures.as_completed(futures):
-                response += future.result()
+                diff_partial_response: Union[ModelError, str] = future.result()
+                if isinstance(diff_partial_response, ModelError):
+                    return diff_partial_response.diff_partial_message
+
+                diff_summary += diff_partial_response
 
     if len(excluded_filenames) > 0:
-        response += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
+        diff_summary += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
 
-    return response
+    return diff_summary
 
 
 import re
 
 
 def batch_git_diffs(
-    file_diffs: Dict[str, str], token_limit: int
+    file_diffs: Dict[str, str], model: ConfiguredModel
 ) -> List[List[Tuple[str, str]]]:
     batches = []
     current_batch: List = []
-    current_batch_size = 0
+    current_batch_text = ""
     for file_name, diff_content in file_diffs.items():
-        if len(diff_content) > token_limit:
-            chunks = [
-                diff_content[i : i + token_limit]
-                for i in range(0, len(diff_content), token_limit)
-            ]
+        if (
+            get_token_count(model, diff_content)
+            > model.hard_token_limit - MinimumReservedLength.DIFF.value
+        ):
+            ## Split the diff into chunks that are less than the token limit
+            chunks = [diff_content]
+            while True:
+                new_chunks = []
+                for chunk in chunks:
+                    if (
+                        get_token_count(model, chunk)
+                        > model.hard_token_limit - MinimumReservedLength.DIFF.value
+                    ):
+                        half_len = len(chunk) // 2
+                        left_half = chunk[:half_len]
+                        right_half = chunk[half_len:]
+                        new_chunks.extend([left_half, right_half])
+                    else:
+                        new_chunks.append(chunk)
+                if new_chunks == chunks:
+                    break
+                chunks = new_chunks
+
+            ## Add the chunks to the batch or multiple batches
             for chunk in chunks:
-                if current_batch_size + len(chunk) > token_limit * 2:
+                if (
+                    get_token_count(model, current_batch_text + chunk)
+                    > model.hard_token_limit - MinimumReservedLength.DIFF.value
+                ):
                     batches.append(current_batch)
                     current_batch = []
-                    current_batch_size = 0
+                    current_batch_text = ""
                 current_batch.append((file_name, chunk))
-                current_batch_size += len(chunk)
-        elif current_batch_size + len(diff_content) > token_limit * 2:
+                current_batch_text += chunk
+
+        elif (
+            get_token_count(model, current_batch_text + diff_content)
+            > model.hard_token_limit - MinimumReservedLength.DIFF.value
+        ):
             batches.append(current_batch)
             current_batch = [(file_name, diff_content)]
-            current_batch_size = len(diff_content)
+            current_batch_text = diff_content
         else:
             current_batch.append((file_name, diff_content))
-            current_batch_size += len(diff_content)
+            current_batch_text += diff_content
     if current_batch:
         batches.append(current_batch)
     return batches

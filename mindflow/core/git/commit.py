@@ -1,8 +1,9 @@
 import subprocess
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 
 from mindflow.core.git.diff import run_diff
 from mindflow.settings import Settings
+from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
@@ -20,9 +21,11 @@ def run_commit(args: Tuple[str], message_overwrite: Optional[str] = None) -> str
         if diff_output == "No staged changes.":
             return diff_output
 
-        response: str = settings.mindflow_models.query.model(
+        response: Union[ModelError, str] = settings.mindflow_models.query.model(
             build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
         )
+        if isinstance(response, ModelError):
+            return response.commit_message
 
         # add co-authorship to commit message
         response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"
