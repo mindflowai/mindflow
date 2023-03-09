@@ -26,7 +26,7 @@ def print_total_tokens_and_ask_to_continue(
     )
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (
-        total_tokens / completion_model.token_cost_unit
+        total_tokens / float(completion_model.token_cost_unit)
     ) * completion_model.token_cost
     if total_cost_usd > 0.50:
         print(f"Total cost: ${total_cost_usd:.2f}")

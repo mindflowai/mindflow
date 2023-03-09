@@ -70,8 +70,8 @@ class DocumentReference(BaseObject):
 
     @classmethod
     def from_resolved(
-        cls, resolved: Dict, model: ConfiguredModel
-    ) -> "DocumentReference":
+        cls, resolved: List[Dict], model: ConfiguredModel
+    ) -> List["DocumentReference"]:
         """
         Create document reference from resolved
         """
