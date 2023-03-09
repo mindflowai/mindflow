@@ -8,6 +8,7 @@ import os
 from mindflow.core.chat import run_chat
 from mindflow.core.index import run_index
 from mindflow.core.query import run_query
+from mindflow.core.search.chat_agency import run_agent_query, Conversation
 
 
 def _parse_chat_prompt_args(prompt_args: Tuple[str]):
@@ -35,9 +36,17 @@ def chat(prompt_args: Tuple[str], ignore_paths: bool):
         click.echo("Note: the following paths were ignored: " + str(paths))
         paths.clear()
 
-    if paths:
-        run_index(paths, refresh=False, verbose=False)
-        click.echo("")
-        print(run_query(paths, prompt))
-    else:
-        print(run_chat(prompt))
+    # if paths:
+        # run_index(paths, refresh=False, verbose=False)
+        # click.echo("")
+        # print(run_query(paths, prompt))
+    print(run_agent_query(paths, prompt))
+    # else:
+        # print(run_chat(prompt))
+
+
+@click.command(help="Show some stats about the chat history.")
+def history():
+    convo = Conversation(conversation_id=0)
+    print("Num messages:", len(convo.messages))
+    print("Total tokens:", convo.total_tokens)
