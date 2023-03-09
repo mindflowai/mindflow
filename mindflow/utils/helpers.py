@@ -16,7 +16,9 @@ def print_total_size(document_references: List[DocumentReference]):
 
 
 def print_total_tokens_and_ask_to_continue(
-    document_references: List[DocumentReference], completion_model: ConfiguredModel
+    document_references: List[DocumentReference],
+    completion_model: ConfiguredModel,
+    usd_threshold: float = 0.5,
 ):
     """
     Print total tokens of documents
@@ -28,7 +30,7 @@ def print_total_tokens_and_ask_to_continue(
     total_cost_usd: float = (
         total_tokens / float(completion_model.token_cost_unit)
     ) * completion_model.token_cost
-    if total_cost_usd > 0.50:
+    if total_cost_usd > usd_threshold:
         print(f"Total cost: ${total_cost_usd:.2f}")
         while True:
             user_input = input("Would you like to continue? (yes/no): ")

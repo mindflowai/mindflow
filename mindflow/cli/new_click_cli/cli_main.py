@@ -7,7 +7,7 @@ from mindflow.cli.new_click_cli.commands.git.diff import diff
 from mindflow.cli.new_click_cli.commands.git.mr import mr
 from mindflow.cli.new_click_cli.commands.git.pr import pr
 
-from mindflow.cli.new_click_cli.commands.chat import chat
+from mindflow.cli.new_click_cli.commands.chat import chat, history
 from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.cli.new_click_cli.commands.index import index
 from mindflow.cli.new_click_cli.commands.inspect import inspect
@@ -33,6 +33,7 @@ def version():
 mindflow_cli.add_command(add)
 mindflow_cli.add_command(push)
 mindflow_cli.add_command(chat)
+mindflow_cli.add_command(history)
 mindflow_cli.add_command(commit)
 mindflow_cli.add_command(delete)
 mindflow_cli.add_command(diff)

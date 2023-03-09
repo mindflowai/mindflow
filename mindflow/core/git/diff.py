@@ -18,7 +18,7 @@ from mindflow.utils.diff_parser import parse_git_diff
 from mindflow.utils.token import get_token_count
 
 
-def run_diff(args: Tuple[str]) -> str:
+def run_diff(args: Tuple[str], detailed: bool = True) -> str:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
@@ -74,7 +74,14 @@ def run_diff(args: Tuple[str]) -> str:
     if len(excluded_filenames) > 0:
         diff_summary += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
 
-    return diff_summary
+    if detailed:
+        return diff_summary
+
+    GIT_DIFF_SUMMARIZE_PROMPT = 'What is the higher level purpose of these changes? Keep it short and sweet, don\'t provide any useless or redudant information like "made changes to the code". Do NOT speak in generalities, be specific.'
+    summarized = completion_model(
+        build_context_prompt(GIT_DIFF_SUMMARIZE_PROMPT, diff_summary)
+    )
+    return summarized
 
 
 import re

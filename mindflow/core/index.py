@@ -27,7 +27,7 @@ from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_batch_token_count, get_token_count
 
 
-def run_index(document_paths: List[str], refresh: bool) -> None:
+def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
@@ -49,7 +49,7 @@ def run_index(document_paths: List[str], refresh: bool) -> None:
     indexable_document_references: List[DocumentReference] = return_if_indexable(
         document_references, refresh
     )
-    if not indexable_document_references:
+    if not indexable_document_references and verbose:
         print("No documents to index")
         return
 
