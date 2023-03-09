@@ -108,6 +108,19 @@ class DocumentReference(BaseObject):
         if not hasattr(self, "hash") or not self.hash:
             return True
         return self.hash != self.new_hash
+    
+
+def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-ascii"]):
+    # check if file is readable
+    for encoding in supported_encodings:
+        try:
+            text = open(path, "r", encoding=encoding).read()
+        except UnicodeDecodeError:
+            continue
+
+        return text
+    
+    return None
 
 
 def read_document(document_path: str, document_type: str) -> Optional[str]:
@@ -115,9 +128,5 @@ def read_document(document_path: str, document_type: str) -> Optional[str]:
     Read a document.
     """
     if document_type == DocumentType.FILE.value:
-        try:
-            with open(document_path, "r", encoding="utf-8") as file:
-                return file.read()
-        except UnicodeDecodeError:
-            return None
+        return read_file_supported_encodings(document_path)
     return None
