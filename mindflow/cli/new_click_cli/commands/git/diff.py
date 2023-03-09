@@ -14,5 +14,7 @@ from mindflow.core.git.diff import run_diff
 @click.option("--detailed", type=bool, default=False, is_flag=True)
 def diff(args: Tuple[str], detailed: bool):
     if not detailed:
-        click.echo("Working on a summary of the diff, use the `--detailed` flag to show a much more thorough breakdown of the diff...\n")
+        click.echo(
+            "Working on a summary of the diff, use the `--detailed` flag to show a much more thorough breakdown of the diff...\n"
+        )
     print(run_diff(args, detailed=detailed))

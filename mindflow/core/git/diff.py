@@ -77,8 +77,10 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> str:
     if detailed:
         return diff_summary
 
-    GIT_DIFF_SUMMARIZE_PROMPT = "What is the higher level purpose of these changes? Keep it short and sweet, don't provide any useless or redudant information like \"made changes to the code\". Do NOT speak in generalities, be specific."
-    summarized = completion_model(build_context_prompt(GIT_DIFF_SUMMARIZE_PROMPT, diff_summary))
+    GIT_DIFF_SUMMARIZE_PROMPT = 'What is the higher level purpose of these changes? Keep it short and sweet, don\'t provide any useless or redudant information like "made changes to the code". Do NOT speak in generalities, be specific.'
+    summarized = completion_model(
+        build_context_prompt(GIT_DIFF_SUMMARIZE_PROMPT, diff_summary)
+    )
     return summarized
 
 
