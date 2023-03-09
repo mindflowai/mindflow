@@ -7,6 +7,8 @@ from mindflow.utils.token import get_batch_token_count
 import json
 from collections import deque
 
+from mindflow.db.db.json import get_mindflow_dir
+
 
 def get_chat_model():
     settings = Settings()
@@ -46,7 +48,7 @@ class Conversation:
         self.system_prompt_tokens = estimate_tokens([], system_prompt)
         self.chat_model = get_chat_model()
 
-        self.conversation_filename = f"current_conversation_{self.conversation_id}.json"
+        self.conversation_filename = os.path.join(get_mindflow_dir(), f"current_conversation_{self.conversation_id}.json")
 
         # Load existing conversation from file if it exists
         if os.path.exists(self.conversation_filename):
@@ -78,6 +80,11 @@ class Conversation:
 
         self.messages.append(message)
         self._prune()
+
+    def clear(self):
+        system_message = self.messages[0]
+        self.messages.clear()
+        self.messages.append(system_message)
 
     def _validate(self):
         # NOTE: we need to make sure we always keep the system prompt (and that there's always only 1)
@@ -154,9 +161,6 @@ def run_agent_query(document_paths: List[str], user_query: str):
     
     # track the response
     convo.add_message(response, role="assistant")
-
-    print(len(convo.messages), "msgs")
-    print(convo.total_tokens, "tokens")
 
     convo.save()
     return response

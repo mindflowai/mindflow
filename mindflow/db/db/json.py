@@ -7,7 +7,7 @@ from typing import Optional
 from mindflow.db.db.database import Database
 
 
-def _get_mindflow_dir():
+def get_mindflow_dir():
     if os.name == "nt":  # Check if the OS is Windows
         config_dir = os.getenv("APPDATA")
     else:
@@ -16,7 +16,7 @@ def _get_mindflow_dir():
     return mindflow_dir
 
 
-MINDFLOW_DIR = _get_mindflow_dir()
+MINDFLOW_DIR = get_mindflow_dir()
 if not os.path.exists(MINDFLOW_DIR):
     os.makedirs(MINDFLOW_DIR)
 
