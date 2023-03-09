@@ -20,34 +20,36 @@ Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do
 
 ## Basic Usage
 
-### Interact with ChatGPT Using the CLI
-The simplest way to use MindFlow is to run a command like this: `mf chat "What is quantum physics?"` which literally interfaces directly with chatGPT from the command line. You should get a response similar to the following:
+### Chats
+There are multiple levels to using mindflow's chat feature.
 
-```
-Quantum physics is the branch of physics that studies the behavior of matter and energy at the scale of atoms and subatomic particles. It is a fundamental theory that describes the laws of nature governing the behavior of matter and energy at the smallest scales. In contrast to classical physics, which describes the behavior of macroscopic objects, quantum physics deals with the properties of individual particles, such as electrons, protons, and photons, and how they interact with each other.
+1. Simplest
+- `mf chat "explain what a programming language is"`
+    - Interact with chatGPT directly just like on the chatGPT website. We also have chat persistence, so it will remember the previous chat messages.
+2. With File Context
+- `mf chat "please summarize what this code does" path/to/code.py`
+    - You can provide single or multi-file context to chatGPT by passing in any number of files as a separate argument in the `mf chat` call. For sufficiently small files (see: [chatGPT token limits](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them)), this will work and also maintain chat history.
+3. With Directory Context
+- `mf chat "what are these submodules responsible for? path/to/submodule1/ path/to/submodule2/`
+    - Providing directories will actually run an indexer over your code subdirectories/files recursively. So it may take a while to fully index everything -- don't worry; we'll warn you if the cost becomes a concern! Right now the warning triggers if the index job costs >$0.50USD.
+4. Custom pre-indexed context
+- `mf index path/to/subdir/ file1.txt path/to/file2.txt`
+- `mf chat -s "How do all of my classes relate to one another?" ./`
+    - If you pre-index your repository, you can narrow the scope for the context provided to the chat. Passing `-s` will skip the auto-indexing, and instead will defer to the currently existing index. This index is generated in the first step `mf index` where only those files/subdirs will be included.
+    - This can save you time and money if your repository is significantly large.
 
-One of the most important concepts in quantum physics is the idea of superposition, which states that a particle can exist in multiple states or locations simultaneously. Another key concept is entanglement, which refers to the quantum mechanical phenomenon where two particles can become correlated in such a way that the state of one particle is dependent on the state of the other, no matter how far apart they are.
+### Chat History and Persistence
+By default, simple chat messages (when referencing no files or very small files) will be stored locally so that you can retain chat persistence. 
 
-Quantum physics has many practical applications in fields such as electronics, computing, and cryptography, and it has revolutionized our understanding of the physical world. However, it also challenges our classical intuition and requires a new way of thinking about the nature of reality.
-```
+To see stats about your chat history, you can run `mf history stats`.
 
-### Query Your Code
-You can also chat about your code repos! Run the following commands in any cloned git repo:
+If you want to clear your chat history, you can run `mf history clear` and it will forget all previous messages that you've sent.
 
-1. `mf index ./` 
-    - To index the entire repo, this will go through all files and generate search indexes.
-    - :warning: Beware! Large code repositories may take a while and have a decent cost. However, it shouldn't be too expensive for moderately sized repos; try it on a smaller one first. For context, the mindflow repo costs ~10 cents to index.
-2. `mf query ./ "Please summarize this repository."`
-    - This will take the index you generated in the above step and use it as context for your question!
-
-You should see a response that looks something like this:
-
-
-```
-This Python file contains various functions and commands for the MindFlow CLI (Command Line Interface). It includes commands such as `chat,` `commit,` `config,` `delete,` `diff,` `index,` `inspect,` `query,` and `refresh.` The `chat` command is used to generate a prompt and then use it as a prompt for the GPT bot. The `commit` command creates a git commit response by feeding git diff to GPT. The `config` command is used to configure a model. The `delete` command deletes a document from the MindFlow index. The `diff` command shows the difference between two git commits. The `index` command creates or updates the MindFlow index. The `inspect` command is used to inspect the MindFlow index. The `query` command runs a query against the MindFlow index. Finally, the `refresh` command refreshes the MindFlow index.
-```
+If you try adding directories to your chat messages, chat persistence will be disabled, and no previous context will be used. This will change as MindFlow matures, and the openAI API supports more token levels/conversation histories natively.
 
 ### Git Diff Summaries
+Note: Git diff summaries do not support chat persistence yet.
+
 Make some changes to your git repo without staging/committing them. Then, run `mf diff`! You should get a response that looks like this:
 
 ```
