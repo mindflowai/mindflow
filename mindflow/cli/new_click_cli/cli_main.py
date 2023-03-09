@@ -29,16 +29,16 @@ def version():
     click.echo(__version__)
 
 
-mindflow_cli.add_command(add)
-mindflow_cli.add_command(push)
+mindflow_cli.add_command(login)
 mindflow_cli.add_command(chat)
-mindflow_cli.add_command(history)
 mindflow_cli.add_command(commit)
-mindflow_cli.add_command(delete)
-mindflow_cli.add_command(diff)
+mindflow_cli.add_command(history)
 mindflow_cli.add_command(index)
 mindflow_cli.add_command(inspect)
-mindflow_cli.add_command(login)
+mindflow_cli.add_command(add)
+mindflow_cli.add_command(push)
+mindflow_cli.add_command(delete)
+mindflow_cli.add_command(diff)
 mindflow_cli.add_command(mr)
 mindflow_cli.add_command(pr)
 
