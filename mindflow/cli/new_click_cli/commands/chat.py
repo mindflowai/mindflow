@@ -33,7 +33,6 @@ def _parse_chat_prompt_args(prompt_args: Tuple[str]):
 @click.option("-s", "--skip-index", type=bool, default=False, is_flag=True)
 @click.argument("prompt_args", nargs=-1, type=str, required=True)
 def chat(prompt_args: Tuple[str], skip_index: bool):
-
     prompt, paths = _parse_chat_prompt_args(prompt_args)
 
     # if paths:
