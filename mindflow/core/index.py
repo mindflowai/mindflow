@@ -49,8 +49,9 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
     indexable_document_references: List[DocumentReference] = return_if_indexable(
         document_references, refresh
     )
-    if not indexable_document_references and verbose:
-        print("No documents to index")
+    if not indexable_document_references:
+        if verbose:
+            print("No documents to index")
         return
 
     print_total_size(indexable_document_references)

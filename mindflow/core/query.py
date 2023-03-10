@@ -69,21 +69,20 @@ def select_content(
     """
     This function is used to generate a prompt based on a question or summarization task
     """
-    embedding_ranked_document_chunks: List[
+    ranked_document_chunks: List[
         DocumentChunk
     ] = rank_document_chunks_by_embedding(query, resolved, embedding_model)
-    if len(embedding_ranked_document_chunks) == 0:
+    if len(ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
         )
         sys.exit(1)
 
     selected_content = trim_content(
-        embedding_ranked_document_chunks, completion_model, query
+        ranked_document_chunks, completion_model, query
     )
 
     return selected_content
-
 
 class DocumentChunk:
     """
@@ -91,8 +90,8 @@ class DocumentChunk:
     """
 
     def __init__(
-        self, path: str, start: int, end: int, embedding: Optional[np.ndarray] = None
-    ):
+        self, path: str, start: int, end: int, embedding: np.ndarray = None
+    ):  
         self.path = path
         self.start = start
         self.end = end
@@ -109,21 +108,9 @@ class DocumentChunk:
         """
 
         stack = [document.search_tree]
-        chunks: List["DocumentChunk"] = [
-            cls(
-                document.path,
-                document.search_tree["start"],
-                document.search_tree["end"],
-            )
-        ]
-        embedding_response: Union[ModelError, np.ndarray] = embedding_model(
-            document.search_tree["summary"]
-        )
-        if isinstance(embedding_response, ModelError):
-            print(embedding_response.embedding_message)
-            return [], []
+        chunks: List["DocumentChunk"] = []
+        embeddings: List[np.ndarray] = []
 
-        embeddings: List[np.ndarray] = [embedding_response]
         rolling_summary: List[str] = []
         while stack:
             node = stack.pop()
@@ -131,17 +118,18 @@ class DocumentChunk:
             if node["leaves"]:
                 for leaf in node["leaves"]:
                     stack.append(leaf)
-                    chunks.append(cls(document.path, leaf["start"], leaf["end"]))
-                    rolling_summary_embedding_response: Union[
-                        np.ndarray, ModelError
-                    ] = embedding_model(
-                        "\n\n".join(rolling_summary) + "\n\n" + leaf["summary"],
-                    )
-                    if isinstance(rolling_summary_embedding_response, ModelError):
-                        print(rolling_summary_embedding_response.embedding_message)
-                        continue
-                    embeddings.append(rolling_summary_embedding_response)
-            rolling_summary.pop()
+            else:
+                rolling_summary_embedding_response: Union[
+                    np.ndarray, ModelError
+                ] = embedding_model("\n\n".join(rolling_summary))
+                if isinstance(rolling_summary_embedding_response, ModelError):
+                    print(rolling_summary_embedding_response.embedding_message)
+                    continue
+
+                chunks.append(cls(document.path, node["start"], node["end"]))
+                embeddings.append(rolling_summary_embedding_response)
+
+                rolling_summary.pop()
 
         return chunks, embeddings
 
@@ -155,27 +143,34 @@ def trim_content(
     selected_content: str = ""
 
     for document_chunk in ranked_document_chunks:
-        if document_chunk:
-            with open(document_chunk.path, "r", encoding="utf-8") as file:
-                file.seek(document_chunk.start)
-                text = file.read(document_chunk.end - document_chunk.start)
+        with open(document_chunk.path, "r", encoding="utf-8") as file:
+            file.seek(document_chunk.start)
+            text = file.read(document_chunk.end - document_chunk.start)
 
-                # Perform a binary search to find the maximum amount of text that fits within the token limit
-                left, right = 0, len(text)
-                while left <= right:
-                    mid = (left + right) // 2
-                    if (
-                        get_token_count(model, query + selected_content + text[:mid])
-                        <= model.hard_token_limit - MinimumReservedLength.QUERY.value
-                    ):
-                        left = mid + 1
-                    else:
-                        right = mid - 1
+            selected_content += formated_chunk(document_chunk, text)
 
-                # Add the selected text to the selected content
-                selected_content += text[:right]
+            if get_token_count(model, query + selected_content) > model.hard_token_limit:
+                break
+    
+    # Perform a binary search to trim the selected content to fit within the token limit
+    left, right = 0, len(selected_content)
+    while left <= right:
+        mid = (left + right) // 2
+        if (
+            get_token_count(model, query + selected_content[:mid])
+            <= model.hard_token_limit - MinimumReservedLength.QUERY.value
+        ):
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    # Trim the selected content to the new bounds
+    selected_content = selected_content[:right]
+
     return selected_content
 
+def formated_chunk(document_chunk: DocumentChunk, text: str) -> str:
+     return "Path: " + document_chunk.path + " Start: " + str(document_chunk.start) + " End: " + str(document_chunk.end) + " Text: " + text + "\n\n"
 
 def rank_document_chunks_by_embedding(
     query: str,
@@ -205,9 +200,10 @@ def rank_document_chunks_by_embedding(
                 for document in filtered_documents
             ]
             for future in as_completed(futures):
-                document_chunks, document_chunk_embeddings = future.result()
+                # Ordered together
+                document_chunks, embeddings = future.result()
                 similarities = cosine_similarity(
-                    prompt_embeddings, document_chunk_embeddings
+                    prompt_embeddings, embeddings
                 )[0]
                 ranked_document_chunks.extend(list(zip(document_chunks, similarities)))
 
