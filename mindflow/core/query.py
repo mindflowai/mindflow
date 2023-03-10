@@ -69,29 +69,26 @@ def select_content(
     """
     This function is used to generate a prompt based on a question or summarization task
     """
-    ranked_document_chunks: List[
-        DocumentChunk
-    ] = rank_document_chunks_by_embedding(query, resolved, embedding_model)
+    ranked_document_chunks: List[DocumentChunk] = rank_document_chunks_by_embedding(
+        query, resolved, embedding_model
+    )
     if len(ranked_document_chunks) == 0:
         print(
             "No index for requested hashes. Please generate index for passed content."
         )
         sys.exit(1)
 
-    selected_content = trim_content(
-        ranked_document_chunks, completion_model, query
-    )
+    selected_content = trim_content(ranked_document_chunks, completion_model, query)
 
     return selected_content
+
 
 class DocumentChunk:
     """
     This class is used to store the chunks of a document.
     """
 
-    def __init__(
-        self, path: str, start: int, end: int, embedding: np.ndarray = None
-    ):  
+    def __init__(self, path: str, start: int, end: int, embedding: np.ndarray = None):
         self.path = path
         self.start = start
         self.end = end
@@ -149,9 +146,12 @@ def trim_content(
 
             selected_content += formated_chunk(document_chunk, text)
 
-            if get_token_count(model, query + selected_content) > model.hard_token_limit:
+            if (
+                get_token_count(model, query + selected_content)
+                > model.hard_token_limit
+            ):
                 break
-    
+
     # Perform a binary search to trim the selected content to fit within the token limit
     left, right = 0, len(selected_content)
     while left <= right:
@@ -169,8 +169,20 @@ def trim_content(
 
     return selected_content
 
+
 def formated_chunk(document_chunk: DocumentChunk, text: str) -> str:
-     return "Path: " + document_chunk.path + " Start: " + str(document_chunk.start) + " End: " + str(document_chunk.end) + " Text: " + text + "\n\n"
+    return (
+        "Path: "
+        + document_chunk.path
+        + " Start: "
+        + str(document_chunk.start)
+        + " End: "
+        + str(document_chunk.end)
+        + " Text: "
+        + text
+        + "\n\n"
+    )
+
 
 def rank_document_chunks_by_embedding(
     query: str,
@@ -202,9 +214,7 @@ def rank_document_chunks_by_embedding(
             for future in as_completed(futures):
                 # Ordered together
                 document_chunks, embeddings = future.result()
-                similarities = cosine_similarity(
-                    prompt_embeddings, embeddings
-                )[0]
+                similarities = cosine_similarity(prompt_embeddings, embeddings)[0]
                 ranked_document_chunks.extend(list(zip(document_chunks, similarities)))
 
     ranked_document_chunks.sort(key=lambda x: x[1], reverse=True)
