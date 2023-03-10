@@ -86,7 +86,7 @@ class DocumentReference(BaseObject):
                 document_reference.id, document_reference.document_type
             )
             if not document_text:
-                print(f"Unable to read document text: {document_reference.id}")
+                ## print(f"Unable to read document text: {document_reference.id}")
                 continue
 
             document_text_bytes = document_text.encode("utf-8")
