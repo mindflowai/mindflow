@@ -49,6 +49,10 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 "Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths."
             )
         else:
+            click.echo(
+                "Indexing paths... Note: this may take a while, if you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n"
+            )
+
             run_index(paths, refresh=False, verbose=False)
             click.echo("")
         print(run_query(paths, prompt))
