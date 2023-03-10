@@ -88,11 +88,10 @@ class DocumentChunk:
     This class is used to store the chunks of a document.
     """
 
-    def __init__(self, path: str, start: int, end: int, embedding: np.ndarray = None):
+    def __init__(self, path: str, start: int, end: int):
         self.path = path
         self.start = start
         self.end = end
-        self.embedding = embedding
 
     @classmethod
     def from_search_tree(
