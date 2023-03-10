@@ -10,6 +10,10 @@ We efficiently index your code repo by leveraging hierarchical embeddings and su
 ## Support Us!
 Please consider supporting us on our [patreon](https://www.patreon.com/MindFlowAI)! :heart:
 
+## Showcase
+### Chat Persistence and File Context!
+<img width="896" alt="Screenshot 2023-03-09 at 4 02 02 PM" src="https://user-images.githubusercontent.com/26421036/224189205-6d786126-7da4-448e-801d-375ec284a05c.png">
+
 ## Getting Started
 
 Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do so [here](https://openai.com/blog/openai-api).
