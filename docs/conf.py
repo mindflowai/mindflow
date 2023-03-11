@@ -5,16 +5,17 @@
 
 import os
 import sys
-import sphinx_theme as st # https://pypi.org/project/sphinx-theme/
+import sphinx_theme as st  # https://pypi.org/project/sphinx-theme/
+
 sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Mindflow'
-copyright = '2023, Mindflow AI'
-author = 'Chris Steege, Dyllan, Tarik Kaan Koc'
-release = '0.3.14'
+project = "Mindflow"
+copyright = "2023, Mindflow AI"
+author = "Chris Steege, Dyllan, Tarik Kaan Koc"
+release = "0.3.14"
 version = "latest"
 
 
@@ -42,18 +43,18 @@ html_context = {
     "github_version": "main/docs/",
 }
 
-templates_path = ['source/_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["source/_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-language = 'English'
+language = "English"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "stanford_theme"
 html_theme_path = [st.get_html_theme_path("stanford-theme")]
-#html_theme = "sphinx_rtd_theme"
-html_static_path = ['source/_static']
+# html_theme = "sphinx_rtd_theme"
+html_static_path = ["source/_static"]
 
 source_suffix = [".rst", ".md"]
 
