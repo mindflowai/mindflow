@@ -7,8 +7,10 @@ MindFlow answers natural language queries about your repos and provides tools fo
 
 We efficiently index your code repo by leveraging hierarchical embeddings and summaries for files/directories. Furthermore, we keep them updated with each file hash so you can save those precious API tokens!
 
-## Support Us!
-Please consider supporting us on our [patreon](https://www.patreon.com/MindFlowAI)! :heart:
+## Join Our Community!
+1. Follow us on [Twitter](https://twitter.com/mindflow_ai)
+2. Join our [discord](https://discord.com/invite/P2cQACzB)
+3. BONUS: Consider [becoming a patron](https://www.patreon.com/MindFlowAI) :heart:
 
 ## Showcase
 ### Chat Persistence and File Context!
@@ -93,6 +95,3 @@ This tool allows you to build an index of text documents and search through them
 
 ## What's next for MindFlow
 In the future, MindFlow plans on becoming an even more integral part of the modern developer's toolkit. We plan on adding the ability to ditch traditional documentation and instead integrate directly with your private documents and communication channels, allowing for a more seamless and intuitive experience. With MindFlow, you can have a true "stream of consciousness" with your code, documentation, and communication channels, making it easier than ever to stay on top of your projects and collaborate with your team. We are excited to continue pushing the boundaries of what's possible with language models and revolutionizing how developers work.
-
-## Socials
-Follow us on [Twitter](https://twitter.com/mindflow_ai)!
