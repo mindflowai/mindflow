@@ -5,7 +5,6 @@
 
 import os
 import sys
-import sphinx_theme as st  # https://pypi.org/project/sphinx-theme/
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -14,7 +13,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 project = "Mindflow"
 copyright = "2023, Mindflow AI"
-author = "Chris Steege, Dyllan, Tarik Kaan Koc"
+author = "Chris Steege, Dyllan McCreary, Tarik Kaan Koc"
 release = "0.3.14"
 version = "latest"
 
@@ -51,15 +50,13 @@ language = "English"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "stanford_theme"
-html_theme_path = [st.get_html_theme_path("stanford-theme")]
-# html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_rtd_theme"
 html_static_path = ["source/_static"]
 
 source_suffix = [".rst", ".md"]
 
 # Below html_theme_options config depends on the theme.
-html_logo = "source/_static/ms-logo.png"
+html_logo = "source/_static/main-logo.png"
 
 html_theme_options = {"logo_only": True, "display_version": True}
 
