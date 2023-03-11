@@ -1,6 +1,5 @@
-# :brain: MindFlow :ocean:
-![Screenshot 2023-03-06 at 1 45 06 AM](https://user-images.githubusercontent.com/26421036/223074441-6cf9707e-f596-4b22-bbcc-78936d578123.png)
-
+# :brain: mindflow :ocean:
+![cover_photo](https://user-images.githubusercontent.com/26421036/224465036-ef590d25-4517-4097-b395-73df778abb6e.png)
 
 Inspired by our hatred for maintaining documentation, we developed MindFlow, a code search engine powered by [ChatGPT](https://openai.com/blog/chatgpt).
 MindFlow answers natural language queries about your repos and provides tools for streamlining your developer experience.
