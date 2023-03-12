@@ -1,5 +1,5 @@
 # :brain: mindflow :ocean:
-The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the modern developer! We provide an AI-powered git wrapper, boilerplate code generator, code search engine, a conversation history manager, and much more!
+The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the modern developer! We provide an AI-powered CLI git wrapper, boilerplate code generator, code search engine, a conversation history manager, and much more!
 
 ![cover_photo](https://user-images.githubusercontent.com/26421036/224465168-77ec4e08-9822-412f-b876-3f07c50d143d.png)
 
