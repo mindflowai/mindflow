@@ -12,6 +12,7 @@ from mindflow.cli.new_click_cli.commands.delete import delete
 from mindflow.cli.new_click_cli.commands.index import index
 from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.cli.new_click_cli.commands.login import login
+from mindflow.cli.new_click_cli.commands.gen import gen
 
 # from mindflow.cli.new_click_cli.commands.config import config
 
@@ -33,6 +34,7 @@ mindflow_cli.add_command(login)
 mindflow_cli.add_command(chat)
 mindflow_cli.add_command(commit)
 mindflow_cli.add_command(history)
+mindflow_cli.add_command(gen)
 mindflow_cli.add_command(index)
 mindflow_cli.add_command(inspect)
 mindflow_cli.add_command(add)
