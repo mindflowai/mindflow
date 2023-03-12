@@ -1,10 +1,7 @@
 # :brain: mindflow :ocean:
+The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the modern developer! We provide an AI-powered git wrapper, boilerplate code generator, code search engine, a conversation history manager, and much more!
+
 ![cover_photo](https://user-images.githubusercontent.com/26421036/224465168-77ec4e08-9822-412f-b876-3f07c50d143d.png)
-
-Inspired by our hatred for maintaining documentation, we developed MindFlow, a code search engine powered by [ChatGPT](https://openai.com/blog/chatgpt).
-MindFlow answers natural language queries about your repos and provides tools for streamlining your developer experience.
-
-We efficiently index your code repo by leveraging hierarchical embeddings and summaries for files/directories. Furthermore, we keep them updated with each file hash so you can save those precious API tokens!
 
 ## Features
 - [Using the CLI Chat bot](#chats)
