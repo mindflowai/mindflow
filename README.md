@@ -43,6 +43,13 @@ There are multiple levels to using mindflow's chat feature.
     - If you pre-index your repository, you can narrow the scope for the context provided to the chat. Passing `-s` will skip the auto-indexing, and instead will defer to the currently existing index. This index is generated in the first step `mf index` where only those files/subdirs will be included.
     - This can save you time and money if your repository is significantly large.
 
+### Code Generation
+You can use mindflow to generate boilerplate code in an instant using `mf gen`! It should only generate code and comments, and will save the file in the path given.
+
+Here's a couple examples:
+1. `mf gen setup.py "write me a setup.py file for my python package 'foobar'"`
+2. `mf gen main.py "write me a python script with a main if block that prints the first 10 fibonacci numbers"`
+
 ### Chat History and Persistence
 By default, simple chat messages (when referencing no files or very small files) will be stored locally so that you can retain chat persistence. 
 
