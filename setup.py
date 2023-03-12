@@ -1,5 +1,4 @@
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 # get version from mindflow/__init__.py
 with open("mindflow/__init__.py", "r") as f:
@@ -21,7 +20,10 @@ setup(
     py_modules=["mindflow"],
     # entry_points={"console_scripts": ["mf = mindflow.main:main"]},
     entry_points={
-        "console_scripts": ["mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli"]
+        "console_scripts": [
+            "mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
+            "mindflow = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
+        ],
     },
     packages=find_packages(),
     install_requires=install_requires,
