@@ -1,7 +1,7 @@
 import subprocess
 from typing import Optional, Tuple, List
 
-from mindflow.core.git.pr import create_title_and_body, is_valid_pr
+from mindflow.core.git.pr import create_title_and_body
 from mindflow.utils.command_parse import get_flag_value
 
 
