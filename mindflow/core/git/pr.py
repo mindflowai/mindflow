@@ -31,9 +31,10 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         return
 
     title, body = title_body_tuple
-    
+
     command: List[str] = ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body]  # type: ignore
     print(execute_no_trace(command))
+
 
 def create_title_and_body(
     base_branch, title: Optional[str], body: Optional[str]

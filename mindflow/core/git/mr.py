@@ -30,4 +30,3 @@ def run_mr(
 
     command: List[str] = ["glab", "mr", "create"] + list(args) + ["--title", title, "--description", description]  # type: ignore
     print(execute_no_trace(command))
-
