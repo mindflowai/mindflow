@@ -9,7 +9,9 @@ from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
 
-def run_commit(args: Tuple[str], message_overwrite: Optional[str] = None) -> Optional[str]:
+def run_commit(
+    args: Tuple[str], message_overwrite: Optional[str] = None
+) -> Optional[str]:
     """
     Commit command.
     """

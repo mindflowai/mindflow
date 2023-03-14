@@ -22,4 +22,3 @@ def diff(args: Tuple[str], detailed: bool):
         click.echo(diff_output)
     else:
         pass
-

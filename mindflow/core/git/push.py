@@ -12,4 +12,3 @@ def run_push(args: Tuple[str]):
 
     # Execute the git diff command and retrieve the output as a string
     print(execute_no_trace(command))
- 

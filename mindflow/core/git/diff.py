@@ -32,7 +32,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     diff_result = execute_no_trace(command)
     if diff_result.strip() == "":
         return None
-    
+
     diff_dict, excluded_filenames = parse_git_diff(diff_result)
 
     if len(diff_dict) <= 0:

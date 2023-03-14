@@ -1,6 +1,7 @@
 import subprocess
 from typing import List
 
+
 ## Execute a command without printing out any additional trace information
 def execute_no_trace(command: List[str]) -> str:
     """
