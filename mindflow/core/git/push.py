@@ -1,6 +1,8 @@
 import subprocess
 from typing import Tuple
 
+from mindflow.utils.execute import execute_no_trace
+
 
 def run_push(args: Tuple[str]):
     """
@@ -9,4 +11,5 @@ def run_push(args: Tuple[str]):
     command = ["git", "push"] + list(args)
 
     # Execute the git diff command and retrieve the output as a string
-    subprocess.check_output(command).decode("utf-8")
+    print(execute_no_trace(command))
+ 
