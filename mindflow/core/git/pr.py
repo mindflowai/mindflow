@@ -67,6 +67,8 @@ def create_title_and_body(
     settings = Settings()
 
     diff_output = run_diff((base_branch,))
+    if not diff_output:
+        diff_output = ""
 
     title_response: Union[ModelError, str]
     body_response: Union[ModelError, str]
