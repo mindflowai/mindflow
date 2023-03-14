@@ -17,4 +17,8 @@ def diff(args: Tuple[str], detailed: bool):
         click.echo(
             "Working on a summary of the diff, use the `--detailed` flag to show a much more thorough breakdown of the diff...\n"
         )
-    print(run_diff(args, detailed=detailed))
+    diff_output = run_diff(args, detailed=detailed)
+    if diff_output is not None:
+        click.echo(diff_output)
+    else:
+        pass

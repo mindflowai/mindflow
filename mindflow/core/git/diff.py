@@ -3,7 +3,7 @@
 """
 import concurrent.futures
 import subprocess
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 from typing import List
 from typing import Tuple
 
@@ -11,6 +11,7 @@ from mindflow.db.objects.model import ConfiguredModel
 from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
+from mindflow.utils.execute import execute_no_trace
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
@@ -18,7 +19,7 @@ from mindflow.utils.diff_parser import parse_git_diff
 from mindflow.utils.token import get_token_count
 
 
-def run_diff(args: Tuple[str], detailed: bool = True) -> str:
+def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
@@ -28,14 +29,14 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> str:
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 
     # Execute the git diff command and retrieve the output as a string
-    diff_result = subprocess.check_output(command).decode("utf-8")
+    diff_result = execute_no_trace(command)
     if diff_result.strip() == "":
-        return "No staged changes."
+        return None
 
     diff_dict, excluded_filenames = parse_git_diff(diff_result)
 
     if len(diff_dict) <= 0:
-        return "No staged changes."
+        return None
 
     batched_parsed_diff_result = batch_git_diffs(diff_dict, completion_model)
 
