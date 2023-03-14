@@ -15,7 +15,6 @@ from mindflow.utils.prompts import PR_TITLE_PREFIX
 def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None):
     base_branch = get_flag_value(args, ["--base", "-B"])
 
-    print("is this working?")
     if base_branch is None:
         # Determine the name of the default branch
         base_branch = (
