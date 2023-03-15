@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+_build/
 develop-eggs/
 dist/
 downloads/
@@ -49,7 +50,6 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-_build/*
 
 # Translations
 *.mo
@@ -128,4 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.vscode
+# MacOS
+.DS_Store
