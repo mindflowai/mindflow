@@ -40,7 +40,7 @@ There are multiple levels to using mindflow's chat feature.
 - `mf chat "what are these submodules responsible for? path/to/submodule1/ path/to/submodule2/`
     - Providing directories will actually run an indexer over your code subdirectories/files recursively. So it may take a while to fully index everything -- don't worry; we'll warn you if the cost becomes a concern! Right now the warning triggers if the index job costs >$0.50USD.
 4. Custom pre-indexed context
-- `mf index path/to/subdir/ file1.txt path/to/file2.txt`
+- `mf index path/to/subdir/file1.txt path/to/file2.txt`
 - `mf chat -s "How do all of my classes relate to one another?" ./`
     - If you pre-index your repository, you can narrow the scope for the context provided to the chat. Passing `-s` will skip the auto-indexing, and instead will defer to the currently existing index. This index is generated in the first step `mf index` where only those files/subdirs will be included.
     - This can save you time and money if your repository is significantly large.
