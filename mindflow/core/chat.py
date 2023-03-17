@@ -31,5 +31,5 @@ def run_chat(prompt: str) -> str:
     )
 
     if response is None:
-        return "Unable to generate response. Please try again. If the problem persists, please raise an issue at: https://github.com/nollied/mindflow-cli/issues."
+        return "Unable to generate response. Please try again. If the problem persists, please raise an issue at: https://github.com/mindflowai/mindflow/issues."
     return response
