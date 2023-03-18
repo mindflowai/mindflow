@@ -17,7 +17,7 @@ from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.diff_parser import parse_git_diff
 from mindflow.utils.token import get_token_count
-
+from tqdm import tqdm
 
 def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     """
@@ -43,7 +43,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     diff_summary: str = ""
     if len(batched_parsed_diff_result) == 1:
         content = ""
-        for file_name, diff_content in batched_parsed_diff_result[0]:
+        for file_name, diff_content in tqdm(batched_parsed_diff_result[0]):
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         diff_response: Union[ModelError, str] = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
@@ -65,7 +65,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
                 futures.append(future)
 
             # Process the results as they become available
-            for future in concurrent.futures.as_completed(futures):
+            for future in tqdm(concurrent.futures.as_completed(futures)):
                 diff_partial_response: Union[ModelError, str] = future.result()
                 if isinstance(diff_partial_response, ModelError):
                     return diff_partial_response.diff_partial_message
