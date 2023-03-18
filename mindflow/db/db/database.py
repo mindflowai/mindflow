@@ -22,7 +22,7 @@ class Database:
     def load(self, collection: str, object_id: str) -> Optional[dict]:
         raise NotImplementedError
 
-    def load_bulk(self, collection: str, object_ids: List[str]) -> Optional[List[dict]]:
+    def load_bulk(self, collection: str, object_ids: List[str]) -> List[Optional[dict]]:
         raise NotImplementedError
 
     def delete(self, collection: str, object_id: str):
