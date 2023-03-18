@@ -32,6 +32,7 @@ def create_and_load_json(path: str) -> dict:
 
 JSON_DATABASE_PATH = os.path.join(MINDFLOW_DIR, "db.json")
 
+
 class JsonDatabase(Database):
     def __init__(self):
         self.collections: Dict = create_and_load_json(JSON_DATABASE_PATH)
@@ -75,7 +76,7 @@ class JsonDatabase(Database):
             raise ValueError("No ID found in object")
 
         objects[object_id] = value
-    
+
     def save_bulk(self, collection: str, values: List[dict]):
         objects = self.collections.get(collection, None)
         if not objects:

@@ -24,6 +24,7 @@ class ServiceConfig(BaseObject):
     _collection: Collection = Collection.CONFIGURATIONS
     _database = DATABASE_CONTROLLER.databases.json
 
+
 class ConfiguredService:
     id: str
     name: str

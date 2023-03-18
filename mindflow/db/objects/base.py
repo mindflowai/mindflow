@@ -4,6 +4,7 @@ from typing import Union
 
 from mindflow.db.db.database import Collection, Database
 
+
 class BaseObject:
     id: str
 
@@ -24,12 +25,10 @@ class BaseObject:
         if self._collection is None:
             raise ValueError("Collection is not defined")
 
-        object_dict: Optional[dict] = self._database.load(
-            self._collection.value, id
-        )
+        object_dict: Optional[dict] = self._database.load(self._collection.value, id)
         if object_dict is None:
             return None
-        
+
         return self(object_dict)
 
     @classmethod
@@ -37,7 +36,9 @@ class BaseObject:
         if cls._collection is None:
             raise ValueError("Collection is not defined")
 
-        object_dict: List[Optional[dict]] = cls._database.load_bulk(cls._collection.value, ids)        
+        object_dict: List[Optional[dict]] = cls._database.load_bulk(
+            cls._collection.value, ids
+        )
         return [cls(object) if object is not None else None for object in object_dict]
 
     @classmethod
@@ -51,16 +52,14 @@ class BaseObject:
         self._database.delete(self._collection.value, self.id)
 
     def save(self):
-        self._database.save(
-            self._collection.value, self.todict(self)
-        )
-    
+        self._database.save(self._collection.value, self.todict(self))
+
     @staticmethod
     def save_bulk(objects: List["BaseObject"]):
         object = objects[0]
         if object._collection is None:
             raise ValueError("Collection is not defined")
-        
+
         object._database.save_bulk(
             object._collection.value, [object.todict(object) for object in objects]
         )

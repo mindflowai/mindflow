@@ -52,6 +52,7 @@ class ModelConfig(BaseObject):
     _collection: Collection = Collection.CONFIGURATIONS
     _database = DATABASE_CONTROLLER.databases.json
 
+
 class ConfiguredModel(Callable):
     id: str
     name: str

@@ -88,28 +88,34 @@ class ConfiguredMindFlowModel:
 class ConfiguredMindFlowModels:
     def __init__(self, configured_services: ConfiguredServices):
         self.configured_services = configured_services
-        self.mind_flow_models = {}
+        self.mind_flow_models: Dict[str, ConfiguredMindFlowModel] = {}
 
     @property
     def index(self):
         if MindFlowModelID.INDEX.value not in self.mind_flow_models:
-            self.mind_flow_models[MindFlowModelID.INDEX.value] = ConfiguredMindFlowModel(
-            MindFlowModelID.INDEX.value, self.configured_services
-        )
+            self.mind_flow_models[
+                MindFlowModelID.INDEX.value
+            ] = ConfiguredMindFlowModel(
+                MindFlowModelID.INDEX.value, self.configured_services
+            )
         return self.mind_flow_models[MindFlowModelID.INDEX.value]
 
     @property
     def query(self):
         if MindFlowModelID.QUERY.value not in self.mind_flow_models:
-            self.mind_flow_models[MindFlowModelID.QUERY.value] = ConfiguredMindFlowModel(
-            MindFlowModelID.QUERY.value, self.configured_services
-        )
+            self.mind_flow_models[
+                MindFlowModelID.QUERY.value
+            ] = ConfiguredMindFlowModel(
+                MindFlowModelID.QUERY.value, self.configured_services
+            )
         return self.mind_flow_models[MindFlowModelID.QUERY.value]
 
     @property
     def embedding(self):
         if MindFlowModelID.EMBEDDING.value not in self.mind_flow_models:
-            self.mind_flow_models[MindFlowModelID.EMBEDDING.value] = ConfiguredMindFlowModel(
-            MindFlowModelID.EMBEDDING.value, self.configured_services
-        )
+            self.mind_flow_models[
+                MindFlowModelID.EMBEDDING.value
+            ] = ConfiguredMindFlowModel(
+                MindFlowModelID.EMBEDDING.value, self.configured_services
+            )
         return self.mind_flow_models[MindFlowModelID.EMBEDDING.value]

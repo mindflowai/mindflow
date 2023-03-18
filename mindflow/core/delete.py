@@ -16,7 +16,8 @@ def run_delete(document_paths: List[str]):
         resolved_path["path"] for resolved_path in resolve_all(document_paths)
     ]
     documents_to_delete = [
-        document.path if document else None for document in Document.load_bulk(resolved_paths)
+        document.path if document else None
+        for document in Document.load_bulk(resolved_paths)
     ]
 
     if len(documents_to_delete) == 0:
