@@ -35,6 +35,8 @@ class Model(StaticObject):
     token_cost: int
     token_cost_unit: str
 
+    config_description: Optional[str]
+
     # Config
     soft_token_limit: int
 
@@ -84,7 +86,12 @@ class ConfiguredModel(Callable):
 
         try:
             if self.service == ServiceID.OPENAI.value:
-                self.tokenizer = tiktoken.encoding_for_model(self.id)
+                if self.id == ModelID.GPT_4.value:
+                    self.tokenizer = tiktoken.encoding_for_model(
+                        ModelID.GPT_3_5_TURBO.value
+                    )
+                else:
+                    self.tokenizer = tiktoken.encoding_for_model(self.id)
         except NameError:
             pass
 
@@ -124,6 +131,7 @@ class ConfiguredModel(Callable):
             if self.id in [
                 ModelID.GPT_3_5_TURBO.value,
                 ModelID.GPT_3_5_TURBO_0301.value,
+                ModelID.GPT_4.value,
             ]:
                 return self.openai_chat_completion(prompt, *args, **kwargs)
             else:
