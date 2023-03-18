@@ -13,6 +13,7 @@ from mindflow.cli.new_click_cli.commands.index import index
 from mindflow.cli.new_click_cli.commands.inspect import inspect
 from mindflow.cli.new_click_cli.commands.login import login
 from mindflow.cli.new_click_cli.commands.gen import gen
+from mindflow.cli.new_click_cli.commands.config import config
 
 # from mindflow.cli.new_click_cli.commands.config import config
 
@@ -43,6 +44,7 @@ mindflow_cli.add_command(delete)
 mindflow_cli.add_command(diff)
 mindflow_cli.add_command(mr)
 mindflow_cli.add_command(pr)
+mindflow_cli.add_command(config)
 
 if __name__ == "__main__":
     mindflow_cli()

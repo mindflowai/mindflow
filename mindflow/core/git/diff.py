@@ -2,7 +2,7 @@
 `diff` command
 """
 import concurrent.futures
-import subprocess
+
 from typing import Dict, Optional, Union
 from typing import List
 from typing import Tuple
@@ -34,7 +34,6 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
         return None
 
     diff_dict, excluded_filenames = parse_git_diff(diff_result)
-
     if len(diff_dict) <= 0:
         return None
 
