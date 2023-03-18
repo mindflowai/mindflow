@@ -8,19 +8,19 @@ from mindflow.db.db.static import Static
 
 class Databases:
     def __init__(self):
-        self.databases = {}
+        self._databases = {}
 
     @property
     def static(self) -> Static:
-        if Store.STATIC not in self.databases:
-            self.databases[Store.STATIC] = Static()
-        return self.databases[Store.STATIC]
+        if Store.STATIC not in self._databases:
+            self._databases[Store.STATIC] = Static()
+        return self._databases[Store.STATIC]
 
     @property
     def json(self) -> JsonDatabase:
-        if Store.JSON not in self.databases:
-            self.databases[Store.JSON] = JsonDatabase()
-        return self.databases[Store.JSON]
+        if Store.JSON not in self._databases:
+            self._databases[Store.JSON] = JsonDatabase()
+        return self._databases[Store.JSON]
 
 
 class DatabaseController:
