@@ -27,7 +27,7 @@ Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do
 
 ## Basic Usage
 
-### Configure your model (Optional)
+### Configuration (Optional)
 Configure the model used for generating responses by running `mf config` and selecting either GPT 3.5 Turbo (default) or GPT 4. In order to use GPT 4, you'll need to have special access to the API. If you have access, you can run `mf config` and select GPT 4. If you don't have access, you'll get an error message. 
 - Sign up for GPT 4 access [here](https://openai.com/waitlist/gpt-4-api). 
 
