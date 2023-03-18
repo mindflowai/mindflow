@@ -5,7 +5,7 @@ from mindflow.utils.enum import ExtendedEnum
 class ModelID(ExtendedEnum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"
     GPT_3_5_TURBO_0301 = "gpt-3.5-turbo-0301"
-    
+
     GPT_4 = "gpt-4"
     GPT_4_0314 = "gpt-4-0314"
     GPT_4_32K = "gpt-4-32k"
@@ -49,7 +49,7 @@ class ModelConfigParameterName(ExtendedEnum):
 class ModelName(ExtendedEnum):
     GPT_3_5_TURBO = "GPT 3.5 Turbo"
     GPT_3_5_TURBO_0301 = "GPT 3.5 Turbo March 1st"
-    
+
     GPT_4 = "GPT 4"
     GPT_4_0314 = "GPT 4 March 14th"
     GPT_4_32K = "GPT 4 32K"
@@ -97,6 +97,7 @@ class ModelTokenCost(ExtendedEnum):
 class ModelTokenCostUnit(ExtendedEnum):
     THOUSAND = 1000
 
+
 class ModelDescription(ExtendedEnum):
     GPT_3_5_TURBO = f"GPT 3.5 Turbo: {str(ModelHardTokenLimit.GPT_3_5_TURBO.value)} token Limit. ${str(ModelTokenCost.GPT_3_5_TURBO.value)} per {str(ModelTokenCostUnit.THOUSAND.value)} tokens.     OpenAI's most powerful model. Longer outputs, more coherent, and more creative."
     GPT_3_5_TURBO_0301 = f"GPT 3.5 Turbo March 1st: {str(ModelHardTokenLimit.GPT_3_5_TURBO_0301.value)} token Limit. ${str(ModelTokenCost.GPT_3_5_TURBO_0301.value)} per {str(ModelTokenCostUnit.THOUSAND.value)} tokens.     OpenAI's most powerful model. Longer outputs, more coherent, and more creative."
@@ -118,6 +119,7 @@ class ModelTextCompletionOpenAI(ExtendedEnum):
     GPT_4_0314 = ModelID.GPT_4_0314.value
     GPT_4_32K = ModelID.GPT_4_32K.value
     GPT_4_32K_0314 = ModelID.GPT_4_32K_0314.value
+
 
 class ModelTextEmbeddingOpenAI(ExtendedEnum):
     TEXT_EMBEDDING_ADA_002 = ModelID.TEXT_EMBEDDING_ADA_002.value

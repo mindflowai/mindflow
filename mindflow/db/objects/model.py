@@ -85,8 +85,10 @@ class ConfiguredModel(Callable):
         try:
             if self.service == ServiceID.OPENAI.value:
                 if self.id == ModelID.GPT_4.value:
-                    self.tokenizer = tiktoken.encoding_for_model(ModelID.GPT_3_5_TURBO.value)
-                else: 
+                    self.tokenizer = tiktoken.encoding_for_model(
+                        ModelID.GPT_3_5_TURBO.value
+                    )
+                else:
                     self.tokenizer = tiktoken.encoding_for_model(self.id)
         except NameError:
             pass
