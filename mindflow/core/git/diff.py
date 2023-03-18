@@ -19,6 +19,7 @@ from mindflow.utils.diff_parser import parse_git_diff
 from mindflow.utils.token import get_token_count
 from tqdm import tqdm
 
+
 def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
