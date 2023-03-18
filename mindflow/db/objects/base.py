@@ -8,8 +8,8 @@ from mindflow.db.db.database import Collection, Database
 class BaseObject:
     id: str
 
-    _collection: Optional[Collection] = None
-    _database: Optional[Database] = None
+    _collection: Collection
+    _database: Database
 
     def __init__(self, id: Union[str, dict]):
         if isinstance(id, dict):
@@ -22,9 +22,6 @@ class BaseObject:
 
     @classmethod
     def load(self, id: str):
-        if self._collection is None:
-            raise ValueError("Collection is not defined")
-
         object_dict: Optional[dict] = self._database.load(self._collection.value, id)
         if object_dict is None:
             return None
@@ -33,9 +30,6 @@ class BaseObject:
 
     @classmethod
     def load_bulk(cls, ids: list) -> List:
-        if cls._collection is None:
-            raise ValueError("Collection is not defined")
-
         object_dict: List[Optional[dict]] = cls._database.load_bulk(
             cls._collection.value, ids
         )
@@ -43,9 +37,6 @@ class BaseObject:
 
     @classmethod
     def delete_bulk(cls, ids: list):
-        if cls._collection is None:
-            raise ValueError("Collection is not defined")
-
         cls._database.delete_bulk(cls._collection.value, ids)
 
     def delete(self):
@@ -57,9 +48,6 @@ class BaseObject:
     @staticmethod
     def save_bulk(objects: List["BaseObject"]):
         object = objects[0]
-        if object._collection is None:
-            raise ValueError("Collection is not defined")
-
         object._database.save_bulk(
             object._collection.value, [object.todict(object) for object in objects]
         )
