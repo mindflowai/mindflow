@@ -1,16 +1,17 @@
+from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.static_definition.service import ServiceID
 
 
-class Service(StaticObject):
+class Service(BaseObject):
     id: str
     name: str
     url: str
     api_url: str
 
     _collection: Collection = Collection.SERVICE
+    _database = DATABASE_CONTROLLER.databases.json
 
 
 class ServiceConfig(BaseObject):
@@ -21,7 +22,7 @@ class ServiceConfig(BaseObject):
     api_secret: str
 
     _collection: Collection = Collection.CONFIGURATIONS
-
+    _database = DATABASE_CONTROLLER.databases.json
 
 class ConfiguredService:
     id: str

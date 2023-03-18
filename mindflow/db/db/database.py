@@ -33,3 +33,6 @@ class Database:
 
     def save(self, collection: str, value: dict):
         raise NotImplementedError
+
+    def save_bulk(self, collection: str, values: List[dict]):
+        raise NotImplementedError

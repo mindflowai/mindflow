@@ -13,17 +13,16 @@ except ImportError:
     print("Upgrade to python v3.8 or higher for better results.")
     pass
 
-
+from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.service import ServiceConfig
 from mindflow.db.objects.static_definition.model import ModelID
 from mindflow.db.objects.static_definition.service import ServiceID
 from mindflow.utils.errors import ModelError
 
 
-class Model(StaticObject):
+class Model(BaseObject):
     """Model object."""
 
     id: str
@@ -41,6 +40,7 @@ class Model(StaticObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.MODEL
+    _database = DATABASE_CONTROLLER.databases.static
 
 
 class ModelConfig(BaseObject):
@@ -50,7 +50,7 @@ class ModelConfig(BaseObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.CONFIGURATIONS
-
+    _database = DATABASE_CONTROLLER.databases.json
 
 class ConfiguredModel(Callable):
     id: str

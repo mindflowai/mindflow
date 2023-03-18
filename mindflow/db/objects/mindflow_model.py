@@ -1,17 +1,17 @@
 import sys
 from typing import Dict
 from typing import Optional
+from mindflow.db.controller import DATABASE_CONTROLLER
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.base import StaticObject
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.db.objects.model import Model
 from mindflow.db.objects.service import ConfiguredServices
 from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
 
 
-class MindFlowModel(StaticObject):
+class MindFlowModel(BaseObject):
     """MindFlow model object."""
 
     id: str  # index, query, embedding
@@ -20,6 +20,7 @@ class MindFlowModel(StaticObject):
     model: str
 
     _collection: Collection = Collection.MIND_FLOW_MODEL
+    _database = DATABASE_CONTROLLER.databases.static
 
 
 class MindFlowModelConfig(BaseObject):
@@ -29,6 +30,7 @@ class MindFlowModelConfig(BaseObject):
     model: str
 
     _collection: Collection = Collection.CONFIGURATIONS
+    _database = DATABASE_CONTROLLER.databases.json
 
 
 class ConfiguredMindFlowModel:
