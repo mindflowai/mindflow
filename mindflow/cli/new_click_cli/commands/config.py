@@ -11,7 +11,7 @@ from mindflow.db.objects.static_definition.model import (
 
 
 @click.command(
-    help='Configure MindFlow. For example, you can configure the model to use.'
+    help="Configure MindFlow. For example, you can configure the model to use."
 )
 def config():
     config_options = ["model"]
