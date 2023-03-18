@@ -24,6 +24,7 @@ class ModelParameterKey(ExtendedEnum):
     TOKEN_COST = "token_cost"
     TOKEN_COST_UNIT = "token_cost_unit"
     DESCRIPTION = "description"
+    CONFIG_DESCRIPTION = "config_description"
 
 
 class ModelService(ExtendedEnum):
@@ -110,6 +111,10 @@ class ModelDescription(ExtendedEnum):
     TEXT_EMBEDDING_ADA_002 = f"Text Embedding Ada 002: {str(ModelHardTokenLimit.TEXT_EMBEDDING_ADA_002)} token Limit. ${str(ModelTokenCost.TEXT_EMBEDDING_ADA_002)} per {str(ModelTokenCostUnit.THOUSAND)} tokens.   OpenAI's best advertised embedding model. Fast and cheap! Recommended for generating deep and shallow indexes"
 
 
+class ModelConfigDescription(ExtendedEnum):
+    GPT_3_5_TURBO = f"{ModelName.GPT_3_5_TURBO.value}: Fast, cheap, and powerful.    Token Limit: {str(ModelHardTokenLimit.GPT_3_5_TURBO.value)}."
+    GPT_4 = f"{ModelName.GPT_4.value}:         Most powerful model (slower). Token Limit: {str(ModelHardTokenLimit.GPT_4.value)}. Get access -> https://openai.com/waitlist/gpt-4-api."
+
 ## Service Models (By Type)
 class ModelTextCompletionOpenAI(ExtendedEnum):
     GPT_3_5_TURBO = ModelID.GPT_3_5_TURBO.value
@@ -148,6 +153,7 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.GPT_3_5_TURBO.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.GPT_3_5_TURBO.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.GPT_3_5_TURBO.value,
     },
     ModelID.GPT_3_5_TURBO_0301.value: {
         ModelParameterKey.ID.value: ModelID.GPT_3_5_TURBO_0301.value,
@@ -168,6 +174,7 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.GPT_4.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.GPT_4.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.GPT_4.value,
     },
     ModelID.GPT_4_0314.value: {
         ModelParameterKey.ID.value: ModelID.GPT_4_0314.value,

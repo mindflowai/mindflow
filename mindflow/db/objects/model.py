@@ -35,6 +35,8 @@ class Model(StaticObject):
     token_cost: int
     token_cost_unit: str
 
+    config_description: Optional[str]
+
     # Config
     soft_token_limit: int
 
