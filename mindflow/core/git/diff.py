@@ -44,7 +44,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     diff_summary: str = ""
     if len(batched_parsed_diff_result) == 1:
         content = ""
-        for file_name, diff_content in tqdm(batched_parsed_diff_result[0]):
+        for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         diff_response: Union[ModelError, str] = completion_model(
             build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
