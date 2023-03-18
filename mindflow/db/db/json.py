@@ -35,7 +35,7 @@ JSON_DATABASE_PATH = os.path.join(MINDFLOW_DIR, "db.json")
 
 class JsonDatabase(Database):
     def __init__(self):
-        self.collections: Dict = create_and_load_json(JSON_DATABASE_PATH)
+        self.collections: dict = create_and_load_json(JSON_DATABASE_PATH)
 
     def load(self, collection: str, object_id: str) -> Optional[dict]:
         objects = self.collections.get(collection, None)
