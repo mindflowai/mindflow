@@ -49,6 +49,13 @@ class ConfiguredService:
 
 
 class ConfiguredServices:
+    def __init__(self):
+        self._services = {}
+
     @property
     def openai(self) -> ConfiguredService:
-        return ConfiguredService(ServiceID.OPENAI.value)
+        if ServiceID.OPENAI.value not in self._services:
+            self._services[ServiceID.OPENAI.value] = ConfiguredService(
+                ServiceID.OPENAI.value
+            )
+        return self._services[ServiceID.OPENAI.value]
