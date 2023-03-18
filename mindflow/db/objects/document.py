@@ -1,5 +1,6 @@
 import hashlib
 from typing import Dict, List, Optional
+from mindflow.db.controller import DATABASE_CONTROLLER
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
@@ -21,6 +22,7 @@ class Document(BaseObject):
     search_tree: dict
 
     _collection = Collection.DOCUMENT
+    _database = DATABASE_CONTROLLER.databases.json
 
     def to_document_reference(
         self,
