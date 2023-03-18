@@ -38,7 +38,9 @@ def model_selection():
         MODEL_STATIC[ModelID.GPT_3_5_TURBO.value],
         MODEL_STATIC[ModelID.GPT_4.value],
     ]
-    options = [model[ModelParameterKey.CONFIG_DESCRIPTION.value] for model in model_options]
+    options = [
+        model[ModelParameterKey.CONFIG_DESCRIPTION.value] for model in model_options
+    ]
 
     # Print options with numbers
     for i, option in enumerate(options, 1):

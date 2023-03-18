@@ -115,6 +115,7 @@ class ModelConfigDescription(ExtendedEnum):
     GPT_3_5_TURBO = f"{ModelName.GPT_3_5_TURBO.value}: Fast, cheap, and powerful.    Token Limit: {str(ModelHardTokenLimit.GPT_3_5_TURBO.value)}."
     GPT_4 = f"{ModelName.GPT_4.value}:         Most powerful model (slower). Token Limit: {str(ModelHardTokenLimit.GPT_4.value)}. Get access -> https://openai.com/waitlist/gpt-4-api."
 
+
 ## Service Models (By Type)
 class ModelTextCompletionOpenAI(ExtendedEnum):
     GPT_3_5_TURBO = ModelID.GPT_3_5_TURBO.value
