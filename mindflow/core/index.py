@@ -161,7 +161,7 @@ def create_document_chunks(
 
     tokens = get_token_count(completion_model, text)
     if tokens < completion_model.soft_token_limit:
-        summary: str = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text))
+        summary: str = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text, completion_model.service))
         document_chunk = DocumentChunk(
             {
                 "id": f"{indexable_document.id}_0",
@@ -204,7 +204,7 @@ def split_raw_text_to_vectors(
         # Split the chunk and add it as a new node
         text_str = text[start : start + text_chunk_size]
         summary: str = completion_model(
-            build_context_prompt(INDEX_PROMPT_PREFIX, text_str)
+            build_context_prompt(INDEX_PROMPT_PREFIX, text_st, completion_model.service)
         )
         document_chunks.append(
             DocumentChunk(
@@ -275,7 +275,7 @@ def create_tree(
 
     merged_summary = completion_model(
         build_context_prompt(
-            INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}"
+            INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}", completion_model.service
         )
     )
 

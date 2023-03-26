@@ -16,6 +16,7 @@ def run_commit(
     Commit command.
     """
     settings = Settings()
+    query_model = settings.mindflow_models.query.model
 
     if message_overwrite is None:
         # Execute the git diff command and retrieve the output as a string
@@ -24,8 +25,8 @@ def run_commit(
         if diff_output is None:
             return "Nothing to commit."
 
-        response: Union[ModelError, str] = settings.mindflow_models.query.model(
-            build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output)
+        response: Union[ModelError, str] = query_model(
+            build_context_prompt(COMMIT_PROMPT_PREFIX, diff_output, query_model.service)
         )
         if isinstance(response, ModelError):
             return response.commit_message
