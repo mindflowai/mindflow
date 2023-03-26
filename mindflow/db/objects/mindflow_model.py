@@ -6,9 +6,9 @@ from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.model import ConfiguredModel
-from mindflow.db.objects.model import Model
 from mindflow.db.objects.service import ConfiguredServices
 from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
+from mindflow.db.objects.static_definition.service import ServiceConfigParameterKey, ServiceID
 
 
 class MindFlowModel(BaseObject):
@@ -64,15 +64,18 @@ class ConfiguredMindFlowModel:
     def get_default_model_id(
         self, mindflow_model_id: str, configured_services: ConfiguredServices
     ) -> str:
-        if hasattr(configured_services.openai, "api_key"):
+        model_id: Optional[str] = None
+        if hasattr(configured_services.openai, ServiceConfigParameterKey.API_KEY.value):
             service = configured_services.openai
+            model_id = self.defaults.get(ServiceID.OPENAI.value, None)
+        if hasattr(configured_services.anthropic, ServiceConfigParameterKey.API_KEY.value):
+            service = configured_services.anthropic
+            model_id = self.defaults.get(ServiceID.ANTHROPIC.value, None)
         else:
             print(
                 "No service API key configured. Please configure an API key for at least one service."
             )
             sys.exit(1)
-
-        model_id = self.defaults.get("openai", None)
 
         if model_id is None:
             raise Exception(

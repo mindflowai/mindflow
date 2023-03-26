@@ -9,7 +9,7 @@ from mindflow.resolving.resolvers.file_resolver import FileResolver
 
 def resolve(
     document_path: str,
-) ->  List[Tuple[str, str]]:
+) -> List[Tuple[str, str]]:
     """
     Resolves a document to text.
     """

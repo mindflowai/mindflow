@@ -29,9 +29,16 @@ def run_query(document_paths: List[str], query: str):
     query_embedding = np.array(embedding_model(query)).reshape(1, -1)
 
     resolved: Tuple[str, str] = resolve_all(document_paths)
-    document_hash_to_path: Dict[str, str] = {get_document_id(document_path, document_type): document_path for document_path, document_type in resolved}
-    documents: List[Document] = [document for document in Document.load_bulk(list(document_hash_to_path.keys())) if document is not None]
-    total_chunks = sum([document.num_chunks +1  for document in documents])
+    document_hash_to_path: Dict[str, str] = {
+        get_document_id(document_path, document_type): document_path
+        for document_path, document_type in resolved
+    }
+    documents: List[Document] = [
+        document
+        for document in Document.load_bulk(list(document_hash_to_path.keys()))
+        if document is not None
+    ]
+    total_chunks = sum([document.num_chunks + 1 for document in documents])
 
     document_chunk_ids = [None] * int(total_chunks)
     j = 0
@@ -39,12 +46,16 @@ def run_query(document_paths: List[str], query: str):
         for i in range(0, int(document.num_chunks) + 1):
             document_chunk_ids[j] = f"{document.id}_{i}"
             j += 1
-    
-    top_document_chunks: List[DocumentChunk] = DocumentChunk.query(vector=query_embedding, ids=document_chunk_ids)
+
+    top_document_chunks: List[DocumentChunk] = DocumentChunk.query(
+        vector=query_embedding, ids=document_chunk_ids
+    )
     path_top_document_chunks: List[Tuple[str, List[DocumentChunk]]] = []
     for document_chunk in top_document_chunks:
         document_hash = document_chunk.id.split("_")[0]
-        path_top_document_chunks.append((document_hash_to_path[document_hash], document_chunk))
+        path_top_document_chunks.append(
+            (document_hash_to_path[document_hash], document_chunk)
+        )
 
     if len(top_document_chunks) == 0:
         print(
@@ -52,7 +63,9 @@ def run_query(document_paths: List[str], query: str):
         )
         sys.exit(1)
 
-    selected_content: str = select_content(query, path_top_document_chunks, completion_model)
+    selected_content: str = select_content(
+        query, path_top_document_chunks, completion_model
+    )
     messages = build_query_messages(
         query,
         selected_content,
@@ -62,6 +75,7 @@ def run_query(document_paths: List[str], query: str):
         return response.query_message
 
     return response
+
 
 def build_query_messages(query: str, content: str) -> List[Dict]:
     """
@@ -91,7 +105,9 @@ def select_content(
     for path, document_chunk in top_document_chunks:
         with open(path, "r", encoding="utf-8") as file:
             file.seek(document_chunk.start_pos)
-            text = file.read(int(document_chunk.end_pos) - int(document_chunk.start_pos))
+            text = file.read(
+                int(document_chunk.end_pos) - int(document_chunk.start_pos)
+            )
 
             selected_content += formated_chunk(path, document_chunk, text)
 
@@ -117,6 +133,7 @@ def select_content(
     selected_content = selected_content[:right]
 
     return selected_content
+
 
 def formated_chunk(path: str, document_chunk: DocumentChunk, text: str) -> str:
     return (

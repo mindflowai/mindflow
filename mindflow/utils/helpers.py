@@ -23,9 +23,7 @@ def print_total_tokens_and_ask_to_continue(
     """
     Print total tokens of documents
     """
-    total_tokens = sum(
-        [document.tokens for document in documents]
-    )
+    total_tokens = sum([document.tokens for document in documents])
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (
         total_tokens / float(completion_model.token_cost_unit)

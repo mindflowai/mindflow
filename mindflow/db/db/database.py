@@ -37,6 +37,6 @@ class Database:
 
     def save_bulk(self, collection: str, values: List[dict]):
         raise NotImplementedError
-    
+
     def query(self, collection: str, query: str):
         raise NotImplementedError

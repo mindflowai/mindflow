@@ -8,10 +8,12 @@ from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.static_definition.document import DocumentType
 
+
 class Document(BaseObject):
     """
     Document
     """
+
     # "{hash}"
     id: str
     embedding: Optional[np.ndarray]
@@ -29,6 +31,7 @@ class DocumentChunk(BaseObject):
     """
     Document chunk
     """
+
     # ("{hash}_{chunk_id}"
     id: str
     embedding: np.ndarray
@@ -41,8 +44,15 @@ class DocumentChunk(BaseObject):
     _database = DATABASE_CONTROLLER.databases.pinecone
 
     @classmethod
-    def query(cls, vector: np.ndarray, ids: List[str], top_k = 100, include_metadata=True):
-        return [cls(chunk) for chunk in cls._database.query(cls._collection.value, vector, ids, top_k, include_metadata)]
+    def query(
+        cls, vector: np.ndarray, ids: List[str], top_k=100, include_metadata=True
+    ):
+        return [
+            cls(chunk)
+            for chunk in cls._database.query(
+                cls._collection.value, vector, ids, top_k, include_metadata
+            )
+        ]
 
 
 def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-ascii"]):
@@ -65,6 +75,7 @@ def read_document(document_path: str, document_type: str) -> Optional[str]:
     if document_type == DocumentType.FILE.value:
         return read_file_supported_encodings(document_path)
     return None
+
 
 def get_document_id(document_path: str, document_type: str) -> str:
     """

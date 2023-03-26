@@ -1,8 +1,12 @@
 from typing import Optional, Union
 
 import openai
+import anthropic
+
 import numpy as np
 from traitlets import Callable
+
+from mindflow.db.objects.static_definition.model_type import ModelType
 
 try:
     import tiktoken
@@ -118,6 +122,24 @@ class ConfiguredModel(Callable):
         except ModelError as e:
             return e
 
+    def anthropic_chat_completion(
+        self,
+        prompt: str,
+        temperature: float = 0.0,
+        max_tokens: Optional[int] = None,
+    ) -> Union[str, ModelError]:
+        try:
+            client = anthropic.Client(self.api_key)
+            return client.completion(
+                prompt=prompt,
+                stop_sequences=[anthropic.HUMAN_PROMPT],
+                model=self.id,
+                max_tokens_to_sample=max_tokens,
+                temperature=temperature,
+            )
+        except ModelError as e:
+            return e
+
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
         try:
             openai.api_key = self.api_key
@@ -129,13 +151,12 @@ class ConfiguredModel(Callable):
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:
-            if self.id in [
-                ModelID.GPT_3_5_TURBO.value,
-                ModelID.GPT_3_5_TURBO_0301.value,
-                ModelID.GPT_4.value,
-            ]:
+            if self.model_type == ModelType.TEXT_COMPLETION.value:
                 return self.openai_chat_completion(prompt, *args, **kwargs)
             else:
                 return self.openai_embedding(prompt, *args, **kwargs)
+        elif self.service == ServiceID.ANTHROPIC.value:
+            if self.model_type == ModelType.TEXT_COMPLETION.value:
+                return self.anthropic_chat_completion(prompt, *args, **kwargs)
         else:
             raise NotImplementedError(f"Service {self.service} not implemented.")

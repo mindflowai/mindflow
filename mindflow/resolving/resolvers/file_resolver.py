@@ -26,6 +26,5 @@ class FileResolver(BaseResolver):
         Extract text from files.
         """
         return [
-            (path, DocumentType.FILE.value)
-            for path in extract_files(document_path)
+            (path, DocumentType.FILE.value) for path in extract_files(document_path)
         ]

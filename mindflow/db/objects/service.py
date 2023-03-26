@@ -59,3 +59,11 @@ class ConfiguredServices:
                 ServiceID.OPENAI.value
             )
         return self._services[ServiceID.OPENAI.value]
+
+    @property
+    def anthropic(self) -> ConfiguredService:
+        if ServiceID.ANTHROPIC.value not in self._services:
+            self._services[ServiceID.ANTHROPIC.value] = ConfiguredService(
+                ServiceID.ANTHROPIC.value
+            )
+        return self._services[ServiceID.ANTHROPIC.value]

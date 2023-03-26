@@ -3,6 +3,7 @@ Base Resolver Class
 """
 from typing import List, Tuple
 
+
 class BaseResolver:
     """
     Base class for resolvers

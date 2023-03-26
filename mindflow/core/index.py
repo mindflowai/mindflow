@@ -15,10 +15,14 @@ from mindflow.db.objects.document import read_document
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
-from mindflow.utils.helpers import print_total_size, print_total_tokens_and_ask_to_continue
+from mindflow.utils.helpers import (
+    print_total_size,
+    print_total_tokens_and_ask_to_continue,
+)
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count
+
 
 def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) -> None:
     """
@@ -32,8 +36,10 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
 
     ## Resolve documents to document references
-    resolved:  List[Tuple[str, str]] = resolve_all(document_paths)
-    indexable_documents: List[Document] = get_indexable_documents(resolved, completion_model)
+    resolved: List[Tuple[str, str]] = resolve_all(document_paths)
+    indexable_documents: List[Document] = get_indexable_documents(
+        resolved, completion_model
+    )
 
     if not indexable_documents:
         if verbose:
@@ -41,9 +47,7 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
         return
 
     print_total_size(indexable_documents)
-    print_total_tokens_and_ask_to_continue(
-        indexable_documents, completion_model
-    ) 
+    print_total_tokens_and_ask_to_continue(indexable_documents, completion_model)
 
     # build search trees in parallel
     with alive_bar(
@@ -60,7 +64,9 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
                 for indexable_document in indexable_documents
             ]
 
-            for document, document_chunk_future in zip(indexable_documents, document_chunk_futures):
+            for document, document_chunk_future in zip(
+                indexable_documents, document_chunk_futures
+            ):
                 document_chunks = document_chunk_future.result()
 
                 document.embedding = np.mean(
@@ -72,13 +78,17 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
                 document.save()
 
                 progress_bar()
-    
 
-def get_indexable_documents(resolved: Tuple[str, str], completion_model: ConfiguredModel) -> List[Document]:
+
+def get_indexable_documents(
+    resolved: Tuple[str, str], completion_model: ConfiguredModel
+) -> List[Document]:
     """
     Get indexable documents
     """
-    document_ids = [get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved]
+    document_ids = [
+        get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+    ]
     documents = Document.load_bulk(document_ids)
     indexable_documents = []
 
@@ -89,7 +99,13 @@ def get_indexable_documents(resolved: Tuple[str, str], completion_model: Configu
 
     return indexable_documents
 
-def get_indexable_document(document: Optional[Document], document_path: str, document_type: str, completion_model: ConfiguredModel) -> Optional[Document]:
+
+def get_indexable_document(
+    document: Optional[Document],
+    document_path: str,
+    document_type: str,
+    completion_model: ConfiguredModel,
+) -> Optional[Document]:
     """
     Get indexable document
     """
@@ -118,7 +134,12 @@ def get_indexable_document(document: Optional[Document], document_path: str, doc
     else:
         return Document(doc_data)
 
-def create_document_chunks(completion_model: ConfiguredModel, embedding_model: ConfiguredModel, indexable_document: Document):
+
+def create_document_chunks(
+    completion_model: ConfiguredModel,
+    embedding_model: ConfiguredModel,
+    indexable_document: Document,
+):
     """
     This function is used to create a tree of responses from the OpenAI API
     """
@@ -132,15 +153,15 @@ def create_document_chunks(completion_model: ConfiguredModel, embedding_model: C
     # ("{hash}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"type": "file", "num_chunks": 5, "num_tokens": 100})
     # ("{hash}_{chunk_id}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"summary": "chunk_summary", "start_pos": "0", "end_pos": "100", "num_tokens": 50})
 
-    text: Optional[str] = read_document(indexable_document.path, indexable_document.document_type)
+    text: Optional[str] = read_document(
+        indexable_document.path, indexable_document.document_type
+    )
     if not text:
         return []
-    
+
     tokens = get_token_count(completion_model, text)
     if tokens < completion_model.soft_token_limit:
-        summary: str = completion_model(
-            build_context_prompt(INDEX_PROMPT_PREFIX, text)
-        )
+        summary: str = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text))
         document_chunk = DocumentChunk(
             {
                 "id": f"{indexable_document.id}_0",
@@ -153,13 +174,19 @@ def create_document_chunks(completion_model: ConfiguredModel, embedding_model: C
         )
         return [document_chunk]
 
-    document_chunks = split_raw_text_to_vectors(completion_model, embedding_model, text, indexable_document.id)
+    document_chunks = split_raw_text_to_vectors(
+        completion_model, embedding_model, text, indexable_document.id
+    )
     document_chunk_tree = create_tree(document_chunks, completion_model)
 
     return collect_leaves_with_embeddings(document_chunk_tree, "", embedding_model)
 
+
 def split_raw_text_to_vectors(
-    completion_model: ConfiguredModel, embedding_model: ConfiguredModel, text: str, document_hash: str
+    completion_model: ConfiguredModel,
+    embedding_model: ConfiguredModel,
+    text: str,
+    document_hash: str,
 ) -> List[DocumentChunk]:
     """
     Splits text into smaller chunks to not exceed the token limit.
@@ -170,10 +197,12 @@ def split_raw_text_to_vectors(
 
     while start < end:
         # Use binary search to find the maximum chunk size in terms of tokens that fits within the token limit
-        text_chunk_size = binary_search_max_raw_text_chunk_size(completion_model, text, start, end)
+        text_chunk_size = binary_search_max_raw_text_chunk_size(
+            completion_model, text, start, end
+        )
 
         # Split the chunk and add it as a new node
-        text_str = text[start:start+text_chunk_size]
+        text_str = text[start : start + text_chunk_size]
         summary: str = completion_model(
             build_context_prompt(INDEX_PROMPT_PREFIX, text_str)
         )
@@ -185,7 +214,7 @@ def split_raw_text_to_vectors(
                     "embedding": embedding_model(summary),
                     "start_pos": start,
                     "end_pos": start + text_chunk_size,
-                    "num_tokens": get_token_count(completion_model, text_str)
+                    "num_tokens": get_token_count(completion_model, text_str),
                 }
             )
         )
@@ -196,7 +225,9 @@ def split_raw_text_to_vectors(
     return document_chunks
 
 
-def binary_search_max_raw_text_chunk_size(completion_model: ConfiguredModel, text: str, start: int, end: int) -> int:
+def binary_search_max_raw_text_chunk_size(
+    completion_model: ConfiguredModel, text: str, start: int, end: int
+) -> int:
     """
     Uses binary search to find the maximum chunk size in terms of tokens that fits within the token limit.
     """
@@ -204,12 +235,14 @@ def binary_search_max_raw_text_chunk_size(completion_model: ConfiguredModel, tex
     right = end - start
     while left < right:
         mid = (left + right + 1) // 2
-        if get_token_count(completion_model, text[start:start+mid]) <= completion_model.soft_token_limit:
+        if (
+            get_token_count(completion_model, text[start : start + mid])
+            <= completion_model.soft_token_limit
+        ):
             left = mid
         else:
             right = mid - 1
     return left
-
 
 
 class Node:
@@ -219,9 +252,14 @@ class Node:
         self.children: Union[Node, DocumentChunk] = children if children else []
 
     def __repr__(self):
-        return f"Node(id={self.id}, summary={self.summary}, children={len(self.children)})"
+        return (
+            f"Node(id={self.id}, summary={self.summary}, children={len(self.children)})"
+        )
 
-def create_tree(nodes: Union[Node, DocumentChunk], completion_model: ConfiguredModel) -> Node:
+
+def create_tree(
+    nodes: Union[Node, DocumentChunk], completion_model: ConfiguredModel
+) -> Node:
     if not nodes:
         return None
 
@@ -236,15 +274,22 @@ def create_tree(nodes: Union[Node, DocumentChunk], completion_model: ConfiguredM
     right_tree = create_tree(nodes[mid:], completion_model)
 
     merged_summary = completion_model(
-            build_context_prompt(INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}")
+        build_context_prompt(
+            INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}"
         )
-    
+    )
+
     parent_id = f"parent_{left_tree.id.split('_')[1]}_{right_tree.id.split('_')[1]}"
     parent_node = Node(parent_id, merged_summary, [left_tree, right_tree])
 
     return parent_node
 
-def collect_leaves_with_embeddings(node: Union[Node, DocumentChunk], ancestor_summaries: str, embedding_model: ConfiguredModel) -> List[DocumentChunk]:
+
+def collect_leaves_with_embeddings(
+    node: Union[Node, DocumentChunk],
+    ancestor_summaries: str,
+    embedding_model: ConfiguredModel,
+) -> List[DocumentChunk]:
     if isinstance(node, DocumentChunk):
         leaf = node
         leaf.embedding = embedding_model(f"{ancestor_summaries} {node.summary}")
@@ -252,6 +297,10 @@ def collect_leaves_with_embeddings(node: Union[Node, DocumentChunk], ancestor_su
 
     leaves = []
     for child in node.children:
-        leaves.extend(collect_leaves_with_embeddings(child, f"{ancestor_summaries} {node.summary}", embedding_model))
+        leaves.extend(
+            collect_leaves_with_embeddings(
+                child, f"{ancestor_summaries} {node.summary}", embedding_model
+            )
+        )
 
     return leaves
