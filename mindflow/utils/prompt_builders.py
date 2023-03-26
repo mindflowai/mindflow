@@ -12,13 +12,6 @@ def build_context_prompt(context: str, text: str, service: str) -> List[Dict]:
             {"role": "user", "content": text},
         ]
     else:
-        return [
-            {"role": anthropic.HUMAN_PROMPT, "content": context},
-            {
-                "role": anthropic.AI_PROMPT,
-                "content": "Sure! I will respond to all following messages with a response like you have just outlined for me.",
-
-            },
-            {"role": anthropic.HUMAN_PROMPT, "content": text},
-            {"role": anthropic.AI_PROMPT, "content": ""}
-        ]
+        return (
+            f"{anthropic.HUMAN_PROMPT} {context}{anthropic.AI_PROMPT} Sure! I will respond to all following messages with a response like you have just outlined for me.{anthropic.HUMAN_PROMPT} {text}{anthropic.AI_PROMPT}",
+        )

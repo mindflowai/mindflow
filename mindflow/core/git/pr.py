@@ -49,8 +49,12 @@ def create_title_and_body(
     title_response: Union[ModelError, str]
     body_response: Union[ModelError, str]
     if title is None and body is None:
-        pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output, completion_model.service)
-        pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output, completion_model.service)
+        pr_title_prompt = build_context_prompt(
+            PR_TITLE_PREFIX, diff_output, completion_model.service
+        )
+        pr_body_prompt = build_context_prompt(
+            PR_BODY_PREFIX, diff_output, completion_model.service
+        )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_title = executor.submit(
@@ -64,10 +68,14 @@ def create_title_and_body(
         body_response = future_body.result()
     else:
         if title is None:
-            pr_title_prompt = build_context_prompt(PR_TITLE_PREFIX, diff_output, completion_model.service)
+            pr_title_prompt = build_context_prompt(
+                PR_TITLE_PREFIX, diff_output, completion_model.service
+            )
             title_response = completion_model(pr_title_prompt)
         if body is None:
-            pr_body_prompt = build_context_prompt(PR_BODY_PREFIX, diff_output, completion_model.service)
+            pr_body_prompt = build_context_prompt(
+                PR_BODY_PREFIX, diff_output, completion_model.service
+            )
             body_response = completion_model(pr_body_prompt)
 
     if isinstance(title_response, ModelError):

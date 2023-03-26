@@ -8,7 +8,10 @@ from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.db.objects.service import ConfiguredServices
 from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
-from mindflow.db.objects.static_definition.service import ServiceConfigParameterKey, ServiceID
+from mindflow.db.objects.static_definition.service import (
+    ServiceConfigParameterKey,
+    ServiceID,
+)
 
 
 class MindFlowModel(BaseObject):
@@ -68,7 +71,9 @@ class ConfiguredMindFlowModel:
         if hasattr(configured_services.openai, ServiceConfigParameterKey.API_KEY.value):
             service = configured_services.openai
             model_id = self.defaults.get(ServiceID.OPENAI.value, None)
-        if hasattr(configured_services.anthropic, ServiceConfigParameterKey.API_KEY.value):
+        if hasattr(
+            configured_services.anthropic, ServiceConfigParameterKey.API_KEY.value
+        ):
             service = configured_services.anthropic
             model_id = self.defaults.get(ServiceID.ANTHROPIC.value, None)
         else:

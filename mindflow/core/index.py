@@ -161,7 +161,9 @@ def create_document_chunks(
 
     tokens = get_token_count(completion_model, text)
     if tokens < completion_model.soft_token_limit:
-        summary: str = completion_model(build_context_prompt(INDEX_PROMPT_PREFIX, text, completion_model.service))
+        summary: str = completion_model(
+            build_context_prompt(INDEX_PROMPT_PREFIX, text, completion_model.service)
+        )
         document_chunk = DocumentChunk(
             {
                 "id": f"{indexable_document.id}_0",
@@ -275,7 +277,9 @@ def create_tree(
 
     merged_summary = completion_model(
         build_context_prompt(
-            INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}", completion_model.service
+            INDEX_PROMPT_PREFIX,
+            f"{left_tree.summary} {right_tree.summary}",
+            completion_model.service,
         )
     )
 

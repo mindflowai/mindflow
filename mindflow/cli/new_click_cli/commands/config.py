@@ -39,6 +39,7 @@ def model_selection():
     model_options = [
         MODEL_STATIC[ModelID.GPT_3_5_TURBO.value],
         MODEL_STATIC[ModelID.GPT_4.value],
+        MODEL_STATIC[ModelID.CLAUDE_V1.value],
     ]
     options = [
         model[ModelParameterKey.CONFIG_DESCRIPTION.value] for model in model_options

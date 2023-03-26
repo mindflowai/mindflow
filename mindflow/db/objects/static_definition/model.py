@@ -142,6 +142,7 @@ class ModelConfigDescription(ExtendedEnum):
     GPT_4 = f"{ModelName.GPT_4.value}:         Most powerful model (slower). Token Limit: {str(ModelHardTokenLimit.GPT_4.value)}. Get access -> https://openai.com/waitlist/gpt-4-api."
 
     CLAUDE_V1 = f"{ModelName.CLAUDE_V1.value}:         Fast, cheap, and powerful.    Token Limit: {str(ModelHardTokenLimit.CLAUDE_V1.value)}."
+    CLAUDE_INSTANT_V1 = f"{ModelName.CLAUDE_INSTANT_V1.value}:         Fast, cheap, and powerful.    Token Limit: {str(ModelHardTokenLimit.CLAUDE_INSTANT_V1.value)}."
 
 
 ## Service Models (By Type)
@@ -224,6 +225,7 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.CLAUDE_V1.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.CLAUDE_V1.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.MILLION.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.CLAUDE_V1.value,
     },
     ModelID.CLAUDE_INSTANT_V1.value: {
         ModelParameterKey.ID.value: ModelID.CLAUDE_INSTANT_V1.value,
@@ -234,6 +236,7 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.CLAUDE_INSTANT_V1.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.CLAUDE_INSTANT_V1.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.MILLION.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.CLAUDE_INSTANT_V1.value,
     },
     ModelID.GPT_4_0314.value: {
         ModelParameterKey.ID.value: ModelID.GPT_4_0314.value,
