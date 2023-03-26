@@ -92,6 +92,3 @@ class JsonDatabase(Database):
     def save_file(self):
         with open(JSON_DATABASE_PATH, "w", encoding="utf-8") as json_file:
             json.dump(self.collections, json_file, indent=4)
-
-    def __del__(self):
-        self.save_file()

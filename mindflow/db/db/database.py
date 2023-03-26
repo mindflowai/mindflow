@@ -7,7 +7,7 @@ from mindflow.utils.enum import ExtendedEnum
 class Store(ExtendedEnum):
     STATIC = "static"
     JSON = "json"
-    NEO4J = "neo4j"
+    PINECONE = "pinecone"
 
 
 class Collection(ExtendedEnum):
@@ -16,6 +16,7 @@ class Collection(ExtendedEnum):
     MIND_FLOW_MODEL = "mind_flow_model"
     CONFIGURATIONS = "configurations"
     DOCUMENT = "document"
+    DOCUMENT_CHUNK = "document_chunk"
 
 
 class Database:
@@ -35,4 +36,7 @@ class Database:
         raise NotImplementedError
 
     def save_bulk(self, collection: str, values: List[dict]):
+        raise NotImplementedError
+    
+    def query(self, collection: str, query: str):
         raise NotImplementedError

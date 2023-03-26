@@ -1,11 +1,11 @@
 import sys
 from typing import List
 
-from mindflow.db.objects.document import DocumentReference
+from mindflow.db.objects.document import Document
 from mindflow.db.objects.model import ConfiguredModel
 
 
-def print_total_size(document_references: List[DocumentReference]):
+def print_total_size(document_references: List[Document]):
     """
     Print total size of documents
     """
@@ -16,7 +16,7 @@ def print_total_size(document_references: List[DocumentReference]):
 
 
 def print_total_tokens_and_ask_to_continue(
-    document_references: List[DocumentReference],
+    documents: List[Document],
     completion_model: ConfiguredModel,
     usd_threshold: float = 0.5,
 ):
@@ -24,7 +24,7 @@ def print_total_tokens_and_ask_to_continue(
     Print total tokens of documents
     """
     total_tokens = sum(
-        [document_reference.tokens for document_reference in document_references]
+        [document.tokens for document in documents]
     )
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (

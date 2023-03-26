@@ -1,263 +1,257 @@
 """
-`generate` command
+`index` command
 """
 from concurrent.futures import ThreadPoolExecutor
-from copy import deepcopy
-
-from typing import Dict, List, Union
-from typing import Optional
+import hashlib
+import os
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from alive_progress import alive_bar  # type: ignore
-
+from alive_progress import alive_bar
 from mindflow.db.controller import DATABASE_CONTROLLER
-from mindflow.db.objects.document import Document
-from mindflow.db.objects.document import DocumentReference
+
+from mindflow.db.objects.document import Document, DocumentChunk, get_document_id
 from mindflow.db.objects.document import read_document
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
-from mindflow.utils.errors import ModelError
-from mindflow.utils.helpers import (
-    print_total_size,
-    print_total_tokens_and_ask_to_continue,
-)
+from mindflow.utils.helpers import print_total_size, print_total_tokens_and_ask_to_continue
 from mindflow.utils.prompt_builders import build_context_prompt
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
-from mindflow.utils.token import get_batch_token_count, get_token_count
-
+from mindflow.utils.token import get_token_count
 
 def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) -> None:
     """
     This function is used to generate an index and/or embeddings for files
     """
 
-    import os
-
     document_paths = [os.path.abspath(path) for path in document_paths]
 
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
+    embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
 
     ## Resolve documents to document references
-    resolved: List[Dict] = resolve_all(document_paths)
-    document_references: List[DocumentReference] = DocumentReference.from_resolved(
-        resolved, completion_model
-    )
+    resolved:  List[Tuple[str, str]] = resolve_all(document_paths)
+    indexable_documents: List[Document] = get_indexable_documents(resolved, completion_model)
 
-    ## Filter out documents that are already indexed
-    indexable_document_references: List[DocumentReference] = return_if_indexable(
-        document_references, refresh
-    )
-    if not indexable_document_references:
+    if not indexable_documents:
         if verbose:
             print("No documents to index")
         return
 
-    print_total_size(indexable_document_references)
+    print_total_size(indexable_documents)
     print_total_tokens_and_ask_to_continue(
-        indexable_document_references, completion_model
-    )
+        indexable_documents, completion_model
+    ) 
 
     # build search trees in parallel
     with alive_bar(
-        len(indexable_document_references), bar="blocks", spinner="twirls"
+        len(indexable_documents), bar="blocks", spinner="twirls"
     ) as progress_bar:
         with ThreadPoolExecutor(max_workers=50) as executor:
-            search_tree_futures = [
+            document_chunk_futures = [
                 executor.submit(
-                    create_text_search_tree,
+                    create_document_chunks,
                     completion_model,
-                    read_document(
-                        document_reference.path, document_reference.document_type
-                    ),  # type: ignore
+                    embedding_model,
+                    indexable_document,
                 )
-                for document_reference in indexable_document_references
+                for indexable_document in indexable_documents
             ]
 
-            for search_tree_future, document_reference in zip(
-                search_tree_futures, indexable_document_references
-            ):
-                document: Document = document_reference.to_document()
-                document.search_tree = search_tree_future.result()
+            for document, document_chunk_future in zip(indexable_documents, document_chunk_futures):
+                document_chunks = document_chunk_future.result()
+
+                document.embedding = np.mean(
+                    [document_chunk.embedding for document_chunk in document_chunks],
+                    axis=0,
+                )
+                document.num_chunks = len(document_chunks)
+                DocumentChunk.save_bulk(document_chunks)
                 document.save()
-                del document_reference, search_tree_future
+
                 progress_bar()
+    
 
-    DATABASE_CONTROLLER.databases.json.save_file()
-
-
-def return_if_indexable(
-    document_references: List[DocumentReference], refresh: bool
-) -> List[DocumentReference]:
-    return [
-        document_reference
-        for document_reference in document_references
-        if index_document(document_reference, refresh)
-    ]
-
-
-def index_document(document_reference: DocumentReference, refresh: bool) -> bool:
-    if not hasattr(document_reference, "hash") or not document_reference.hash:
-        return True
-    if refresh:
-        return True
-    return document_reference.hash != document_reference.new_hash
-
-
-class Node:
+def get_indexable_documents(resolved: Tuple[str, str], completion_model: ConfiguredModel) -> List[Document]:
     """
-    Simple node class for search tree.
+    Get indexable documents
     """
+    document_ids = [get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved]
+    documents = Document.load_bulk(document_ids)
+    indexable_documents = []
 
-    start: int
-    end: int
-    summary: str
-    embedding: np.ndarray
-    leaves: List["Node"]
+    for doc, (path, doc_type) in zip(documents, resolved):
+        indexable_doc = get_indexable_document(doc, path, doc_type, completion_model)
+        if indexable_doc is not None:
+            indexable_documents.append(indexable_doc)
 
-    def __init__(
-        self,
-        completion_model: ConfiguredModel,
-        start: int,
-        end: int,
-        text: Optional[str] = None,
-    ):
-        self.start = start
-        self.end = end
-        if text:
-            response: Union[str, ModelError] = completion_model(
-                build_context_prompt(INDEX_PROMPT_PREFIX, text)
-            )
-            if isinstance(response, ModelError):
-                self.summary = ""
-                print(response.index_message)
-            else:
-                self.summary = response
+    return indexable_documents
 
-    def set_leaves(self, leaves: List["Node"]) -> None:
-        self.leaves = leaves
-
-    def to_dict(self) -> dict:
-        return {
-            "start": self.start,
-            "end": self.end,
-            "summary": self.summary if hasattr(self, "summary") else None,
-            "embedding": self.embedding if hasattr(self, "embedding") else None,
-            "leaves": [leaf.to_dict() for leaf in self.leaves]
-            if hasattr(self, "leaves")
-            else None,
-        }
-
-    def iterative_to_dict(self) -> dict:
-        # Can't figure out what is wrong with this yet. Leaves coming up null.
-        stack = [(self, None)]
-        while stack:
-            node, parent_leaves = stack.pop()
-            node_dict: dict = {
-                "start": node.start,
-                "end": node.end,
-                "summary": node.summary if hasattr(node, "summary") else None,
-                "embedding": node.embedding if hasattr(node, "embedding") else None,
-                "leaves": [],
-            }
-            if parent_leaves:
-                parent_leaves.append(node_dict)
-            if hasattr(node, "leaves"):
-                for leaf in node.leaves:
-                    leaves = node_dict["leaves"]
-                    stack.append((leaf, leaves))
-        return node_dict
-
-
-# This function is used to split a string into chunks of a specified token limit using binary search
-def binary_split_raw_text_to_nodes(
-    completion_model: ConfiguredModel, text: str
-) -> List[Node]:
+def get_indexable_document(document: Optional[Document], document_path: str, document_type: str, completion_model: ConfiguredModel) -> Optional[Document]:
     """
-    Splits text into smaller chunks to not exceed the token limit.
+    Get indexable document
     """
-    nodes = []
-    stack = [(0, len(text))]
-    while stack:
-        start, end = stack.pop()
-        if (
-            get_token_count(completion_model, text[start:end])
-            < completion_model.soft_token_limit
-        ):
-            nodes.append(Node(completion_model, start, end, text[start:end]))
-        else:
-            mid = ((end - start) // 2) + start
-            stack.append((start, mid))
-            stack.append((mid, end))
-    return nodes
+    document_text = read_document(document_path, document_type)
+    if not document_text:
+        return None
 
+    document_text_bytes = document_text.encode("utf-8")
+    doc_hash = hashlib.sha256(document_text_bytes).hexdigest()
 
-def binary_split_nodes_to_chunks(
-    completion_model: ConfiguredModel, nodes: List[Node]
-) -> List[List[Node]]:
-    """
-    Split nodes into smaller chunks to not exceed the token limit.
-    """
-    chunks = []
-    stack = [(nodes, 0, len(nodes))]
-    while stack:
-        nodes, start, end = stack.pop()
-        if (
-            get_batch_token_count(
-                completion_model, [node.summary for node in nodes[start:end]]
-            )
-            < completion_model.soft_token_limit
-        ):
-            chunks.append(nodes[start:end])
-        else:
-            mid = (start + end) // 2
-            stack.append((nodes, deepcopy(start), mid))
-            stack.append((nodes, mid, deepcopy(end)))
-    return chunks
+    if document and document.id == doc_hash:
+        return None
 
+    doc_data = {
+        "id": doc_hash,
+        "path": document_path,
+        "document_type": document_type,
+        "num_chunks": document.num_chunks if document else 0,
+        "size": len(document_text_bytes),
+        "tokens": get_token_count(completion_model, document_text),
+    }
 
-def create_nodes(completion_model: ConfiguredModel, leaf_nodes: List[Node]) -> Node:
-    """
-    This function is used to iteratively create a nodes of our search tree
-    """
-    stack = [(leaf_nodes, 0, len(leaf_nodes))]
-    while stack:
-        leaf_nodes, start, end = stack.pop()
-        if (
-            get_batch_token_count(
-                completion_model,
-                [leaf_node.summary for leaf_node in leaf_nodes[start:end]],
-            )
-            > completion_model.soft_token_limit
-        ):
-            node_chunks: List[List[Node]] = binary_split_nodes_to_chunks(
-                completion_model, leaf_nodes[start:end]
-            )
-            for node_chunk in node_chunks:
-                stack.append((node_chunk, 0, len(node_chunk)))
-        else:
-            parent_node_summaries = "\n".join(
-                [node.summary for node in leaf_nodes[start:end]]
-            )
-            node = Node(
-                completion_model,
-                leaf_nodes[start].start,
-                leaf_nodes[end - 1].end,
-                parent_node_summaries,
-            )
-            node.set_leaves(leaf_nodes[start:end])
-            return node
-    return Node(completion_model, 0, 0)
+    if document:
+        document.update(doc_data)
+        return document
+    else:
+        return Document(doc_data)
 
-
-def create_text_search_tree(completion_model: ConfiguredModel, text: str) -> dict:
+def create_document_chunks(completion_model: ConfiguredModel, embedding_model: ConfiguredModel, indexable_document: Document):
     """
     This function is used to create a tree of responses from the OpenAI API
     """
-    if get_token_count(completion_model, text) < completion_model.soft_token_limit:
-        return Node(completion_model, 0, len(text), text).to_dict()
+    # key for each chunk embedding is {file_hash}_chunk_id
+    # then the key for each file embedding is {file_hash}
 
-    return create_nodes(
-        completion_model, binary_split_raw_text_to_nodes(completion_model, text)
-    ).to_dict()
+    # IMPORTANT NOTE:
+    # if we want to be able to track file histories and such, we should have the file hash be determined by git's native hasing
+    # run command: git hash-object {file_name}
+
+    # ("{hash}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"type": "file", "num_chunks": 5, "num_tokens": 100})
+    # ("{hash}_{chunk_id}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"summary": "chunk_summary", "start_pos": "0", "end_pos": "100", "num_tokens": 50})
+
+    text: Optional[str] = read_document(indexable_document.path, indexable_document.document_type)
+    if not text:
+        return []
+    
+    tokens = get_token_count(completion_model, text)
+    if tokens < completion_model.soft_token_limit:
+        summary: str = completion_model(
+            build_context_prompt(INDEX_PROMPT_PREFIX, text)
+        )
+        document_chunk = DocumentChunk(
+            {
+                "id": f"{indexable_document.id}_0",
+                "summary": summary,
+                "embedding": embedding_model(summary),
+                "start_pos": 0,
+                "end_pos": len(text),
+                "num_tokens": tokens,
+            }
+        )
+        return [document_chunk]
+
+    document_chunks = split_raw_text_to_vectors(completion_model, embedding_model, text, indexable_document.id)
+    document_chunk_tree = create_tree(document_chunks, completion_model)
+
+    return collect_leaves_with_embeddings(document_chunk_tree, "", embedding_model)
+
+def split_raw_text_to_vectors(
+    completion_model: ConfiguredModel, embedding_model: ConfiguredModel, text: str, document_hash: str
+) -> List[DocumentChunk]:
+    """
+    Splits text into smaller chunks to not exceed the token limit.
+    """
+    start = 0
+    end = len(text)
+    document_chunks: List[DocumentChunk] = []
+
+    while start < end:
+        # Use binary search to find the maximum chunk size in terms of tokens that fits within the token limit
+        text_chunk_size = binary_search_max_raw_text_chunk_size(completion_model, text, start, end)
+
+        # Split the chunk and add it as a new node
+        text_str = text[start:start+text_chunk_size]
+        summary: str = completion_model(
+            build_context_prompt(INDEX_PROMPT_PREFIX, text_str)
+        )
+        document_chunks.append(
+            DocumentChunk(
+                {
+                    "id": f"{document_hash}_{len(document_chunks)}",
+                    "summary": summary,
+                    "embedding": embedding_model(summary),
+                    "start_pos": start,
+                    "end_pos": start + text_chunk_size,
+                    "num_tokens": get_token_count(completion_model, text_str)
+                }
+            )
+        )
+
+        # Update start pointer to point to the start of the next chunk
+        start += text_chunk_size
+
+    return document_chunks
+
+
+def binary_search_max_raw_text_chunk_size(completion_model: ConfiguredModel, text: str, start: int, end: int) -> int:
+    """
+    Uses binary search to find the maximum chunk size in terms of tokens that fits within the token limit.
+    """
+    left = 0
+    right = end - start
+    while left < right:
+        mid = (left + right + 1) // 2
+        if get_token_count(completion_model, text[start:start+mid]) <= completion_model.soft_token_limit:
+            left = mid
+        else:
+            right = mid - 1
+    return left
+
+
+
+class Node:
+    def __init__(self, id, summary, children=None):
+        self.id = id
+        self.summary = summary
+        self.children: Union[Node, DocumentChunk] = children if children else []
+
+    def __repr__(self):
+        return f"Node(id={self.id}, summary={self.summary}, children={len(self.children)})"
+
+def create_tree(nodes: Union[Node, DocumentChunk], completion_model: ConfiguredModel) -> Node:
+    if not nodes:
+        return None
+
+    summary = " ".join(node.summary for node in nodes)
+    if get_token_count(completion_model, summary) <= completion_model.soft_token_limit:
+        summary = " ".join(node.summary for node in nodes)
+        node_id = f"parent_{nodes[0].id.split('_')[0]}"
+        return Node(node_id, summary, nodes)
+
+    mid = len(nodes) // 2
+    left_tree = create_tree(nodes[:mid], completion_model)
+    right_tree = create_tree(nodes[mid:], completion_model)
+
+    merged_summary = completion_model(
+            build_context_prompt(INDEX_PROMPT_PREFIX, f"{left_tree.summary} {right_tree.summary}")
+        )
+    
+    parent_id = f"parent_{left_tree.id.split('_')[1]}_{right_tree.id.split('_')[1]}"
+    parent_node = Node(parent_id, merged_summary, [left_tree, right_tree])
+
+    return parent_node
+
+def collect_leaves_with_embeddings(node: Union[Node, DocumentChunk], ancestor_summaries: str, embedding_model: ConfiguredModel) -> List[DocumentChunk]:
+    if isinstance(node, DocumentChunk):
+        leaf = node
+        leaf.embedding = embedding_model(f"{ancestor_summaries} {node.summary}")
+        return [leaf]
+
+    leaves = []
+    for child in node.children:
+        leaves.extend(collect_leaves_with_embeddings(child, f"{ancestor_summaries} {node.summary}", embedding_model))
+
+    return leaves
