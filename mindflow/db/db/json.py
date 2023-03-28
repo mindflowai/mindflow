@@ -67,9 +67,9 @@ class JsonDatabase(Database):
             objects.pop(object_id, None)
 
     def save(self, collection: str, value: dict):
-        objects = self.collections.get(collection, None)
-        if not objects:
-            return None
+        objects = self.collections.get(collection, {})
+        if objects == {}:
+            self.collections[collection] = objects
 
         object_id = value.get("id", None)
         if not object_id:
@@ -78,9 +78,9 @@ class JsonDatabase(Database):
         objects[object_id] = value
 
     def save_bulk(self, collection: str, values: List[dict]):
-        objects = self.collections.get(collection, None)
-        if not objects:
-            return None
+        objects = self.collections.get(collection, {})
+        if objects == {}:
+            self.collections[collection] = objects
 
         for value in values:
             object_id = value.get("id", None)
