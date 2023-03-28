@@ -1,3 +1,4 @@
+import time
 from typing import Optional, Union
 
 import openai
@@ -126,19 +127,25 @@ class ConfiguredModel(Callable):
         self,
         prompt: str,
         temperature: float = 0.0,
-        max_tokens: Optional[int] = None,
+        max_tokens: Optional[int] = 100,
     ) -> Union[str, ModelError]:
-        try:
-            client = anthropic.Client(self.api_key)
-            return client.completion(
-                prompt=prompt,
-                stop_sequences=[anthropic.HUMAN_PROMPT],
-                model=self.id,
-                max_tokens_to_sample=max_tokens,
-                temperature=temperature,
-            )
-        except ModelError as e:
-            return e
+        try_count = 0
+        while try_count < 5:
+            try:
+                client = anthropic.Client(self.api_key)
+                response = client.completion(
+                    prompt=prompt,
+                    stop_sequences=[],
+                    model=self.id,
+                    max_tokens_to_sample=max_tokens,
+                    temperature=temperature,
+                )["completion"]
+                return response
+            except Exception as e:
+                try_count += 1
+                if try_count == 5:
+                    raise e
+                time.sleep(1)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
         try:

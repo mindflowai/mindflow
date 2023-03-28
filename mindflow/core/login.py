@@ -1,6 +1,5 @@
 from mindflow.db.controller import DATABASE_CONTROLLER
 from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.objects.static_definition.service import ServiceConfigParameterKey
 
 
 def run_login():

@@ -17,6 +17,7 @@ class Collection(ExtendedEnum):
     CONFIGURATIONS = "configurations"
     DOCUMENT = "document"
     DOCUMENT_CHUNK = "document_chunk"
+    CONVERSATION = "conversation"
 
 
 class Database:

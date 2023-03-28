@@ -3,18 +3,23 @@
 """
 import sys
 
-from typing import Dict, Optional, Union
-from typing import List
-from typing import Tuple
+from typing import Dict, List, Union, Tuple
 
 import numpy as np
 
-from mindflow.db.objects.document import Document, DocumentChunk, get_document_id
+from mindflow.db.objects.document import (
+    Document,
+    DocumentChunk,
+    get_document_chunk_ids,
+    get_document_id,
+)
 from mindflow.db.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_all
 from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
+from mindflow.utils.prompt_builders import Role, build_prompt, create_message
+from mindflow.utils.prompts import QUERY_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count
 
 
@@ -26,36 +31,26 @@ def run_query(document_paths: List[str], query: str):
     completion_model = settings.mindflow_models.query.model
     embedding_model = settings.mindflow_models.embedding.model
 
-    query_embedding = np.array(embedding_model(query)).reshape(1, -1)
-
+    # Resolve all paths and get a mapping to their local paths
     resolved: Tuple[str, str] = resolve_all(document_paths)
     document_hash_to_path: Dict[str, str] = {
         get_document_id(document_path, document_type): document_path
         for document_path, document_type in resolved
     }
-    documents: List[Document] = [
-        document
-        for document in Document.load_bulk(list(document_hash_to_path.keys()))
-        if document is not None
-    ]
-    total_chunks = sum([document.num_chunks + 1 for document in documents])
 
-    document_chunk_ids = [None] * int(total_chunks)
-    j = 0
-    for document in documents:
-        for i in range(0, int(document.num_chunks) + 1):
-            document_chunk_ids[j] = f"{document.id}_{i}"
-            j += 1
-
-    top_document_chunks: List[DocumentChunk] = DocumentChunk.query(
-        vector=query_embedding, ids=document_chunk_ids
+    # Query vector DB for the top 100 document chunks
+    document_chunk_ids = get_document_chunk_ids(
+        Document.load_bulk(list(document_hash_to_path.keys()), return_none=False)
     )
-    path_top_document_chunks: List[Tuple[str, List[DocumentChunk]]] = []
-    for document_chunk in top_document_chunks:
-        document_hash = document_chunk.id.split("_")[0]
-        path_top_document_chunks.append(
-            (document_hash_to_path[document_hash], document_chunk)
-        )
+    top_document_chunks: List[DocumentChunk] = DocumentChunk.query(
+        vector=np.array(embedding_model(query)).reshape(1, -1), ids=document_chunk_ids
+    )
+
+    # Create a list of tuples of the form (path, DocumentChunk) to be used in select_content
+    document_selection_batch: List[Tuple[str, List[DocumentChunk]]] = [
+        (document_hash_to_path[document_chunk.id.split("_")[0]], document_chunk)
+        for document_chunk in top_document_chunks
+    ]
 
     if len(top_document_chunks) == 0:
         print(
@@ -63,32 +58,23 @@ def run_query(document_paths: List[str], query: str):
         )
         sys.exit(1)
 
+    # Select the top content that can fit in the prompt
     selected_content: str = select_content(
-        query, path_top_document_chunks, completion_model
+        query, document_selection_batch, completion_model
     )
-    messages = build_query_messages(
-        query,
-        selected_content,
+    response: Union[ModelError, str] = completion_model(
+        build_prompt(
+            [
+                create_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
+                create_message(Role.USER.value, f"{query}\n\n{selected_content}"),
+            ],
+            completion_model,
+        )
     )
-    response: Union[ModelError, str] = completion_model(messages)
     if isinstance(response, ModelError):
         return response.query_message
 
     return response
-
-
-def build_query_messages(query: str, content: str) -> List[Dict]:
-    """
-    This function is used to build the query messages for the prompt.
-    """
-    return [
-        {
-            "role": "system",
-            "content": "You are a helpful virtual assistant responding to a users query using your general knowledge and the text provided below.",
-        },
-        {"role": "user", "content": query},
-        {"role": "system", "content": content},
-    ]
 
 
 def select_content(
@@ -101,7 +87,6 @@ def select_content(
     """
 
     selected_content: str = ""
-
     for path, document_chunk in top_document_chunks:
         with open(path, "r", encoding="utf-8") as file:
             file.seek(document_chunk.start_pos)
@@ -109,7 +94,7 @@ def select_content(
                 int(document_chunk.end_pos) - int(document_chunk.start_pos)
             )
 
-            selected_content += formated_chunk(path, document_chunk, text)
+            selected_content += formatted_chunk(path, document_chunk, text)
 
             if (
                 get_token_count(completion_model, query + selected_content)
@@ -135,7 +120,7 @@ def select_content(
     return selected_content
 
 
-def formated_chunk(path: str, document_chunk: DocumentChunk, text: str) -> str:
+def formatted_chunk(path: str, document_chunk: DocumentChunk, text: str) -> str:
     return (
         "Path: "
         + path

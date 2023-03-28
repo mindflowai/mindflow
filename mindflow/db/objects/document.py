@@ -1,5 +1,5 @@
 import hashlib
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from mindflow.db.controller import DATABASE_CONTROLLER
@@ -83,3 +83,19 @@ def get_document_id(document_path: str, document_type: str) -> str:
     """
     text = read_document(document_path, document_type)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def get_document_chunk_ids(documents: Union[List[Document], Document]):
+    if isinstance(documents, Document):
+        documents = [documents]
+
+    ## Get total number of chunks and create a list of chunk ids
+    total_chunks = sum([document.num_chunks + 1 for document in documents])
+    document_chunk_ids = [None] * int(total_chunks)
+    j = 0
+    for document in documents:
+        for i in range(0, int(document.num_chunks) + 1):
+            document_chunk_ids[j] = f"{document.id}_{i}"
+            j += 1
+
+    return document_chunk_ids

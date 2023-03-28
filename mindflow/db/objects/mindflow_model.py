@@ -71,7 +71,7 @@ class ConfiguredMindFlowModel:
         if hasattr(configured_services.openai, ServiceConfigParameterKey.API_KEY.value):
             service = configured_services.openai
             model_id = self.defaults.get(ServiceID.OPENAI.value, None)
-        if hasattr(
+        elif hasattr(
             configured_services.anthropic, ServiceConfigParameterKey.API_KEY.value
         ):
             service = configured_services.anthropic

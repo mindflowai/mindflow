@@ -3,12 +3,11 @@
 """
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
-import os
+
 from typing import List, Optional, Tuple, Union
 
-import numpy as np
 from alive_progress import alive_bar
-from mindflow.db.controller import DATABASE_CONTROLLER
+import numpy as np
 
 from mindflow.db.objects.document import Document, DocumentChunk, get_document_id
 from mindflow.db.objects.document import read_document
@@ -19,7 +18,7 @@ from mindflow.utils.helpers import (
     print_total_size,
     print_total_tokens_and_ask_to_continue,
 )
-from mindflow.utils.prompt_builders import build_context_prompt
+from mindflow.utils.prompt_builders import Role, build_prompt, create_message
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count
 
@@ -28,9 +27,6 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
     """
     This function is used to generate an index and/or embeddings for files
     """
-
-    document_paths = [os.path.abspath(path) for path in document_paths]
-
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
@@ -69,11 +65,11 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
             ):
                 document_chunks = document_chunk_future.result()
 
+                document.num_chunks = len(document_chunks)
                 document.embedding = np.mean(
                     [document_chunk.embedding for document_chunk in document_chunks],
                     axis=0,
                 )
-                document.num_chunks = len(document_chunks)
                 DocumentChunk.save_bulk(document_chunks)
                 document.save()
 
@@ -162,7 +158,13 @@ def create_document_chunks(
     tokens = get_token_count(completion_model, text)
     if tokens < completion_model.soft_token_limit:
         summary: str = completion_model(
-            build_context_prompt(INDEX_PROMPT_PREFIX, text, completion_model.service)
+            build_prompt(
+                [
+                    create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                    create_message(Role.USER.value, text),
+                ],
+                completion_model,
+            )
         )
         document_chunk = DocumentChunk(
             {
@@ -206,7 +208,13 @@ def split_raw_text_to_vectors(
         # Split the chunk and add it as a new node
         text_str = text[start : start + text_chunk_size]
         summary: str = completion_model(
-            build_context_prompt(INDEX_PROMPT_PREFIX, text_st, completion_model.service)
+            build_prompt(
+                [
+                    create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                    create_message(Role.USER.value, text_str),
+                ],
+                completion_model,
+            )
         )
         document_chunks.append(
             DocumentChunk(
@@ -276,10 +284,14 @@ def create_tree(
     right_tree = create_tree(nodes[mid:], completion_model)
 
     merged_summary = completion_model(
-        build_context_prompt(
-            INDEX_PROMPT_PREFIX,
-            f"{left_tree.summary} {right_tree.summary}",
-            completion_model.service,
+        build_prompt(
+            [
+                create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                create_message(
+                    Role.USER.value, f"{left_tree.summary} {right_tree.summary}"
+                ),
+            ],
+            completion_model,
         )
     )
 

@@ -29,11 +29,16 @@ class BaseObject:
         return self(object_dict)
 
     @classmethod
-    def load_bulk(cls, ids: list) -> List:
+    def load_bulk(cls, ids: list, return_none=True) -> List:
         object_dict: List[Optional[dict]] = cls._database.load_bulk(
             cls._collection.value, ids
         )
-        return [cls(object) if object is not None else None for object in object_dict]
+        if return_none:
+            return [
+                cls(object) if object is not None else None for object in object_dict
+            ]
+        else:
+            return [cls(object) for object in object_dict if object is not None]
 
     @classmethod
     def delete_bulk(cls, ids: list):

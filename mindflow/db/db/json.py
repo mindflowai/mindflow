@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import Dict, List
+from typing import List
 from typing import Optional
 
 from mindflow.db.db.database import Database
