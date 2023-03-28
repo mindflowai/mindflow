@@ -145,7 +145,7 @@ class ConfiguredModel(Callable):
                 try_count += 1
                 if try_count == 5:
                     raise e
-                time.sleep(1)
+                time.sleep(5)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
         try:

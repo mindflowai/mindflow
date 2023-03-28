@@ -5,6 +5,7 @@ from mindflow.db.objects.conversation import Conversation
 from mindflow.db.objects.static_definition.conversation import ConversationID
 from mindflow.settings import Settings
 from mindflow.utils.errors import ModelError
+from mindflow.utils.helpers import get_text_within_xml
 
 from mindflow.utils.prompt_builders import (
     Role,
@@ -42,7 +43,7 @@ def run_code_generation(output_path: str, prompt: str):
     conversation.messages.append(
         create_message(
             Role.USER.value,
-            f"Generate code for '{output_path}' with the following prompt: '{prompt}'. Do NOT use any special characters or symbols, any additional information must be put in comments.",
+            f"Generate code for '{output_path}' with the following prompt: '{prompt}'. Do NOT use any special characters or symbols, any additional information must be put in comments. Please put the code within XML tags like <GEN></GEN>.",
         )
     )
     conversation.messages = prune_messages(conversation.messages, completion_model)
@@ -52,6 +53,8 @@ def run_code_generation(output_path: str, prompt: str):
     )
     if isinstance(response, ModelError):
         return response.message
+    
+    response = get_text_within_xml(response, "GEN")
 
     parse_and_write_file(response, output_path)
     conversation.total_tokens = estimate_tokens_from_messages(

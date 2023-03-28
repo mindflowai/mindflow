@@ -4,6 +4,7 @@ from mindflow.core.git.diff import run_diff
 from mindflow.settings import Settings
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
+from mindflow.utils.helpers import get_text_within_xml
 from mindflow.utils.prompt_builders import Role, build_prompt, create_message
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
@@ -36,9 +37,8 @@ def run_commit(
         if isinstance(response, ModelError):
             return response.commit_message
 
-        print(response)
         # Parse out everything between brackets {}
-        response = response.split("{")[1].split("}")[0]
+        response = get_text_within_xml(response, "COMMIT")
 
         # add co-authorship to commit message
         response += ": Co-authored-by: MindFlow <mf@mindflo.ai>"
