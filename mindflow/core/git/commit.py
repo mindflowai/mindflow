@@ -31,7 +31,7 @@ def run_commit(
             return response.commit_message
 
         # add co-authorship to commit message
-        response += "\n\nCo-authored-by: MindFlow <mf@mindflo.ai>"
+        response += ": Co-authored-by: MindFlow <mf@mindflo.ai>"
     else:
         response = message_overwrite
 
