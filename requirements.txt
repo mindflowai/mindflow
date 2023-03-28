@@ -2,6 +2,7 @@ alive-progress
 click
 numpy
 openai==0.27.0
+anthropic==0.2.3
 tiktoken==0.3.0; python_version >= '3.8'
 pytest
 scikit-learn

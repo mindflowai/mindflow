@@ -111,17 +111,22 @@ class ConfiguredModel(Callable):
         max_tokens: Optional[int] = None,
         stop: Optional[list] = None,
     ) -> Union[str, ModelError]:
-        try:
-            openai.api_key = self.api_key
-            return openai.ChatCompletion.create(
-                model=self.id,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stop=stop,
-            )["choices"][0]["message"]["content"]
-        except ModelError as e:
-            return e
+        try_count = 0
+        while try_count < 5:
+            try:
+                openai.api_key = self.api_key
+                return openai.ChatCompletion.create(
+                    model=self.id,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stop=stop,
+                )["choices"][0]["message"]["content"]
+            except Exception as e:
+                try_count += 1
+                if try_count == 5:
+                    raise e
+                time.sleep(5)
 
     def anthropic_chat_completion(
         self,
@@ -148,13 +153,18 @@ class ConfiguredModel(Callable):
                 time.sleep(5)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
-        try:
-            openai.api_key = self.api_key
-            return openai.Embedding.create(engine=self.id, input=text)["data"][0][
-                "embedding"
-            ]
-        except ModelError as e:
-            return e
+        try_count = 0
+        while try_count < 5:
+            try:
+                openai.api_key = self.api_key
+                return openai.Embedding.create(engine=self.id, input=text)["data"][0][
+                    "embedding"
+                ]
+            except Exception as e:
+                try_count += 1
+                if try_count == 5:
+                    raise e
+                time.sleep(5)
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:
