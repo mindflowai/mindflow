@@ -3,7 +3,7 @@
 """
 from typing import Tuple
 
-from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.cli.util import passthrough_command
 from mindflow.core.git.add import run_add
 
 

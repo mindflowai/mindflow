@@ -21,8 +21,8 @@ setup(
     # entry_points={"console_scripts": ["mf = mindflow.main:main"]},
     entry_points={
         "console_scripts": [
-            "mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
-            "mindflow = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
+            "mf = mindflow.cli.cli_main:mindflow_cli",
+            "mindflow = mindflow.cli.cli_main:mindflow_cli",
         ],
     },
     packages=find_packages(),
