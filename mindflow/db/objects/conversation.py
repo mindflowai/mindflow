@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
 from mindflow.db.db.database import Collection
 
 from mindflow.db.objects.base import BaseObject
@@ -17,4 +17,4 @@ class Conversation(BaseObject):
     total_tokens: int
 
     _collection = Collection.CONVERSATION
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = JSON_DATABASE

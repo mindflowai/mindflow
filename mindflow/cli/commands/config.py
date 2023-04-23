@@ -1,7 +1,7 @@
 import sys
 from typing import List
 import click
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
 from mindflow.db.objects.mindflow_model import (
     MindFlowModel,
     MindFlowModelConfig,
@@ -26,7 +26,7 @@ def config():
     if selected_config == "model":
         model_selection()
 
-    DATABASE_CONTROLLER.databases.json.save_file()
+    JSON_DATABASE.save_file()
 
 
 def model_selection():

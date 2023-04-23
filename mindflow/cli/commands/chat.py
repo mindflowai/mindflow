@@ -8,7 +8,7 @@ import os
 from mindflow.core.chat import run_chat
 from mindflow.core.index import run_index
 from mindflow.core.query import run_query
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
 from mindflow.db.objects.conversation import Conversation
 from mindflow.db.objects.static_definition.conversation import ConversationID
 
@@ -59,7 +59,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
         print(run_query(paths, prompt))
     else:
         print(run_chat(paths, prompt))
-        DATABASE_CONTROLLER.databases.json.save_file()
+        JSON_DATABASE.save_file()
 
 
 @click.group(help="Manage conversation histories.")

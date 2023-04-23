@@ -18,7 +18,8 @@ except ImportError:
     print("Upgrade to python v3.8 or higher for better results.")
     pass
 
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
+from mindflow.db.db.static import STATIC_DATABASE
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.service import ServiceConfig
@@ -45,7 +46,7 @@ class Model(BaseObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.MODEL
-    _database = DATABASE_CONTROLLER.databases.static
+    _database = STATIC_DATABASE
 
 
 class ModelConfig(BaseObject):
@@ -55,7 +56,7 @@ class ModelConfig(BaseObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.CONFIGURATIONS
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = JSON_DATABASE
 
 
 class ConfiguredModel(Callable):

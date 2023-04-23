@@ -4,6 +4,7 @@ import numpy as np
 
 import pinecone  # type: ignore
 from mindflow.db.db.database import Database
+from mindflow.settings import Settings
 
 
 def return_values_as_dict(values: List[dict]) -> dict:
@@ -12,15 +13,19 @@ def return_values_as_dict(values: List[dict]) -> dict:
 
 class PineconeDatabase(Database):
     def __init__(self):
-        pinecone.init(
-            api_key="dc297606-b324-4f89-9b98-d9156b2b98a5", environment="us-east-1-aws"
-        )
-        self.indexes = {
-            "document": pinecone.Index("document"),
-            "document_chunk": pinecone.Index("document"),
-        }
+        self.got_indexes = False
 
     def _get_index(self, collection: str) -> pinecone.Index:
+        if not self.got_indexes:
+            settings = Settings()
+            pinecone.init(
+                api_key=settings.services.pinecone.api_key, environment=settings.services.pinecone.environment
+            )
+            self.indexes = {
+                "document": pinecone.Index("document"),
+                "document_chunk": pinecone.Index("document"),
+            }
+            self.got_indexes = True
         if collection not in self.indexes:
             raise ValueError(f"Unknown collection: {collection}")
 
@@ -91,3 +96,5 @@ class PineconeDatabase(Database):
             include_metadata=include_metadata,
         )
         return [self._convert_pinecone_return(result) for result in results["matches"]]
+
+PINECONE_DATABASE = PineconeDatabase()

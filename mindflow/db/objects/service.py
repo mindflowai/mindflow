@@ -1,4 +1,5 @@
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
+from mindflow.db.db.static import STATIC_DATABASE
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.static_definition.service import ServiceID
@@ -11,7 +12,7 @@ class Service(BaseObject):
     api_url: str
 
     _collection: Collection = Collection.SERVICE
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = STATIC_DATABASE
 
 
 class ServiceConfig(BaseObject):
@@ -20,9 +21,10 @@ class ServiceConfig(BaseObject):
     id: str
     api_key: str
     api_secret: str
+    environment: str
 
     _collection: Collection = Collection.CONFIGURATIONS
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = JSON_DATABASE
 
 
 class ConfiguredService:
@@ -33,6 +35,7 @@ class ConfiguredService:
 
     api_key: str
     api_secret: str
+    environment: str
 
     def __init__(self, service_id: str):
         service = Service.load(service_id)
@@ -67,3 +70,11 @@ class ConfiguredServices:
                 ServiceID.ANTHROPIC.value
             )
         return self._services[ServiceID.ANTHROPIC.value]
+    
+    @property
+    def pinecone(self) -> ConfiguredService:
+        if ServiceID.PINECONE.value not in self._services:
+            self._services[ServiceID.PINECONE.value] = ConfiguredService(
+                ServiceID.PINECONE.value
+            )
+        return self._services[ServiceID.PINECONE.value]

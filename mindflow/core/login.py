@@ -1,24 +1,27 @@
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.cli.commands.config import select_option
+from mindflow.db.db.json import JSON_DATABASE
 from mindflow.db.objects.service import ServiceConfig
+from mindflow.db.objects.static_definition.service import ServiceConfigID
 
 
 def run_login():
-    api_choice = input("Choose API to configure: \n1. OpenAI\n2. Anthropic\n")
-    while api_choice not in ["1", "2"]:
-        api_choice = input("Invalid choice. Please choose 1 or 2: ")
+    service_ids = [
+        ServiceConfigID.OPENAI.value,
+        ServiceConfigID.ANTHROPIC.value,
+        ServiceConfigID.PINECONE.value,
+    ]
+    service_options = [ServiceConfig.load(service_id, False) for service_id in service_ids]
+    service_descriptions = ["OpenAI", "Anthropic", "Pinecone: (Vector DB)"]
+    service_config: ServiceConfig = select_option(
+        "Choose service to configure. Enter #",
+        service_options,
+        service_descriptions,
+    )
 
-    api_key = input("Enter API key: ")
-    service_config_id: str
-    if api_choice == "1":
-        service_config_id = "openai_config"
-    else:
-        service_config_id = "anthropic_config"
+    service_config.api_key = input("Enter API key: ")
+    if service_config.id == ServiceConfigID.PINECONE.value:
+        service_config.environment = input("Enter environment: ")
 
-    service_config = ServiceConfig.load(service_config_id)
-    if not service_config:
-        service_config = ServiceConfig(service_config_id)
-
-    service_config.api_key = api_key
     service_config.save()
 
-    DATABASE_CONTROLLER.databases.json.save_file()
+    JSON_DATABASE.save_file()

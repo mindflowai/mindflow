@@ -2,7 +2,6 @@
 `inspect` command
 """
 import json
-import os
 from typing import List, Optional, Tuple
 
 from mindflow.db.objects.document import (

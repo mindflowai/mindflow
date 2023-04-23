@@ -2,7 +2,7 @@ import hashlib
 from typing import List, Optional, Union
 
 import numpy as np
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.pinecone import PINECONE_DATABASE
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
@@ -24,7 +24,7 @@ class Document(BaseObject):
     tokens: int
 
     _collection = Collection.DOCUMENT
-    _database = DATABASE_CONTROLLER.databases.pinecone
+    _database = PINECONE_DATABASE
 
 
 class DocumentChunk(BaseObject):
@@ -41,7 +41,7 @@ class DocumentChunk(BaseObject):
     tokens = Optional[int]
 
     _collection = Collection.DOCUMENT_CHUNK
-    _database = DATABASE_CONTROLLER.databases.pinecone
+    _database = PINECONE_DATABASE
 
     @classmethod
     def query(

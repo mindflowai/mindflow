@@ -21,10 +21,12 @@ class BaseObject:
             self.id = id
 
     @classmethod
-    def load(self, id: str):
+    def load(self, id: str, return_none=True):
         object_dict: Optional[dict] = self._database.load(self._collection.value, id)
         if object_dict is None:
-            return None
+            if return_none:
+                return None
+            return self(id)
 
         return self(object_dict)
 

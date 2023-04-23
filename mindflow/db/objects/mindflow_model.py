@@ -1,7 +1,8 @@
 import sys
 from typing import Dict
 from typing import Optional
-from mindflow.db.controller import DATABASE_CONTROLLER
+from mindflow.db.db.json import JSON_DATABASE
+from mindflow.db.db.static import STATIC_DATABASE
 
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
@@ -23,7 +24,7 @@ class MindFlowModel(BaseObject):
     model: str
 
     _collection: Collection = Collection.MIND_FLOW_MODEL
-    _database = DATABASE_CONTROLLER.databases.static
+    _database = STATIC_DATABASE
 
 
 class MindFlowModelConfig(BaseObject):
@@ -33,7 +34,7 @@ class MindFlowModelConfig(BaseObject):
     model: str
 
     _collection: Collection = Collection.CONFIGURATIONS
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = JSON_DATABASE
 
 
 class ConfiguredMindFlowModel:
