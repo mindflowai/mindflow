@@ -10,7 +10,6 @@ from mindflow.settings import Settings
 def return_values_as_dict(values: List[dict]) -> dict:
     return {value["name"]: value["value"] for value in values}
 
-
 class PineconeDatabase(Database):
     def __init__(self):
         self.got_indexes = False
@@ -21,9 +20,13 @@ class PineconeDatabase(Database):
             pinecone.init(
                 api_key=settings.services.pinecone.api_key, environment=settings.services.pinecone.environment
             )
+            if "mindflow" not in pinecone.list_indexes():
+                print("Creating Pinecone index...")
+                pinecone.create_index("mindflow", dimension=1536)
+                
             self.indexes = {
-                "document": pinecone.Index("document"),
-                "document_chunk": pinecone.Index("document"),
+                "document": pinecone.Index("mindflow"),
+                "document_chunk": pinecone.Index("mindflow"),
             }
             self.got_indexes = True
         if collection not in self.indexes:

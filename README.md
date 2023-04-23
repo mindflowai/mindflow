@@ -19,10 +19,12 @@ The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the 
 
 ## Getting Started
 
-Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do so [here](https://openai.com/blog/openai-api).
+Pre-requisite: You'll need to create an [OpenAI](https://openai.com/blog/openai-api) account or request early access from [Anthropic](https://www.anthropic.com/earlyaccess).
 
 1. Run `pip install mindflow,` or you can clone this repo and run `pip install -e path/to/mindflow`.
-2. Run `mf login {OPENAI_API_KEY}`; you can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
+2. Run `mf login`; 
+    a. Register with OpenAI or Anthropic to use their models. You can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
+    b. Register with Pinecone to use their vector search engine. You can find your Pinecone API key and Environment [here](https://www.pinecone.io/start).
 3. Now, you're ready to start using MindFlow!
 
 ## Basic Usage
@@ -30,7 +32,7 @@ Pre-requisite: You'll need to create an OpenAI API account; you'll be able to do
 ### Configuration (Optional)
 Configure the model used for generating responses by running `mf config` and selecting either GPT 3.5 Turbo (default) or GPT 4. In order to use GPT 4, you'll need to have special access to the API. If you have access, you can run `mf config` and select GPT 4. If you don't have access, you'll get an error message. 
 - Sign up for GPT 4 access [here](https://openai.com/waitlist/gpt-4-api). 
-
+uest
 ### Chats
 There are multiple levels to using mindflow's chat feature.
 
