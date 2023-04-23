@@ -126,7 +126,9 @@ class ConfiguredModel(Callable):
             except Exception as e:
                 try_count += 1
                 if try_count == 5:
-                    raise e
+                    # Handle the error case here
+                    error_message = f"Error: {str(e)}"
+                    return ModelError(error_message)  # Return an instance of ModelError
                 time.sleep(5)
 
     def anthropic_chat_completion(
@@ -150,7 +152,9 @@ class ConfiguredModel(Callable):
             except Exception as e:
                 try_count += 1
                 if try_count == 5:
-                    raise e
+                    # Handle the error case here
+                    error_message = f"Error: {str(e)}"
+                    return ModelError(error_message)  # Return an instance of ModelError
                 time.sleep(5)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
@@ -164,7 +168,9 @@ class ConfiguredModel(Callable):
             except Exception as e:
                 try_count += 1
                 if try_count == 5:
-                    raise e
+                    # Handle the error case here
+                    error_message = f"Error: {str(e)}"
+                    return ModelError(error_message)  # Return an instance of ModelError
                 time.sleep(5)
 
     def __call__(self, prompt, *args, **kwargs):
