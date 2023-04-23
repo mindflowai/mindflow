@@ -15,5 +15,6 @@ class Static(Database):
             return MINDFLOW_MODEL_STATIC[object_key]
         else:
             raise ValueError(f"Unknown object collection: {collection}")
-        
+
+
 STATIC_DATABASE = Static()

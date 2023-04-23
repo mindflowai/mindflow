@@ -10,7 +10,9 @@ def run_login():
         ServiceConfigID.ANTHROPIC.value,
         ServiceConfigID.PINECONE.value,
     ]
-    service_options = [ServiceConfig.load(service_id, False) for service_id in service_ids]
+    service_options = [
+        ServiceConfig.load(service_id, False) for service_id in service_ids
+    ]
     service_descriptions = ["OpenAI", "Anthropic", "Pinecone: (Vector DB)"]
     service_config: ServiceConfig = select_option(
         "Choose service to configure. Enter #",

@@ -10,6 +10,7 @@ class ServiceID(ExtendedEnum):
     ANTHROPIC = "anthropic"
     PINECONE = "pinecone"
 
+
 class ServiceConfigID(ExtendedEnum):
     OPENAI = "openai_config"
     ANTHROPIC = "anthropic_config"
@@ -62,9 +63,11 @@ class ServiceDefaultIndexModel(ExtendedEnum):
     OPENAI = ModelID.GPT_3_5_TURBO.value
     ANTHROPIC = ModelID.CLAUDE_INSTANT_V1.value
 
+
 class ServiceDefaultQueryModel(ExtendedEnum):
     OPENAI = ModelID.GPT_3_5_TURBO.value
     ANTHROPIC = ModelID.CLAUDE_V1.value
+
 
 class ServiceDefaultEmbeddingModel(ExtendedEnum):
     OPENAI = ModelID.TEXT_EMBEDDING_ADA_002.value

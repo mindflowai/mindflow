@@ -70,7 +70,7 @@ class ConfiguredServices:
                 ServiceID.ANTHROPIC.value
             )
         return self._services[ServiceID.ANTHROPIC.value]
-    
+
     @property
     def pinecone(self) -> ConfiguredService:
         if ServiceID.PINECONE.value not in self._services:
