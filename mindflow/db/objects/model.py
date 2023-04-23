@@ -113,6 +113,7 @@ class ConfiguredModel(Callable):
         stop: Optional[list] = None,
     ) -> Union[str, ModelError]:
         try_count = 0
+        error_message = ""
         while try_count < 5:
             try:
                 openai.api_key = self.api_key
@@ -125,11 +126,10 @@ class ConfiguredModel(Callable):
                 )["choices"][0]["message"]["content"]
             except Exception as e:
                 try_count += 1
-                if try_count == 5:
-                    # Handle the error case here
-                    error_message = f"Error: {str(e)}"
-                    return ModelError(error_message)  # Return an instance of ModelError
+                error_message = f"Error: {str(e)}"
                 time.sleep(5)
+                
+        return ModelError(error_message)
 
     def anthropic_chat_completion(
         self,
@@ -138,6 +138,7 @@ class ConfiguredModel(Callable):
         max_tokens: Optional[int] = 100,
     ) -> Union[str, ModelError]:
         try_count = 0
+        error_message = ""
         while try_count < 5:
             try:
                 client = anthropic.Client(self.api_key)
@@ -151,14 +152,14 @@ class ConfiguredModel(Callable):
                 return response
             except Exception as e:
                 try_count += 1
-                if try_count == 5:
-                    # Handle the error case here
-                    error_message = f"Error: {str(e)}"
-                    return ModelError(error_message)  # Return an instance of ModelError
+                error_message = f"Error: {str(e)}"
                 time.sleep(5)
+                
+        return ModelError(error_message)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
         try_count = 0
+        error_message = ""
         while try_count < 5:
             try:
                 openai.api_key = self.api_key
@@ -167,11 +168,10 @@ class ConfiguredModel(Callable):
                 ]
             except Exception as e:
                 try_count += 1
-                if try_count == 5:
-                    # Handle the error case here
-                    error_message = f"Error: {str(e)}"
-                    return ModelError(error_message)  # Return an instance of ModelError
+                error_message = f"Error: {str(e)}"
                 time.sleep(5)
+
+        return ModelError(error_message)
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:
