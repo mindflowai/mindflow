@@ -4,6 +4,7 @@ from typing import Optional
 from mindflow.db.db.database import Store
 from mindflow.db.db.json import JsonDatabase
 from mindflow.db.db.static import Static
+from mindflow.db.db.pinecone import PineconeDatabase
 
 
 class Databases:
@@ -21,6 +22,13 @@ class Databases:
         if Store.JSON not in self._databases:
             self._databases[Store.JSON] = JsonDatabase()
         return self._databases[Store.JSON]
+
+    @property
+    def pinecone(self) -> JsonDatabase:
+        if Store.PINECONE not in self._databases:
+            self._databases[Store.PINECONE] = PineconeDatabase()
+
+        return self._databases[Store.PINECONE]
 
 
 class DatabaseController:

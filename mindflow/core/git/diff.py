@@ -12,7 +12,7 @@ from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
-from mindflow.utils.prompt_builders import build_context_prompt
+from mindflow.utils.prompt_builders import Role, build_prompt, create_message
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.diff_parser import parse_git_diff
@@ -46,7 +46,13 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         diff_response: Union[ModelError, str] = completion_model(
-            build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content)
+            build_prompt(
+                [
+                    create_message(Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX),
+                    create_message(Role.USER.value, content),
+                ],
+                completion_model,
+            )
         )
         if isinstance(diff_response, ModelError):
             return diff_response.diff_message
@@ -60,7 +66,13 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
                     content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
                 future: concurrent.futures.Future = executor.submit(
                     completion_model,
-                    build_context_prompt(GIT_DIFF_PROMPT_PREFIX, content),
+                    build_prompt(
+                        [
+                            create_message(Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX),
+                            create_message(Role.USER.value, content),
+                        ],
+                        completion_model,
+                    ),
                 )
                 futures.append(future)
 
@@ -78,9 +90,15 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     if detailed:
         return diff_summary
 
-    GIT_DIFF_SUMMARIZE_PROMPT = 'What is the higher level purpose of these changes? Keep it short and sweet, don\'t provide any useless or redudant information like "made changes to the code". Do NOT speak in generalities, be specific.'
+    GIT_DIFF_SUMMARIZE_PROMPT = 'What is the higher level purpose of these changes? Keep it short and sweet, don\'t provide any useless or redundant information like "made changes to the code". Do NOT speak in generalities, be specific.'
     summarized = completion_model(
-        build_context_prompt(GIT_DIFF_SUMMARIZE_PROMPT, diff_summary)
+        build_prompt(
+            [
+                create_message(Role.SYSTEM.value, GIT_DIFF_SUMMARIZE_PROMPT),
+                create_message(Role.USER.value, content),
+            ],
+            completion_model,
+        )
     )
     return summarized
 

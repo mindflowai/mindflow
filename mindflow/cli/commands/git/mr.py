@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import click
-from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.cli.util import passthrough_command
 from mindflow.core.git.mr import run_mr
 
 

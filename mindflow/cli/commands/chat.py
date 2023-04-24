@@ -8,7 +8,9 @@ import os
 from mindflow.core.chat import run_chat
 from mindflow.core.index import run_index
 from mindflow.core.query import run_query
-from mindflow.core.search.chat_agency import run_agent_query, Conversation
+from mindflow.db.db.json import JSON_DATABASE
+from mindflow.db.objects.conversation import Conversation
+from mindflow.db.objects.static_definition.conversation import ConversationID
 
 
 def _parse_chat_prompt_args(prompt_args: Tuple[str]):
@@ -36,7 +38,6 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
     prompt, paths = _parse_chat_prompt_args(prompt_args)
 
     # if paths:
-
     has_dirs = False
     for path in paths:
         if os.path.isdir(path):
@@ -57,7 +58,8 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
             click.echo("")
         print(run_query(paths, prompt))
     else:
-        print(run_agent_query(paths, prompt))
+        print(run_chat(paths, prompt))
+        JSON_DATABASE.save_file()
 
 
 @click.group(help="Manage conversation histories.")
@@ -67,13 +69,21 @@ def history():
 
 @history.command(help="View chat history stats.")
 def stats():
-    convo = Conversation(conversation_id=0)
-    print("Num messages:", len(convo.messages))
-    print("Total tokens:", convo.total_tokens)
+    conversation = Conversation.load(ConversationID.CHAT_0.value)
+    if conversation is None:
+        print("No conversation history found.")
+        return
+
+    print("Num messages:", len(conversation.messages))
+    print("Total tokens:", conversation.total_tokens)
 
 
 @history.command(help="Clear the chat history.")
 def clear():
-    convo = Conversation(conversation_id=0)
-    convo.clear()
-    convo.save()
+    conversation = Conversation.load(ConversationID.CHAT_0.value)
+    if conversation is None:
+        print("No conversation history found.")
+        return
+
+    conversation.messages = []
+    conversation.save()

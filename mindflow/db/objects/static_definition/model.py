@@ -11,6 +11,10 @@ class ModelID(ExtendedEnum):
     GPT_4_32K = "gpt-4-32k"
     GPT_4_32K_0314 = "gpt-4-32k-0314"
 
+    CLAUDE_V1 = "claude-v1"
+    CLAUDE_V1_2 = "claude-v1.2"
+    CLAUDE_INSTANT_V1 = "claude-instant-v1"
+
     TEXT_EMBEDDING_ADA_002 = "text-embedding-ada-002"
 
 
@@ -38,6 +42,10 @@ class ModelService(ExtendedEnum):
 
     TEXT_EMBEDDING_ADA_002 = "openai"
 
+    CLAUDE_V1 = "anthropic"
+    CLAUDE_V1_2 = "anthropic"
+    CLAUDE_INSTANT_V1 = "anthropic"
+
 
 class ModelConfigParameterKey(ExtendedEnum):
     SOFT_TOKEN_LIMIT = "soft_token_limit"
@@ -58,6 +66,10 @@ class ModelName(ExtendedEnum):
 
     TEXT_EMBEDDING_ADA_002 = "Text Embedding Ada 002"
 
+    CLAUDE_V1 = "Claude V1"
+    CLAUDE_V1_2 = "Claude V1.2"
+    CLAUDE_INSTANT_V1 = "Claude Instant V1"
+
 
 class ModelSoftTokenLimit(ExtendedEnum):
     GPT_3_5_TURBO = 500
@@ -69,6 +81,10 @@ class ModelSoftTokenLimit(ExtendedEnum):
     GPT_4_32K_0314 = 500
 
     TEXT_EMBEDDING_ADA_002 = 8191
+
+    CLAUDE_V1 = 500
+    CLAUDE_V1_2 = 500
+    CLAUDE_INSTANT_V1 = 500
 
 
 class ModelHardTokenLimit(ExtendedEnum):
@@ -82,6 +98,9 @@ class ModelHardTokenLimit(ExtendedEnum):
 
     TEXT_EMBEDDING_ADA_002 = 8191
 
+    CLAUDE_V1 = 9000
+    CLAUDE_INSTANT_V1 = 9000
+
 
 class ModelTokenCost(ExtendedEnum):
     GPT_3_5_TURBO = 0.002
@@ -92,11 +111,15 @@ class ModelTokenCost(ExtendedEnum):
     GPT_4_32K = 0.002
     GPT_4_32K_0314 = 0.002
 
+    CLAUDE_V1 = 2.90
+    CLAUDE_INSTANT_V1 = 0.43
+
     TEXT_EMBEDDING_ADA_002 = 0.0004
 
 
 class ModelTokenCostUnit(ExtendedEnum):
     THOUSAND = 1000
+    MILLION = 1_000_000
 
 
 class ModelDescription(ExtendedEnum):
@@ -108,12 +131,19 @@ class ModelDescription(ExtendedEnum):
     GPT_4_32K = f"GPT 4 32K: {str(ModelHardTokenLimit.GPT_4_32K.value)} token Limit. ${str(ModelTokenCost.GPT_4_32K.value)} per {str(ModelTokenCostUnit.THOUSAND.value)} tokens.     OpenAI's most powerful model. Longer outputs, more coherent, and more creative."
     GPT_4_32K_0314 = f"GPT 4 32K March 14th: {str(ModelHardTokenLimit.GPT_4_32K_0314.value)} token Limit. ${str(ModelTokenCost.GPT_4_32K_0314.value)} per {str(ModelTokenCostUnit.THOUSAND.value)} tokens.     OpenAI's most powerful model. Longer outputs, more coherent, and more creative."
 
+    CLAUDE_V1 = f"Claude V1: {str(ModelHardTokenLimit.CLAUDE_V1.value)} token Limit. ${str(ModelTokenCost.CLAUDE_V1.value)} per {str(ModelTokenCostUnit.MILLION.value)} tokens. Anthropic's largest and most powerful model"
+    CLAUDE_INSTANT_V1 = f"Claude Instant V1: {str(ModelHardTokenLimit.CLAUDE_INSTANT_V1.value)} token Limit. ${str(ModelTokenCost.CLAUDE_INSTANT_V1.value)} per {str(ModelTokenCostUnit.MILLION.value)} tokens. Anthropic's smaller, faster, and cheaper model."
+
     TEXT_EMBEDDING_ADA_002 = f"Text Embedding Ada 002: {str(ModelHardTokenLimit.TEXT_EMBEDDING_ADA_002)} token Limit. ${str(ModelTokenCost.TEXT_EMBEDDING_ADA_002)} per {str(ModelTokenCostUnit.THOUSAND)} tokens.   OpenAI's best advertised embedding model. Fast and cheap! Recommended for generating deep and shallow indexes"
 
 
 class ModelConfigDescription(ExtendedEnum):
-    GPT_3_5_TURBO = f"{ModelName.GPT_3_5_TURBO.value}: Fast, cheap, and powerful.    Token Limit: {str(ModelHardTokenLimit.GPT_3_5_TURBO.value)}."
-    GPT_4 = f"{ModelName.GPT_4.value}:         Most powerful model (slower). Token Limit: {str(ModelHardTokenLimit.GPT_4.value)}. Get access -> https://openai.com/waitlist/gpt-4-api."
+    GPT_3_5_TURBO = f"{ModelName.GPT_3_5_TURBO.value}:       OpenAI's Fast, cheap, and still powerful model.       Token Limit: {str(ModelHardTokenLimit.GPT_3_5_TURBO.value)}."
+    GPT_4 = f"{ModelName.GPT_4.value}:               OpenAI's most powerful model (slower + expensive).    Token Limit: {str(ModelHardTokenLimit.GPT_4.value)}. Get access -> https://openai.com/waitlist/gpt-4-api."
+    TEXT_EMBEDDING_ADA_002 = f"{ModelName.TEXT_EMBEDDING_ADA_002.value}:   OpenAI's best and cheapest embedding model.    Token Limit: {str(ModelHardTokenLimit.TEXT_EMBEDDING_ADA_002.value)}"
+
+    CLAUDE_INSTANT_V1 = f"{ModelName.CLAUDE_INSTANT_V1.value}:   Anthropic's Fast, cheap, and still powerful model.    Token Limit: {str(ModelHardTokenLimit.CLAUDE_INSTANT_V1.value)}. Get access -> https://www.anthropic.com/earlyaccess"
+    CLAUDE_V1 = f"{ModelName.CLAUDE_V1.value}:           Anthropic's most powerful model (slower + expensive). Token Limit: {str(ModelHardTokenLimit.CLAUDE_V1.value)}. Get access -> https://www.anthropic.com/earlyaccess"
 
 
 ## Service Models (By Type)
@@ -125,6 +155,11 @@ class ModelTextCompletionOpenAI(ExtendedEnum):
     GPT_4_0314 = ModelID.GPT_4_0314.value
     GPT_4_32K = ModelID.GPT_4_32K.value
     GPT_4_32K_0314 = ModelID.GPT_4_32K_0314.value
+
+
+class ModelTextCompletionAnthropic(ExtendedEnum):
+    CLAUDE_V1 = ModelID.CLAUDE_V1.value
+    CLAUDE_INSTANT_V1 = ModelID.CLAUDE_INSTANT_V1.value
 
 
 class ModelTextEmbeddingOpenAI(ExtendedEnum):
@@ -142,6 +177,11 @@ class ModelOpenAI(ExtendedEnum):
     GPT_4_32K_0314 = ModelID.GPT_4_32K_0314.value
 
     TEXT_EMBEDDING_ADA_002 = ModelID.TEXT_EMBEDDING_ADA_002.value
+
+
+class ModelAnthropic(ExtendedEnum):
+    CLAUDE_V1 = ModelID.CLAUDE_V1.value
+    CLAUDE_INSTANT_V1 = ModelID.CLAUDE_INSTANT_V1.value
 
 
 MODEL_STATIC: dict = {
@@ -176,6 +216,28 @@ MODEL_STATIC: dict = {
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.GPT_4.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
         ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.GPT_4.value,
+    },
+    ModelID.CLAUDE_V1.value: {
+        ModelParameterKey.ID.value: ModelID.CLAUDE_V1.value,
+        ModelParameterKey.NAME.value: ModelName.CLAUDE_V1.value,
+        ModelParameterKey.SERVICE.value: ModelService.CLAUDE_V1.value,
+        ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
+        ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.CLAUDE_V1.value,
+        ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.CLAUDE_V1.value,
+        ModelParameterKey.TOKEN_COST.value: ModelTokenCost.CLAUDE_V1.value,
+        ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.MILLION.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.CLAUDE_V1.value,
+    },
+    ModelID.CLAUDE_INSTANT_V1.value: {
+        ModelParameterKey.ID.value: ModelID.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.NAME.value: ModelName.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.SERVICE.value: ModelService.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.MODEL_TYPE.value: ModelType.TEXT_COMPLETION.value,
+        ModelParameterKey.SOFT_TOKEN_LIMIT.value: ModelSoftTokenLimit.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.TOKEN_COST.value: ModelTokenCost.CLAUDE_INSTANT_V1.value,
+        ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.MILLION.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.CLAUDE_INSTANT_V1.value,
     },
     ModelID.GPT_4_0314.value: {
         ModelParameterKey.ID.value: ModelID.GPT_4_0314.value,
@@ -216,6 +278,7 @@ MODEL_STATIC: dict = {
         ModelParameterKey.HARD_TOKEN_LIMIT.value: ModelHardTokenLimit.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.TOKEN_COST.value: ModelTokenCost.TEXT_EMBEDDING_ADA_002.value,
         ModelParameterKey.TOKEN_COST_UNIT.value: ModelTokenCostUnit.THOUSAND.value,
+        ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.TEXT_EMBEDDING_ADA_002.value,
     },
 }
 

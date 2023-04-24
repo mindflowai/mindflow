@@ -7,6 +7,7 @@ class MindFlowModelParameterKey(ExtendedEnum):
     ID = "id"
     NAME = "name"
     DEFAULTS = "defaults"
+    DESCRIPTION = "description"
 
 
 class MindFlowModelID(ExtendedEnum):
@@ -40,8 +41,9 @@ class MindFlowModelType(ExtendedEnum):
 
 
 class MindFlowModelDescription(ExtendedEnum):
-    QUERY = f"{MindFlowModelName.QUERY}:    Used to generate final response from query."
-    INDEX = f"{MindFlowModelName.INDEX}:    Used to generate deep index from query. (Warning! Expensive and slow!)"
+    QUERY = f"{MindFlowModelName.QUERY}:    Used to respond to chat, queries, and git functionality."
+    INDEX = f"{MindFlowModelName.INDEX}:    Used to generate index summaries used for search."
+    EMBEDDING = f"{MindFlowModelName.EMBEDDING}:    Used to generate embeddings for text used in search."
 
 
 MINDFLOW_MODEL_STATIC = {
@@ -49,16 +51,19 @@ MINDFLOW_MODEL_STATIC = {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.QUERY.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.QUERY.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.QUERY.value,
+        MindFlowModelParameterKey.DESCRIPTION.value: MindFlowModelDescription.QUERY.value,
     },
     MindFlowModelID.INDEX.value: {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.INDEX.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.INDEX.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.INDEX.value,
+        MindFlowModelParameterKey.DESCRIPTION.value: MindFlowModelDescription.INDEX.value,
     },
     MindFlowModelID.EMBEDDING.value: {
         MindFlowModelParameterKey.ID.value: MindFlowModelID.EMBEDDING.value,
         MindFlowModelParameterKey.NAME.value: MindFlowModelName.EMBEDDING.value,
         MindFlowModelParameterKey.DEFAULTS.value: MindFlowModelDefaults.EMBEDDING.value,
+        MindFlowModelParameterKey.DESCRIPTION.value: MindFlowModelDescription.EMBEDDING.value,
     },
 }
 

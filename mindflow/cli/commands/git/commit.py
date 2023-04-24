@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 
 import click
 
-from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.cli.util import passthrough_command
 from mindflow.core.git.commit import run_commit
 
 

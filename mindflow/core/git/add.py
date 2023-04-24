@@ -1,4 +1,3 @@
-import subprocess
 from typing import Tuple
 
 from mindflow.utils.execute import execute_no_trace

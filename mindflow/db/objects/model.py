@@ -1,19 +1,18 @@
+import time
 from typing import Optional, Union
 
 import openai
+import anthropic
+
 import numpy as np
 from traitlets import Callable
 
-try:
-    import tiktoken
-except ImportError:
-    print(
-        "tiktoken not not available in python<=v3.8. Estimation of tokens will be less precise, which may impact performance and quality of responses."
-    )
-    print("Upgrade to python v3.8 or higher for better results.")
-    pass
+from mindflow.db.objects.static_definition.model_type import ModelType
 
-from mindflow.db.controller import DATABASE_CONTROLLER
+import tiktoken
+
+from mindflow.db.db.json import JSON_DATABASE
+from mindflow.db.db.static import STATIC_DATABASE
 from mindflow.db.db.database import Collection
 from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.service import ServiceConfig
@@ -40,7 +39,7 @@ class Model(BaseObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.MODEL
-    _database = DATABASE_CONTROLLER.databases.static
+    _database = STATIC_DATABASE
 
 
 class ModelConfig(BaseObject):
@@ -50,7 +49,7 @@ class ModelConfig(BaseObject):
     soft_token_limit: int
 
     _collection: Collection = Collection.CONFIGURATIONS
-    _database = DATABASE_CONTROLLER.databases.json
+    _database = JSON_DATABASE
 
 
 class ConfiguredModel(Callable):
@@ -59,10 +58,7 @@ class ConfiguredModel(Callable):
     service: str
     model_type: str
 
-    try:
-        tokenizer: tiktoken.Encoding
-    except NameError:
-        pass
+    tokenizer: tiktoken.Encoding
 
     hard_token_limit: int
     token_cost: int
@@ -106,36 +102,75 @@ class ConfiguredModel(Callable):
         max_tokens: Optional[int] = None,
         stop: Optional[list] = None,
     ) -> Union[str, ModelError]:
-        try:
-            openai.api_key = self.api_key
-            return openai.ChatCompletion.create(
-                model=self.id,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stop=stop,
-            )["choices"][0]["message"]["content"]
-        except ModelError as e:
-            return e
+        try_count = 0
+        error_message = ""
+        while try_count < 5:
+            try:
+                openai.api_key = self.api_key
+                return openai.ChatCompletion.create(
+                    model=self.id,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stop=stop,
+                )["choices"][0]["message"]["content"]
+            except Exception as e:
+                try_count += 1
+                error_message = f"Error: {str(e)}"
+                time.sleep(5)
+
+        return ModelError(error_message)
+
+    def anthropic_chat_completion(
+        self,
+        prompt: str,
+        temperature: float = 0.0,
+        max_tokens: Optional[int] = 100,
+    ) -> Union[str, ModelError]:
+        try_count = 0
+        error_message = ""
+        while try_count < 5:
+            try:
+                client = anthropic.Client(self.api_key)
+                response = client.completion(
+                    prompt=prompt,
+                    stop_sequences=[],
+                    model=self.id,
+                    max_tokens_to_sample=max_tokens,
+                    temperature=temperature,
+                )["completion"]
+                return response
+            except Exception as e:
+                try_count += 1
+                error_message = f"Error: {str(e)}"
+                time.sleep(5)
+
+        return ModelError(error_message)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
-        try:
-            openai.api_key = self.api_key
-            return openai.Embedding.create(engine=self.id, input=text)["data"][0][
-                "embedding"
-            ]
-        except ModelError as e:
-            return e
+        try_count = 0
+        error_message = ""
+        while try_count < 5:
+            try:
+                openai.api_key = self.api_key
+                return openai.Embedding.create(engine=self.id, input=text)["data"][0][
+                    "embedding"
+                ]
+            except Exception as e:
+                try_count += 1
+                error_message = f"Error: {str(e)}"
+                time.sleep(5)
+
+        return ModelError(error_message)
 
     def __call__(self, prompt, *args, **kwargs):
         if self.service == ServiceID.OPENAI.value:
-            if self.id in [
-                ModelID.GPT_3_5_TURBO.value,
-                ModelID.GPT_3_5_TURBO_0301.value,
-                ModelID.GPT_4.value,
-            ]:
+            if self.model_type == ModelType.TEXT_COMPLETION.value:
                 return self.openai_chat_completion(prompt, *args, **kwargs)
             else:
                 return self.openai_embedding(prompt, *args, **kwargs)
+        elif self.service == ServiceID.ANTHROPIC.value:
+            if self.model_type == ModelType.TEXT_COMPLETION.value:
+                return self.anthropic_chat_completion(prompt, *args, **kwargs)
         else:
             raise NotImplementedError(f"Service {self.service} not implemented.")

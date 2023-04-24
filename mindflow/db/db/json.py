@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import Dict, List
+from typing import List
 from typing import Optional
 
 from mindflow.db.db.database import Database
@@ -93,5 +93,5 @@ class JsonDatabase(Database):
         with open(JSON_DATABASE_PATH, "w", encoding="utf-8") as json_file:
             json.dump(self.collections, json_file, indent=4)
 
-    def __del__(self):
-        self.save_file()
+
+JSON_DATABASE = JsonDatabase()

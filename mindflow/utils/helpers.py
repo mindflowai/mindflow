@@ -1,11 +1,11 @@
 import sys
 from typing import List
 
-from mindflow.db.objects.document import DocumentReference
+from mindflow.db.objects.document import Document
 from mindflow.db.objects.model import ConfiguredModel
 
 
-def print_total_size(document_references: List[DocumentReference]):
+def print_total_size(document_references: List[Document]):
     """
     Print total size of documents
     """
@@ -16,16 +16,14 @@ def print_total_size(document_references: List[DocumentReference]):
 
 
 def print_total_tokens_and_ask_to_continue(
-    document_references: List[DocumentReference],
+    documents: List[Document],
     completion_model: ConfiguredModel,
     usd_threshold: float = 0.5,
 ):
     """
     Print total tokens of documents
     """
-    total_tokens = sum(
-        [document_reference.tokens for document_reference in document_references]
-    )
+    total_tokens = sum([document.tokens for document in documents])
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (
         total_tokens / float(completion_model.token_cost_unit)
@@ -38,3 +36,14 @@ def print_total_tokens_and_ask_to_continue(
                 sys.exit(0)
             elif user_input.lower() in ["yes", "y"]:
                 break
+
+
+def get_text_within_xml(text: str, tag: str) -> str:
+    """
+    Get xml from text
+    """
+    start_tag = f"<{tag}>"
+    end_tag = f"</{tag}>"
+    start_index = text.index(start_tag) + len(start_tag)
+    end_index = text.index(end_tag)
+    return text[start_index:end_index]

@@ -4,7 +4,7 @@
 from typing import Tuple
 import click
 
-from mindflow.cli.new_click_cli.util import passthrough_command
+from mindflow.cli.util import passthrough_command
 from mindflow.core.git.diff import run_diff
 
 

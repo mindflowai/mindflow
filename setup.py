@@ -15,14 +15,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name="mindflow",
-    python_requires=">=3.7.1",
+    python_requires=">=3.8",
     version=version,
     py_modules=["mindflow"],
     # entry_points={"console_scripts": ["mf = mindflow.main:main"]},
     entry_points={
         "console_scripts": [
-            "mf = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
-            "mindflow = mindflow.cli.new_click_cli.cli_main:mindflow_cli",
+            "mf = mindflow.cli.cli_main:mindflow_cli",
+            "mindflow = mindflow.cli.cli_main:mindflow_cli",
         ],
     },
     packages=find_packages(),
