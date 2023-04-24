@@ -22,9 +22,9 @@ The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the 
 Pre-requisite: You'll need to create an [OpenAI](https://openai.com/blog/openai-api) account or request early access from [Anthropic](https://www.anthropic.com/earlyaccess).
 
 1. Run `pip install mindflow,` or you can clone this repo and run `pip install -e path/to/mindflow`.
-2. Run `mf login`; 
-    a. Register with OpenAI or Anthropic to use their models. You can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
-    b. Register with Pinecone to use their vector search engine. You can find your Pinecone API key and Environment [here](https://www.pinecone.io/start).
+2. Run `mf login`:
+    - Register with OpenAI or Anthropic to use their models. You can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
+    - Register with Pinecone to use their vector search engine. You can find your Pinecone API key and Environment [here](https://www.pinecone.io/start).
 3. Now, you're ready to start using MindFlow!
 
 ## Basic Usage
