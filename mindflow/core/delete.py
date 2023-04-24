@@ -19,7 +19,11 @@ def run_delete(document_paths: List[str]):
     resolved: List[Tuple[str, str]] = resolve_all(document_paths)
 
     document_ids = [
-        get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+        document_id
+        for document_id in [
+            get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+        ]
+        if document_id is not None
     ]
     documents: List[Document] = Document.load_bulk(document_ids, return_none=False)
     if len(documents) == 0:

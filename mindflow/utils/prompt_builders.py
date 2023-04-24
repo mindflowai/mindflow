@@ -16,7 +16,7 @@ class Role(Enum):
     ASSISTANT = "assistant"
 
 
-def create_message(role: Union[str, Role], prompt: str) -> Dict[str, str]:
+def create_message(role: str, prompt: str) -> Dict[str, str]:
     return {"role": role, "content": prompt}
 
 

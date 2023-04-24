@@ -9,14 +9,7 @@ from traitlets import Callable
 
 from mindflow.db.objects.static_definition.model_type import ModelType
 
-try:
-    import tiktoken
-except ImportError:
-    print(
-        "tiktoken not not available in python<=v3.8. Estimation of tokens will be less precise, which may impact performance and quality of responses."
-    )
-    print("Upgrade to python v3.8 or higher for better results.")
-    pass
+import tiktoken
 
 from mindflow.db.db.json import JSON_DATABASE
 from mindflow.db.db.static import STATIC_DATABASE
@@ -65,10 +58,7 @@ class ConfiguredModel(Callable):
     service: str
     model_type: str
 
-    try:
-        tokenizer: tiktoken.Encoding
-    except NameError:
-        pass
+    tokenizer: tiktoken.Encoding
 
     hard_token_limit: int
     token_cost: int
@@ -128,7 +118,7 @@ class ConfiguredModel(Callable):
                 try_count += 1
                 error_message = f"Error: {str(e)}"
                 time.sleep(5)
-                
+
         return ModelError(error_message)
 
     def anthropic_chat_completion(
@@ -154,7 +144,7 @@ class ConfiguredModel(Callable):
                 try_count += 1
                 error_message = f"Error: {str(e)}"
                 time.sleep(5)
-                
+
         return ModelError(error_message)
 
     def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:

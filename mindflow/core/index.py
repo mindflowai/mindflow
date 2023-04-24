@@ -4,7 +4,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, TypeVar, Iterable
 
 from alive_progress import alive_bar
 import numpy as np
@@ -77,13 +77,17 @@ def run_index(document_paths: List[str], refresh: bool, verbose: bool = True) ->
 
 
 def get_indexable_documents(
-    resolved: Tuple[str, str], completion_model: ConfiguredModel
+    resolved: List[Tuple[str, str]], completion_model: ConfiguredModel
 ) -> List[Document]:
     """
     Get indexable documents
     """
     document_ids = [
-        get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+        document_id
+        for document_id in [
+            get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+        ]
+        if document_id is not None
     ]
     documents = Document.load_bulk(document_ids)
     indexable_documents = []
@@ -115,20 +119,16 @@ def get_indexable_document(
     if document and document.id == doc_hash:
         return None
 
-    doc_data = {
-        "id": doc_hash,
-        "path": document_path,
-        "document_type": document_type,
-        "num_chunks": document.num_chunks if document else 0,
-        "size": len(document_text_bytes),
-        "tokens": get_token_count(completion_model, document_text),
-    }
-
-    if document:
-        document.update(doc_data)
-        return document
-    else:
-        return Document(doc_data)
+    return Document(
+        {
+            "id": doc_hash,
+            "path": document_path,
+            "document_type": document_type,
+            "num_chunks": document.num_chunks if document else 0,
+            "size": len(document_text_bytes),
+            "tokens": get_token_count(completion_model, document_text),
+        }
+    )
 
 
 def create_document_chunks(
@@ -178,7 +178,7 @@ def create_document_chunks(
         )
         return [document_chunk]
 
-    document_chunks = split_raw_text_to_vectors(
+    document_chunks: List[DocumentChunk] = split_raw_text_to_vectors(
         completion_model, embedding_model, text, indexable_document.id
     )
     document_chunk_tree = create_tree(document_chunks, completion_model)
@@ -259,7 +259,7 @@ class Node:
     def __init__(self, id, summary, children=None):
         self.id = id
         self.summary = summary
-        self.children: Union[Node, DocumentChunk] = children if children else []
+        self.children: List[T] = children if children else []
 
     def __repr__(self):
         return (
@@ -267,12 +267,10 @@ class Node:
         )
 
 
-def create_tree(
-    nodes: Union[Node, DocumentChunk], completion_model: ConfiguredModel
-) -> Node:
-    if not nodes:
-        return None
+T = TypeVar("T", Node, DocumentChunk)
 
+
+def create_tree(nodes: List[T], completion_model: ConfiguredModel) -> Node:
     summary = " ".join(node.summary for node in nodes)
     if get_token_count(completion_model, summary) <= completion_model.soft_token_limit:
         summary = " ".join(node.summary for node in nodes)
@@ -302,7 +300,7 @@ def create_tree(
 
 
 def collect_leaves_with_embeddings(
-    node: Union[Node, DocumentChunk],
+    node: T,
     ancestor_summaries: str,
     embedding_model: ConfiguredModel,
 ) -> List[DocumentChunk]:

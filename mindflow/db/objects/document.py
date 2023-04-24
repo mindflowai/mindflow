@@ -19,7 +19,7 @@ class Document(BaseObject):
     embedding: Optional[np.ndarray]
     path: str
     document_type: str
-    num_chunks: Optional[int]
+    num_chunks: int
     size: int
     tokens: int
 
@@ -77,11 +77,13 @@ def read_document(document_path: str, document_type: str) -> Optional[str]:
     return None
 
 
-def get_document_id(document_path: str, document_type: str) -> str:
+def get_document_id(document_path: str, document_type: str) -> Optional[str]:
     """
     This function is used to generate a document id.
     """
     text = read_document(document_path, document_type)
+    if text is None:
+        return None
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -91,11 +93,11 @@ def get_document_chunk_ids(documents: Union[List[Document], Document]):
 
     ## Get total number of chunks and create a list of chunk ids
     total_chunks = sum([document.num_chunks + 1 for document in documents])
-    document_chunk_ids = [None] * int(total_chunks)
+    document_chunk_ids = [""] * int(total_chunks)
     j = 0
     for document in documents:
         for i in range(0, int(document.num_chunks) + 1):
-            document_chunk_ids[j] = f"{document.id}_{i}"
+            document_chunk_ids[j] = f"{document.id}_{str(i)}"
             j += 1
 
     return document_chunk_ids

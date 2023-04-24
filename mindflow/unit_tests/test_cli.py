@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 
 import mindflow
-from mindflow.cli.new_click_cli.cli_main import mindflow_cli
+from mindflow.cli.cli_main import mindflow_cli
 
 
 def test_version():

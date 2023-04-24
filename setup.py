@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="mindflow",
-    python_requires=">=3.7.1",
+    python_requires=">=3.8",
     version=version,
     py_modules=["mindflow"],
     # entry_points={"console_scripts": ["mf = mindflow.main:main"]},

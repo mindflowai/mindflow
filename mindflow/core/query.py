@@ -32,11 +32,12 @@ def run_query(document_paths: List[str], query: str):
     embedding_model = settings.mindflow_models.embedding.model
 
     # Resolve all paths and get a mapping to their local paths
-    resolved: Tuple[str, str] = resolve_all(document_paths)
-    document_hash_to_path: Dict[str, str] = {
-        get_document_id(document_path, document_type): document_path
-        for document_path, document_type in resolved
-    }
+    resolved: List[Tuple[str, str]] = resolve_all(document_paths)
+    document_hash_to_path: Dict[str, str] = {}
+    for document_path, document_type in resolved:
+        document_id = get_document_id(document_path, document_type)
+        if document_id is not None:
+            document_hash_to_path[document_id] = document_path
 
     # Query vector DB for the top 100 document chunks
     document_chunk_ids = get_document_chunk_ids(
@@ -47,7 +48,7 @@ def run_query(document_paths: List[str], query: str):
     )
 
     # Create a list of tuples of the form (path, DocumentChunk) to be used in select_content
-    document_selection_batch: List[Tuple[str, List[DocumentChunk]]] = [
+    document_selection_batch: List[Tuple[str, DocumentChunk]] = [
         (document_hash_to_path[document_chunk.id.split("_")[0]], document_chunk)
         for document_chunk in top_document_chunks
     ]

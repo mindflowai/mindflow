@@ -3,7 +3,8 @@ click
 numpy
 openai==0.27.0
 anthropic==0.2.3
-tiktoken==0.3.0; python_version >= '3.8'
+tiktoken==0.3.0
+pinecone-client==2.2.1
 pytest
 scikit-learn
 tqdm
