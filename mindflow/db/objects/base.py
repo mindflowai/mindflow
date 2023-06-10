@@ -1,7 +1,8 @@
 from typing import List, TypeVar, Optional, Union
 from mindflow.db.db.database import Collection, Database
 
-T_BaseObject = TypeVar('T_BaseObject', bound='BaseObject')
+T_BaseObject = TypeVar("T_BaseObject", bound="BaseObject")
+
 
 class BaseObject:
     id: str
