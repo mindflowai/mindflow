@@ -18,7 +18,6 @@ def run_inspect(document_paths: List[str]) -> str:
     This function is used to inspect your MindFlow index.
     """
     resolved: List[Tuple[str, str]] = resolve_all(document_paths)
-
     document_ids = [
         document_id
         for document_id in [
@@ -30,10 +29,10 @@ def run_inspect(document_paths: List[str]) -> str:
         Document.load_bulk(document_ids, return_none=False)
     )
 
-    if len(document_chunk_ids) == 0:
+    if not document_chunk_ids:
         return "No documents to inspect"
 
-    document_chunks: List[Optional[DocumentChunk]] = DocumentChunk.load_bulk(
+    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk(
         document_chunk_ids, return_none=False
     )
 
@@ -53,5 +52,4 @@ def run_inspect(document_paths: List[str]) -> str:
 
     if inspect_output != "null":
         return inspect_output
-    else:
-        return "No documents to inspect"
+    return "No documents to inspect"

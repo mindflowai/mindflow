@@ -1,5 +1,5 @@
 import subprocess
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 from mindflow.core.git.pr import create_title_and_body
 from mindflow.utils.command_parse import get_flag_value
@@ -21,12 +21,18 @@ def run_mr(
         )
 
     if not title or not description:
-        tital_description_tuple = create_title_and_body(base_branch, title, description)
+        title, description = create_title_and_body(base_branch, title, description) or (
+            None,
+            None,
+        )
 
-    if not tital_description_tuple:
+    if not title or not description:
         return
 
-    title, description = tital_description_tuple
-
-    command: List[str] = ["glab", "mr", "create"] + list(args) + ["--title", title, "--description", description]  # type: ignore
-    print(execute_no_trace(command))
+    print(
+        execute_no_trace(
+            ["glab", "mr", "create"]
+            + list(args)
+            + ["--title", title, "--description", description]
+        )
+    )

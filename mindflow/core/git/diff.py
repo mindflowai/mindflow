@@ -24,18 +24,16 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     """
     This function is used to generate a git diff response by feeding git diff to gpt.
     """
-    command = ["git", "diff"] + list(args)
-
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 
     # Execute the git diff command and retrieve the output as a string
-    diff_result = execute_no_trace(command)
-    if diff_result.strip() == "":
+    diff_result = execute_no_trace(["git", "diff"] + list(args)).strip()
+    if not diff_result:
         return None
 
     diff_dict, excluded_filenames = parse_git_diff(diff_result)
-    if len(diff_dict) <= 0:
+    if not diff_dict:
         return None
 
     batched_parsed_diff_result = batch_git_diffs(diff_dict, completion_model)
@@ -101,9 +99,6 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
         )
     )
     return summarized
-
-
-import re
 
 
 def batch_git_diffs(

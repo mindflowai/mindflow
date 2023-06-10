@@ -1,6 +1,6 @@
 import concurrent.futures
 import subprocess
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from mindflow.core.git.diff import run_diff
 from mindflow.settings import Settings
@@ -25,15 +25,16 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         )
 
     if not title or not body:
-        title_body_tuple = create_title_and_body(base_branch, title, body)
+        title, body = create_title_and_body(base_branch, title, body) or (None, None)
 
-    if not title_body_tuple:
+    if not title or not body:
         return
 
-    title, body = title_body_tuple
-
-    command: List[str] = ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body]  # type: ignore
-    print(execute_no_trace(command))
+    print(
+        execute_no_trace(
+            ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body]
+        )
+    )
 
 
 def create_title_and_body(
@@ -101,6 +102,7 @@ def create_title_and_body(
         print(body_response.pr_message)
         return None
 
-    title = title if title is not None else title_response
-    body = body if body is not None else body_response
-    return title, body
+    return (
+        title if title is not None else title_response,
+        body if body is not None else body_response,
+    )
