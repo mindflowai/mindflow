@@ -17,7 +17,6 @@ def run_delete(document_paths: List[str]):
     This function is used to delete your MindFlow index.
     """
     resolved: List[Tuple[str, str]] = resolve_all(document_paths)
-
     document_ids = [
         document_id
         for document_id in [
@@ -26,15 +25,15 @@ def run_delete(document_paths: List[str]):
         if document_id is not None
     ]
     documents: List[Document] = Document.load_bulk(document_ids, return_none=False)
-    if len(documents) == 0:
+    if not documents:
         return "No documents to delete"
 
     document_chunk_ids = get_document_chunk_ids(documents)
-    document_chunks: List[Optional[DocumentChunk]] = DocumentChunk.load_bulk(
+    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk(
         document_chunk_ids,
-        return_none=True,
+        return_none=False,
     )
-    if len(document_chunks) == 0:
+    if not document_chunks:
         return "No documents to delete"
 
     Document.delete_bulk(document_ids)

@@ -1,8 +1,7 @@
-from typing import List
-from typing import Optional
-from typing import Union
-
+from typing import List, TypeVar, Optional, Union
 from mindflow.db.db.database import Collection, Database
+
+T_BaseObject = TypeVar("T_BaseObject", bound="BaseObject")
 
 
 class BaseObject:
@@ -53,7 +52,7 @@ class BaseObject:
         self._database.save(self._collection.value, self.todict(self))
 
     @staticmethod
-    def save_bulk(objects: List["BaseObject"]):
+    def save_bulk(objects: List[T_BaseObject]):
         object = objects[0]
         object._database.save_bulk(
             object._collection.value, [object.todict(object) for object in objects]

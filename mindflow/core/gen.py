@@ -54,9 +54,7 @@ def run_code_generation(output_path: str, prompt: str):
     if isinstance(response, ModelError):
         return response.message
 
-    response = get_text_within_xml(response, "GEN")
-
-    parse_and_write_file(response, output_path)
+    parse_and_write_file(get_text_within_xml(response, "GEN"), output_path)
     conversation.total_tokens = estimate_tokens_from_messages(
         conversation.messages, completion_model
     )

@@ -3,6 +3,7 @@
 """
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
+import sys
 
 from typing import List, Optional, Tuple, TypeVar, Iterable
 
@@ -135,55 +136,81 @@ def create_document_chunks(
     completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
     indexable_document: Document,
-):
+) -> List[DocumentChunk]:
     """
     This function is used to create a tree of responses from the OpenAI API
     """
     # key for each chunk embedding is {file_hash}_chunk_id
     # then the key for each file embedding is {file_hash}
 
-    # IMPORTANT NOTE:
-    # if we want to be able to track file histories and such, we should have the file hash be determined by git's native hasing
-    # run command: git hash-object {file_name}
-
-    # ("{hash}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"type": "file", "num_chunks": 5, "num_tokens": 100})
-    # ("{hash}_{chunk_id}", [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], {"summary": "chunk_summary", "start_pos": "0", "end_pos": "100", "num_tokens": 50})
-
     text: Optional[str] = read_document(
         indexable_document.path, indexable_document.document_type
     )
     if not text:
-        return []
+        print("Document staged for indexing could not be read")
+        sys.exit(1)
 
-    tokens = get_token_count(completion_model, text)
-    if tokens < completion_model.soft_token_limit:
-        summary: str = completion_model(
-            build_prompt(
-                [
-                    create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                    create_message(Role.USER.value, text),
-                ],
+    token_count: int = get_token_count(completion_model, text)
+    if token_count < completion_model.soft_token_limit:
+        return [
+            process_small_document(
                 completion_model,
+                embedding_model,
+                text,
+                indexable_document.id,
+                token_count,
             )
-        )
-        document_chunk = DocumentChunk(
-            {
-                "id": f"{indexable_document.id}_0",
-                "summary": summary,
-                "embedding": embedding_model(summary),
-                "start_pos": 0,
-                "end_pos": len(text),
-                "num_tokens": tokens,
-            }
-        )
-        return [document_chunk]
+        ]
 
-    document_chunks: List[DocumentChunk] = split_raw_text_to_vectors(
+    return process_large_document(
         completion_model, embedding_model, text, indexable_document.id
     )
-    document_chunk_tree = create_tree(document_chunks, completion_model)
 
-    return collect_leaves_with_embeddings(document_chunk_tree, "", embedding_model)
+
+def process_small_document(
+    completion_model: ConfiguredModel,
+    embedding_model: ConfiguredModel,
+    text: str,
+    document_id: str,
+    tokens: int,
+) -> DocumentChunk:
+    summary: str = completion_model(
+        build_prompt(
+            [
+                create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                create_message(Role.USER.value, text),
+            ],
+            completion_model,
+        )
+    )
+    return DocumentChunk(
+        {
+            "id": f"{document_id}_0",
+            "summary": summary,
+            "embedding": embedding_model(summary),
+            "start_pos": 0,
+            "end_pos": len(text),
+            "num_tokens": tokens,
+        }
+    )
+
+
+def process_large_document(
+    completion_model: ConfiguredModel,
+    embedding_model: ConfiguredModel,
+    text: str,
+    document_id: str,
+) -> List[DocumentChunk]:
+    return collect_leaves_with_embeddings(
+        create_tree(
+            split_raw_text_to_vectors(
+                completion_model, embedding_model, text, document_id
+            ),
+            completion_model,
+        ),
+        "",
+        embedding_model,
+    )
 
 
 def split_raw_text_to_vectors(
