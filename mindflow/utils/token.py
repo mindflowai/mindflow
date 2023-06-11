@@ -14,20 +14,21 @@ def get_batch_token_count_of_text_for_model(
     model: ConfiguredModel, texts: List[str]
 ) -> int:
     try:
-        return sum([len(encoding) for encoding in model.tokenizer.encode_batch(texts)])
+        return sum(len(encoding) for encoding in model.tokenizer.encode_batch(texts))
     except Exception:
-        return sum([len(text) // 3 for text in texts])
+        return sum(len(text) // 3 for text in texts)
 
 
 def get_token_count_of_messages_for_model(
     messages: List[Dict[str, str]],
     model: ConfiguredModel,
 ):
-    content = ""
-    for i in range(len(messages)):
-        content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
-
-    return get_token_count_of_text_for_model(model, content)
+    return get_token_count_of_text_for_model(
+        model,
+        "\n\n".join(
+            [f"{message['role']}\n\n{message['content']}" for message in messages]
+        ),
+    )
 
 
 def get_token_count_from_document_query_for_model(
@@ -46,8 +47,7 @@ def get_token_count_from_document_query_for_model(
             raise FileNotFoundError(f"Could not find file at {document_path}")
 
         file_text = {open(document_path, "r").read()}
-        text = f"```{file_text}```"
-        texts.append(text)
+        texts.append(f"```{file_text}```")
 
     tokens = get_batch_token_count_of_text_for_model(model, texts)
     if return_texts:

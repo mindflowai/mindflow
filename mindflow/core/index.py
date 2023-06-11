@@ -26,7 +26,7 @@ from mindflow.utils.helpers import (
 )
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
 )
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
@@ -34,9 +34,6 @@ from mindflow.utils.token import get_token_count_of_text_for_model
 
 
 def run_index(document_paths: List[str], verbose: bool = True) -> None:
-    """
-    This function is used to generate an index and/or embeddings for files
-    """
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
@@ -184,7 +181,7 @@ def process_small_document(
     tokens: int,
 ) -> DocumentChunk:
     summary: str = completion_model(
-        build_conversation_from_conversation_messages(
+        build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
                 create_conversation_message(Role.USER.value, text),
@@ -233,13 +230,13 @@ def split_raw_text_to_document_chunks(
     document_chunks: List[DocumentChunk] = []
 
     while start < end:
-        text_chunk_size = binary_search_max_raw_text_chunk_size(
+        text_chunk_size = binary_search_max_raw_text_chunk_size_for_token_limit(
             completion_model, text, start, end
         )
 
         text_str = text[start : start + text_chunk_size]
         summary: str = completion_model(
-            build_conversation_from_conversation_messages(
+            build_prompt_from_conversation_messages(
                 [
                     create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
                     create_conversation_message(Role.USER.value, text_str),
@@ -267,12 +264,9 @@ def split_raw_text_to_document_chunks(
     return document_chunks
 
 
-def binary_search_max_raw_text_chunk_size(
+def binary_search_max_raw_text_chunk_size_for_token_limit(
     completion_model: ConfiguredModel, text: str, start: int, end: int
 ) -> int:
-    """
-    Uses binary search to find the maximum chunk size in terms of tokens that fits within the token limit.
-    """
     left = 0
     right = end - start
     while left < right:
@@ -321,7 +315,7 @@ def create_hierarchical_summary_tree(
     right_tree = create_hierarchical_summary_tree(nodes[mid:], completion_model)
 
     merged_summary = completion_model(
-        build_conversation_from_conversation_messages(
+        build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
                 create_conversation_message(

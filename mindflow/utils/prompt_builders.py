@@ -20,7 +20,7 @@ def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
     return {"role": role, "content": prompt}
 
 
-def build_conversation_from_conversation_messages(
+def build_prompt_from_conversation_messages(
     messages: List[Dict[str, str]], model: ConfiguredModel
 ) -> Union[List[Dict], str]:
     if model.service == ServiceID.OPENAI.value:

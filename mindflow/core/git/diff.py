@@ -14,7 +14,7 @@ from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
 )
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
@@ -47,7 +47,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
         for file_name, diff_content in batched_parsed_diff_result[0]:
             content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
         diff_response: Union[ModelError, str] = completion_model(
-            build_conversation_from_conversation_messages(
+            build_prompt_from_conversation_messages(
                 [
                     create_conversation_message(
                         Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX
@@ -69,7 +69,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
                     content += f"*{file_name}*\n DIFF CONTENT: {diff_content}\n\n"
                 future: concurrent.futures.Future = executor.submit(
                     completion_model,
-                    build_conversation_from_conversation_messages(
+                    build_prompt_from_conversation_messages(
                         [
                             create_conversation_message(
                                 Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX
@@ -97,7 +97,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
 
     GIT_DIFF_SUMMARIZE_PROMPT = 'What is the higher level purpose of these changes? Keep it short and sweet, don\'t provide any useless or redundant information like "made changes to the code". Do NOT speak in generalities, be specific.'
     summarized = completion_model(
-        build_conversation_from_conversation_messages(
+        build_prompt_from_conversation_messages(
             [
                 create_conversation_message(
                     Role.SYSTEM.value, GIT_DIFF_SUMMARIZE_PROMPT

@@ -21,7 +21,7 @@ from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
 )
 from mindflow.utils.prompts import QUERY_PROMPT_PREFIX
@@ -71,7 +71,7 @@ def run_query(document_paths: List[str], query: str):
         query, document_selection_batch, completion_model
     )
     response: Union[ModelError, str] = completion_model(
-        build_conversation_from_conversation_messages(
+        build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
                 create_conversation_message(

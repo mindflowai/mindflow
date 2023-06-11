@@ -9,7 +9,7 @@ from mindflow.utils.helpers import get_text_within_xml
 
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
     prune_messages_to_fit_context_window,
 )
@@ -51,9 +51,7 @@ def run_code_generation(output_path: str, prompt: str):
     )
 
     response: Union[ModelError, str] = completion_model(
-        build_conversation_from_conversation_messages(
-            conversation.messages, completion_model
-        )
+        build_prompt_from_conversation_messages(conversation.messages, completion_model)
     )
     if isinstance(response, ModelError):
         return response.message

@@ -6,7 +6,7 @@ from mindflow.settings import Settings
 from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
     prune_messages_to_fit_context_window,
 )
@@ -48,9 +48,7 @@ def run_chat(document_paths: List[str], user_query: str):
     )
 
     response: Union[ModelError, str] = completion_model(
-        build_conversation_from_conversation_messages(
-            conversation.messages, completion_model
-        )
+        build_prompt_from_conversation_messages(conversation.messages, completion_model)
     )
     if isinstance(response, ModelError):
         return response.message
@@ -63,5 +61,4 @@ def run_chat(document_paths: List[str], user_query: str):
     )
 
     conversation.save()
-
     return response

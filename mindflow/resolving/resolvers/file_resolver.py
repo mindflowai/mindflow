@@ -5,7 +5,7 @@ from mindflow.db.objects.document import DocumentReference
 
 from mindflow.db.objects.static_definition.document import DocumentType
 from mindflow.resolving.resolvers.base_resolver import BaseResolver
-from mindflow.utils.files.extract import extract_files
+from mindflow.utils.files.extract import extract_files_from_directory
 
 
 class FileResolver(BaseResolver):
@@ -19,5 +19,5 @@ class FileResolver(BaseResolver):
     ) -> List[DocumentReference]:
         return [
             DocumentReference(path, DocumentType.FILE)
-            for path in extract_files(os.path.abspath(document_path))
+            for path in extract_files_from_directory(os.path.abspath(document_path))
         ]

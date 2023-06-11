@@ -9,7 +9,7 @@ from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
 from mindflow.utils.prompt_builders import (
     Role,
-    build_conversation_from_conversation_messages,
+    build_prompt_from_conversation_messages,
     create_conversation_message,
 )
 from mindflow.utils.prompts import PR_BODY_PREFIX
@@ -56,14 +56,14 @@ def create_title_and_body(
     title_response: Union[ModelError, str]
     body_response: Union[ModelError, str]
     if title is None and body is None:
-        pr_title_prompt = build_conversation_from_conversation_messages(
+        pr_title_prompt = build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
                 create_conversation_message(Role.USER.value, diff_output),
             ],
             completion_model,
         )
-        pr_body_prompt = build_conversation_from_conversation_messages(
+        pr_body_prompt = build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, PR_BODY_PREFIX),
                 create_conversation_message(Role.USER.value, diff_output),
@@ -83,7 +83,7 @@ def create_title_and_body(
         body_response = future_body.result()
     else:
         if title is None:
-            pr_title_prompt = build_conversation_from_conversation_messages(
+            pr_title_prompt = build_prompt_from_conversation_messages(
                 [
                     create_conversation_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
                     create_conversation_message(Role.USER.value, diff_output),
@@ -92,7 +92,7 @@ def create_title_and_body(
             )
             title_response = completion_model(pr_title_prompt)
         if body is None:
-            pr_body_prompt = build_conversation_from_conversation_messages(
+            pr_body_prompt = build_prompt_from_conversation_messages(
                 [
                     create_conversation_message(Role.SYSTEM.value, PR_BODY_PREFIX),
                     create_conversation_message(Role.USER.value, diff_output),
