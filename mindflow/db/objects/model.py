@@ -22,8 +22,6 @@ from mindflow.utils.errors import ModelError
 
 
 class Model(BaseObject):
-    """Model object."""
-
     id: str
     api: str
     name: str
@@ -43,8 +41,6 @@ class Model(BaseObject):
 
 
 class ModelConfig(BaseObject):
-    """Model config object."""
-
     id: str
     soft_token_limit: int
 

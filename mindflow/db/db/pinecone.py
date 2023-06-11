@@ -50,16 +50,14 @@ class PineconeDatabase(Database):
         )
 
     def load(self, collection: str, object_id: str) -> Optional[dict]:
-        index = self._get_index(collection)
-        object = index.fetch(ids=[object_id])
+        object = self._get_index(collection).fetch(ids=[object_id])
         if not object:
             return {}
 
         return self._convert_pinecone_return(object["matches"][0])
 
     def load_bulk(self, collection: str, object_ids: List[str]) -> List[Optional[dict]]:
-        index = self._get_index(collection)
-        vectors = index.fetch(ids=object_ids)["vectors"]
+        vectors = self._get_index(collection).fetch(ids=object_ids)["vectors"]
 
         vector_list: List[Optional[dict]] = [None] * len(object_ids)
 
@@ -73,17 +71,14 @@ class PineconeDatabase(Database):
         return vector_list
 
     def delete_bulk(self, collection: str, object_ids: List[str]):
-        index = self._get_index(collection)
-        index.delete(ids=object_ids)
+        self._get_index(collection).delete(ids=object_ids)
 
     def save(self, collection: str, value: dict):
-        index = self._get_index(collection)
-        index.upsert(vectors=[self._convert_object_to_pinecone(value)])
+        self._get_index(collection).upsert(vectors=[self._convert_object_to_pinecone(value)])
 
     def save_bulk(self, collection: str, values: List[dict]):
-        index = self._get_index(collection)
         vectors = [self._convert_object_to_pinecone(value) for value in values]
-        index.upsert(vectors=vectors)
+        self._get_index(collection).upsert(vectors=vectors)
 
     def query(
         self,
@@ -93,8 +88,7 @@ class PineconeDatabase(Database):
         top_k=100,
         include_metadata=True,
     ) -> List[dict]:
-        index = self._get_index(collection)
-        results = index.query(
+        results = self._get_index(collection).query(
             vector=vector.tolist(),
             filter={"id": {"$in": ids}},
             top_k=top_k,

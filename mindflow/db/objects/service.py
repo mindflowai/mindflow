@@ -16,8 +16,6 @@ class Service(BaseObject):
 
 
 class ServiceConfig(BaseObject):
-    """Service config object."""
-
     id: str
     api_key: str
     api_secret: str

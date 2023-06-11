@@ -18,8 +18,6 @@ from mindflow.utils.token import (
 
 
 def run_chat(document_paths: List[str], user_query: str):
-    # if the document paths contains only files that are reasonably small, then we don't need to run any kind of
-    # search, we can just concatenate the files and return the result.
     settings = Settings()
     completion_model = settings.mindflow_models.query.model
 

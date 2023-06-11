@@ -16,8 +16,6 @@ from mindflow.db.objects.static_definition.service import (
 
 
 class MindFlowModel(BaseObject):
-    """MindFlow model object."""
-
     id: str  # index, query, embedding
     name: str
     defaults: Dict[str, str]
@@ -28,8 +26,6 @@ class MindFlowModel(BaseObject):
 
 
 class MindFlowModelConfig(BaseObject):
-    """MindFlow model config object."""
-
     id: str
     model: str
 
@@ -38,8 +34,6 @@ class MindFlowModelConfig(BaseObject):
 
 
 class ConfiguredMindFlowModel:
-    """MindFlow model object."""
-
     id: str  # index, query, embedding
     name: str
     defaults: Dict[str, str]

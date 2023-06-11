@@ -14,9 +14,7 @@ from mindflow.resolving.resolve import resolve_paths_to_document_references
 
 
 def run_delete(document_paths: List[str]):
-    """
-    This function is used to delete your MindFlow index.
-    """
+    """Delete documents from MindFlow index."""
     document_references: List[DocumentReference] = resolve_paths_to_document_references(
         document_paths
     )

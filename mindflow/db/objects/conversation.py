@@ -6,10 +6,6 @@ from mindflow.db.objects.base import BaseObject
 
 
 class Conversation(BaseObject):
-    """
-    Converstation
-    """
-
     id: str
 
     # (Role, Message)
