@@ -47,7 +47,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
         print(run_query(paths, prompt))
         JSON_DATABASE.save_file()
         return
-    
+
     print(run_chat(paths, prompt))
     JSON_DATABASE.save_file()
 

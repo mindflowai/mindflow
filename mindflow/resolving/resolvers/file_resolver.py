@@ -1,6 +1,4 @@
-"""
-File/Directory Resolver
-"""
+"""File/Directory Resolver"""
 import os
 from typing import List, Union
 from mindflow.db.objects.document import DocumentReference

@@ -1,6 +1,4 @@
-"""
-Module for resolving documents to text.
-"""
+"""Module for resolving documents to text."""
 import sys
 from typing import List
 from mindflow.db.objects.document import DocumentReference

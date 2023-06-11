@@ -16,11 +16,11 @@ class Role(Enum):
     ASSISTANT = "assistant"
 
 
-def create_message(role: str, prompt: str) -> Dict[str, str]:
+def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
     return {"role": role, "content": prompt}
 
 
-def build_prompt(
+def build_conversation_from_conversation_messages(
     messages: List[Dict[str, str]], model: ConfiguredModel
 ) -> Union[List[Dict], str]:
     if model.service == ServiceID.OPENAI.value:

@@ -7,7 +7,7 @@ from mindflow.settings import Settings
 from mindflow.utils.command_parse import get_flag_values_from_args
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
-from mindflow.utils.prompt_builders import Role, build_prompt, create_message
+from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
 from mindflow.utils.prompts import PR_BODY_PREFIX
 from mindflow.utils.prompts import PR_TITLE_PREFIX
 
@@ -52,17 +52,17 @@ def create_title_and_body(
     title_response: Union[ModelError, str]
     body_response: Union[ModelError, str]
     if title is None and body is None:
-        pr_title_prompt = build_prompt(
+        pr_title_prompt = build_conversation_from_conversation_messages(
             [
-                create_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
-                create_message(Role.USER.value, diff_output),
+                create_conversation_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
+                create_conversation_message(Role.USER.value, diff_output),
             ],
             completion_model,
         )
-        pr_body_prompt = build_prompt(
+        pr_body_prompt = build_conversation_from_conversation_messages(
             [
-                create_message(Role.SYSTEM.value, PR_BODY_PREFIX),
-                create_message(Role.USER.value, diff_output),
+                create_conversation_message(Role.SYSTEM.value, PR_BODY_PREFIX),
+                create_conversation_message(Role.USER.value, diff_output),
             ],
             completion_model,
         )
@@ -79,19 +79,19 @@ def create_title_and_body(
         body_response = future_body.result()
     else:
         if title is None:
-            pr_title_prompt = build_prompt(
+            pr_title_prompt = build_conversation_from_conversation_messages(
                 [
-                    create_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
-                    create_message(Role.USER.value, diff_output),
+                    create_conversation_message(Role.SYSTEM.value, PR_TITLE_PREFIX),
+                    create_conversation_message(Role.USER.value, diff_output),
                 ],
                 completion_model,
             )
             title_response = completion_model(pr_title_prompt)
         if body is None:
-            pr_body_prompt = build_prompt(
+            pr_body_prompt = build_conversation_from_conversation_messages(
                 [
-                    create_message(Role.SYSTEM.value, PR_BODY_PREFIX),
-                    create_message(Role.USER.value, diff_output),
+                    create_conversation_message(Role.SYSTEM.value, PR_BODY_PREFIX),
+                    create_conversation_message(Role.USER.value, diff_output),
                 ],
                 completion_model,
             )

@@ -19,7 +19,7 @@ from mindflow.resolving.resolve import resolve_paths_to_document_references
 from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
-from mindflow.utils.prompt_builders import Role, build_prompt, create_message
+from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
 from mindflow.utils.prompts import QUERY_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count_of_text_for_model
 
@@ -67,10 +67,10 @@ def run_query(document_paths: List[str], query: str):
         query, document_selection_batch, completion_model
     )
     response: Union[ModelError, str] = completion_model(
-        build_prompt(
+        build_conversation_from_conversation_messages(
             [
-                create_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
-                create_message(Role.USER.value, f"{query}\n\n{trimmed_content}"),
+                create_conversation_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
+                create_conversation_message(Role.USER.value, f"{query}\n\n{trimmed_content}"),
             ],
             completion_model,
         )

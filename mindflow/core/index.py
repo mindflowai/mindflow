@@ -24,7 +24,7 @@ from mindflow.utils.helpers import (
     print_total_size_of_documents,
     print_total_tokens_and_ask_to_continue,
 )
-from mindflow.utils.prompt_builders import Role, build_prompt, create_message
+from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count_of_text_for_model
 
@@ -180,10 +180,10 @@ def process_small_document(
     tokens: int,
 ) -> DocumentChunk:
     summary: str = completion_model(
-        build_prompt(
+        build_conversation_from_conversation_messages(
             [
-                create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                create_message(Role.USER.value, text),
+                create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                create_conversation_message(Role.USER.value, text),
             ],
             completion_model,
         )
@@ -235,10 +235,10 @@ def split_raw_text_to_document_chunks(
 
         text_str = text[start : start + text_chunk_size]
         summary: str = completion_model(
-            build_prompt(
+            build_conversation_from_conversation_messages(
                 [
-                    create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                    create_message(Role.USER.value, text_str),
+                    create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                    create_conversation_message(Role.USER.value, text_str),
                 ],
                 completion_model,
             )
@@ -317,10 +317,10 @@ def create_hierarchical_summary_tree(
     right_tree = create_hierarchical_summary_tree(nodes[mid:], completion_model)
 
     merged_summary = completion_model(
-        build_prompt(
+        build_conversation_from_conversation_messages(
             [
-                create_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                create_message(
+                create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                create_conversation_message(
                     Role.USER.value, f"{left_tree.summary} {right_tree.summary}"
                 ),
             ],
