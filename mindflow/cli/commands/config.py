@@ -24,12 +24,12 @@ def config():
         "What do you want to configure? Enter #", config_options, config_options
     )
     if selected_config == "model":
-        model_selection()
+        configure_model()
 
     JSON_DATABASE.save_file()
 
 
-def model_selection():
+def configure_model():
     mindflow_model_ids = [
         MindFlowModelID.QUERY.value,
         MindFlowModelID.INDEX.value,
@@ -49,14 +49,14 @@ def model_selection():
         mindflow_model_descriptions,
     )
     if selected_mindflow_model.id == MindFlowModelID.QUERY.value:
-        query_model_selection()
+        configure_query_model()
     elif selected_mindflow_model.id == MindFlowModelID.INDEX.value:
-        index_model_selection()
+        configure_index_model()
     elif selected_mindflow_model.id == MindFlowModelID.EMBEDDING.value:
-        embedding_model_selection()
+        configure_embedding_model()
 
 
-def query_model_selection():
+def configure_query_model():
     model_ids = [
         ModelID.GPT_3_5_TURBO.value,
         ModelID.GPT_4.value,
@@ -83,7 +83,7 @@ def query_model_selection():
     print(f"Query Model: {selected_model.id} saved!")
 
 
-def index_model_selection():
+def configure_index_model():
     model_ids = [
         ModelID.GPT_3_5_TURBO.value,
         ModelID.GPT_4.value,
@@ -109,7 +109,7 @@ def index_model_selection():
     print(f"Index Model: {selected_model.id} saved!")
 
 
-def embedding_model_selection():
+def configure_embedding_model():
     model_ids = [ModelID.TEXT_EMBEDDING_ADA_002.value]
     model_options: List[Model] = [Model.load(model_id) for model_id in model_ids]
     model_descriptions: List[str] = [
