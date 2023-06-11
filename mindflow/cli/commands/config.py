@@ -137,13 +137,10 @@ def clear_console(lines: int):
         sys.stdout.write("\033[K")  # Clear the line
 
 
-# Takes a prompt and a list of descriptions and returns the index of the selected description
 def select_option(prompt: str, options: List, descriptions: List[str]) -> int:
-    # Print options with numbers
     for i, description in enumerate(descriptions, 1):
         click.echo(f"{i}: {description}")
 
-    # Validate input and adjust index for 0-based list
     lines_to_clear = len(descriptions)
     while True:
         selected_option_index = click.prompt(prompt, type=int)

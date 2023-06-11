@@ -13,14 +13,10 @@ from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 def run_commit(
     args: Tuple[str], message_overwrite: Optional[str] = None
 ) -> Optional[str]:
-    """
-    Commit command.
-    """
     settings = Settings()
     query_model = settings.mindflow_models.query.model
 
     if message_overwrite is None:
-        # Execute the git diff command and retrieve the output as a string
         diff_output = run_diff(("--cached",))
         if diff_output is None:
             return "Nothing to commit."

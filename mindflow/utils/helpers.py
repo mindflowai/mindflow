@@ -5,13 +5,8 @@ from mindflow.db.objects.document import Document
 from mindflow.db.objects.model import ConfiguredModel
 
 
-def print_total_size(document_references: List[Document]):
-    """
-    Print total size of documents
-    """
-    total_size = sum(
-        [document_reference.size for document_reference in document_references]
-    )
+def print_total_size_of_documents(documents: List[Document]):
+    total_size = sum([document.size for document in documents])
     print(f"Total content size: MB {total_size / 1024 / 1024:.2f}")
 
 
@@ -20,9 +15,6 @@ def print_total_tokens_and_ask_to_continue(
     completion_model: ConfiguredModel,
     usd_threshold: float = 0.5,
 ):
-    """
-    Print total tokens of documents
-    """
     total_tokens = sum([document.tokens for document in documents])
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (
@@ -39,9 +31,6 @@ def print_total_tokens_and_ask_to_continue(
 
 
 def get_text_within_xml(text: str, tag: str) -> str:
-    """
-    Get xml from text
-    """
     start_tag = f"<{tag}>"
     end_tag = f"</{tag}>"
     start_index = text.index(start_tag) + len(start_tag)

@@ -1,14 +1,11 @@
 """
 Base Resolver Class
 """
-from typing import List, Tuple
+from typing import List
+from mindflow.db.objects.document import DocumentReference
 
 
 class BaseResolver:
-    """
-    Base class for resolvers
-    """
-
     @staticmethod
     def should_resolve(document_path: str) -> bool:
         """
@@ -16,8 +13,8 @@ class BaseResolver:
         """
         return False
 
-    def resolve(self, document_path: str) -> List[Tuple[str, str]]:
-        """
-        Resolve a document path to text.
-        """
-        return []
+    def resolve_to_document_reference(
+        self, document_path: str
+    ) -> List[DocumentReference]:
+        document_references: List[DocumentReference] = []
+        return document_references

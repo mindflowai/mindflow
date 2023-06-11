@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 
 from mindflow.core.git.diff import run_diff
 from mindflow.settings import Settings
-from mindflow.utils.command_parse import get_flag_value
+from mindflow.utils.command_parse import get_flag_values_from_args
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
 from mindflow.utils.prompt_builders import Role, build_prompt, create_message
@@ -13,11 +13,10 @@ from mindflow.utils.prompts import PR_TITLE_PREFIX
 
 
 def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None):
-    base_branch = get_flag_value(args, ["--base", "-B"])
+    base_branch_name = get_flag_values_from_args(args, ["--base", "-B"])
 
-    if base_branch is None:
-        # Determine the name of the default branch
-        base_branch = (
+    if base_branch_name is None:
+        base_branch_name = (
             subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
             .decode()
             .strip()
@@ -25,7 +24,10 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         )
 
     if not title or not body:
-        title, body = create_title_and_body(base_branch, title, body) or (None, None)
+        title, body = create_title_and_body(base_branch_name, title, body) or (
+            None,
+            None,
+        )
 
     if not title or not body:
         return

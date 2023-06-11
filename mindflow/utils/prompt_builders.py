@@ -7,7 +7,7 @@ from mindflow.db.objects.static_definition.service import ServiceID
 import anthropic
 from mindflow.utils.constants import MinimumReservedLength
 
-from mindflow.utils.token import get_token_count
+from mindflow.utils.token import get_token_count_of_text_for_model
 
 
 class Role(Enum):
@@ -20,12 +20,6 @@ def create_message(role: str, prompt: str) -> Dict[str, str]:
     return {"role": role, "content": prompt}
 
 
-# messages = [
-#     {
-#         "role": "*role*",
-#         "content": "*content*",
-#     }
-# ]
 def build_prompt(
     messages: List[Dict[str, str]], model: ConfiguredModel
 ) -> Union[List[Dict], str]:
@@ -56,18 +50,15 @@ def build_prompt(
         return full_prompt
 
 
-def prune_messages(
+def prune_messages_to_fit_context_window(
     messages: List[Dict[str, str]], model: ConfiguredModel
 ) -> List[Dict[str, str]]:
-    """
-    Prunes the messages to a maximum length.
-    """
     # Improvement can be made on the estimation here for Anthropic system messages
     content = ""
     for i in range(0, len(messages)):
         content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
         if (
-            get_token_count(model, content)
+            get_token_count_of_text_for_model(model, content)
             > model.hard_token_limit - MinimumReservedLength.CHAT.value
         ):
             return messages[:i]

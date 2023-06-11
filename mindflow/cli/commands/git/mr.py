@@ -29,9 +29,6 @@ def mr():
 def create(
     args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
 ):
-    """
-    PR command.
-    """
     if title is not None:
         click.echo(
             f"Warning: Using message '{title}' instead of mindflow generated message."

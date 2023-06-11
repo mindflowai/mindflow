@@ -9,11 +9,16 @@ from mindflow.db.objects.base import BaseObject
 from mindflow.db.objects.static_definition.document import DocumentType
 
 
-class Document(BaseObject):
-    """
-    Document
-    """
+class DocumentReference:
+    path: str
+    document_type: str
 
+    def __init__(self, path: str, document_type: DocumentType):
+        self.path = path
+        self.document_type = document_type.value
+
+
+class Document(BaseObject):
     # "{hash}"
     id: str
     embedding: Optional[np.ndarray]
@@ -28,10 +33,6 @@ class Document(BaseObject):
 
 
 class DocumentChunk(BaseObject):
-    """
-    Document chunk
-    """
-
     # ("{hash}_{chunk_id}"
     id: str
     embedding: np.ndarray
@@ -56,7 +57,6 @@ class DocumentChunk(BaseObject):
 
 
 def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-ascii"]):
-    # check if file is readable
     for encoding in supported_encodings:
         try:
             text = open(path, "r", encoding=encoding).read()
@@ -64,24 +64,17 @@ def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-a
             continue
 
         return text
-
     return None
 
 
-def read_document(document_path: str, document_type: str) -> Optional[str]:
-    """
-    Read a document.
-    """
+def read_document(path: str, document_type: str) -> Optional[str]:
     if document_type == DocumentType.FILE.value:
-        return read_file_supported_encodings(document_path)
+        return read_file_supported_encodings(path)
     return None
 
 
-def get_document_id(document_path: str, document_type: str) -> Optional[str]:
-    """
-    This function is used to generate a document id.
-    """
-    text = read_document(document_path, document_type)
+def get_document_id(path: str, document_type: str) -> Optional[str]:
+    text = read_document(path, document_type)
     if text is None:
         return None
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -91,7 +84,6 @@ def get_document_chunk_ids(documents: Union[List[Document], Document]):
     if isinstance(documents, Document):
         documents = [documents]
 
-    ## Get total number of chunks and create a list of chunk ids
     total_chunks = sum([document.num_chunks + 1 for document in documents])
     document_chunk_ids = [""] * int(total_chunks)
     j = 0

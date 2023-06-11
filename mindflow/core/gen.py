@@ -11,9 +11,9 @@ from mindflow.utils.prompt_builders import (
     Role,
     build_prompt,
     create_message,
-    prune_messages,
+    prune_messages_to_fit_context_window,
 )
-from mindflow.utils.token import estimate_tokens_from_messages
+from mindflow.utils.token import get_token_count_of_messages_for_model
 
 
 CODE_GEN_SYSTEM_PROMPT = "All responses must be valid code for the specified language. Do not use any special characters or symbols, any additional information must be put in comments."
@@ -46,7 +46,9 @@ def run_code_generation(output_path: str, prompt: str):
             f"Generate code for '{output_path}' with the following prompt: '{prompt}'. Do NOT use any special characters or symbols, any additional information must be put in comments. Please put the code within XML tags like <GEN></GEN>.",
         )
     )
-    conversation.messages = prune_messages(conversation.messages, completion_model)
+    conversation.messages = prune_messages_to_fit_context_window(
+        conversation.messages, completion_model
+    )
 
     response: Union[ModelError, str] = completion_model(
         build_prompt(conversation.messages, completion_model)
@@ -55,7 +57,7 @@ def run_code_generation(output_path: str, prompt: str):
         return response.message
 
     parse_and_write_file(get_text_within_xml(response, "GEN"), output_path)
-    conversation.total_tokens = estimate_tokens_from_messages(
+    conversation.total_tokens = get_token_count_of_messages_for_model(
         conversation.messages, completion_model
     )
 
@@ -65,6 +67,5 @@ def run_code_generation(output_path: str, prompt: str):
 
 
 def parse_and_write_file(response: str, output_path: str):
-    # take the response and parse it into a valid file.
     with open(output_path, "w") as f:
         f.write(response)

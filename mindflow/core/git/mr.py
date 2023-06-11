@@ -2,18 +2,17 @@ import subprocess
 from typing import Optional, Tuple
 
 from mindflow.core.git.pr import create_title_and_body
-from mindflow.utils.command_parse import get_flag_value
+from mindflow.utils.command_parse import get_flag_values_from_args
 from mindflow.utils.execute import execute_no_trace
 
 
 def run_mr(
     args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
 ):
-    base_branch = get_flag_value(args, ["--target-branch", "-b"])
+    base_branch_name = get_flag_values_from_args(args, ["--target-branch", "-b"])
 
-    if base_branch is None:
-        # Determine the name of the default branch
-        base_branch = (
+    if base_branch_name is None:
+        base_branch_name = (
             subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
             .decode()
             .strip()
@@ -21,7 +20,9 @@ def run_mr(
         )
 
     if not title or not description:
-        title, description = create_title_and_body(base_branch, title, description) or (
+        title, description = create_title_and_body(
+            base_branch_name, title, description
+        ) or (
             None,
             None,
         )

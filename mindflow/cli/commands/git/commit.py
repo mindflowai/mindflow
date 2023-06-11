@@ -20,9 +20,6 @@ from mindflow.core.git.commit import run_commit
     default=None,
 )
 def commit(args: Tuple[str], message: Optional[str] = None):
-    """
-    Commit command.
-    """
     if message is not None:
         click.echo(
             f"Warning: Using message '{message}' instead of mindflow generated message."

@@ -2,26 +2,30 @@
 `inspect` command
 """
 import json
-from typing import List, Optional, Tuple
+from typing import List
 
 from mindflow.db.objects.document import (
     Document,
     DocumentChunk,
+    DocumentReference,
     get_document_chunk_ids,
     get_document_id,
 )
-from mindflow.resolving.resolve import resolve_all
+from mindflow.resolving.resolve import resolve_paths_to_document_references
 
 
 def run_inspect(document_paths: List[str]) -> str:
     """
     This function is used to inspect your MindFlow index.
     """
-    resolved: List[Tuple[str, str]] = resolve_all(document_paths)
+    document_references: List[DocumentReference] = resolve_paths_to_document_references(
+        document_paths
+    )
     document_ids = [
         document_id
         for document_id in [
-            get_document_id(doc_path, doc_type) for doc_path, doc_type in resolved
+            get_document_id(document_reference.path, document_reference.document_type)
+            for document_reference in document_references
         ]
         if document_id is not None
     ]
@@ -36,7 +40,6 @@ def run_inspect(document_paths: List[str]) -> str:
         document_chunk_ids, return_none=False
     )
 
-    # Dump the document chunks to JSON without the embedding
     inspect_output = json.dumps(
         {
             document_chunk.id: {

@@ -3,27 +3,23 @@ from typing import Dict, List
 from mindflow.db.objects.model import ConfiguredModel
 
 
-def get_token_count(model: ConfiguredModel, text: str) -> int:
-    """
-    This function is used to get the token count of a string.
-    """
+def get_token_count_of_text_for_model(model: ConfiguredModel, text: str) -> int:
     try:
         return len(model.tokenizer.encode(text))
     except Exception:
         return len(text) // 3
 
 
-def get_batch_token_count(model: ConfiguredModel, texts: List[str]) -> int:
-    """
-    This function is used to get the token count of a list of strings.
-    """
+def get_batch_token_count_of_text_for_model(
+    model: ConfiguredModel, texts: List[str]
+) -> int:
     try:
         return sum([len(encoding) for encoding in model.tokenizer.encode_batch(texts)])
     except Exception:
         return sum([len(text) // 3 for text in texts])
 
 
-def estimate_tokens_from_messages(
+def get_token_count_of_messages_for_model(
     messages: List[Dict[str, str]],
     model: ConfiguredModel,
 ):
@@ -31,10 +27,10 @@ def estimate_tokens_from_messages(
     for i in range(len(messages)):
         content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
 
-    return get_token_count(model, content)
+    return get_token_count_of_text_for_model(model, content)
 
 
-def estimate_tokens_from_paths(
+def get_token_count_from_document_query_for_model(
     document_paths: List[str],
     query: str,
     model: ConfiguredModel,
@@ -53,7 +49,7 @@ def estimate_tokens_from_paths(
         text = f"```{file_text}```"
         texts.append(text)
 
-    tokens = get_batch_token_count(model, texts)
+    tokens = get_batch_token_count_of_text_for_model(model, texts)
     if return_texts:
         return tokens, texts
     return tokens

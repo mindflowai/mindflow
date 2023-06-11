@@ -16,7 +16,7 @@ from mindflow.utils.prompt_builders import Role, build_prompt, create_message
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.diff_parser import parse_git_diff
-from mindflow.utils.token import get_token_count
+from mindflow.utils.token import get_token_count_of_text_for_model
 from tqdm import tqdm
 
 
@@ -27,7 +27,6 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 
-    # Execute the git diff command and retrieve the output as a string
     diff_result = execute_no_trace(["git", "diff"] + list(args)).strip()
     if not diff_result:
         return None
@@ -109,16 +108,15 @@ def batch_git_diffs(
     current_batch_text = ""
     for file_name, diff_content in file_diffs.items():
         if (
-            get_token_count(model, diff_content)
+            get_token_count_of_text_for_model(model, diff_content)
             > model.hard_token_limit - MinimumReservedLength.DIFF.value
         ):
-            ## Split the diff into chunks that are less than the token limit
             chunks = [diff_content]
             while True:
                 new_chunks = []
                 for chunk in chunks:
                     if (
-                        get_token_count(model, chunk)
+                        get_token_count_of_text_for_model(model, chunk)
                         > model.hard_token_limit - MinimumReservedLength.DIFF.value
                     ):
                         half_len = len(chunk) // 2
@@ -131,10 +129,9 @@ def batch_git_diffs(
                     break
                 chunks = new_chunks
 
-            ## Add the chunks to the batch or multiple batches
             for chunk in chunks:
                 if (
-                    get_token_count(model, current_batch_text + chunk)
+                    get_token_count_of_text_for_model(model, current_batch_text + chunk)
                     > model.hard_token_limit - MinimumReservedLength.DIFF.value
                 ):
                     batches.append(current_batch)
@@ -144,7 +141,7 @@ def batch_git_diffs(
                 current_batch_text += chunk
 
         elif (
-            get_token_count(model, current_batch_text + diff_content)
+            get_token_count_of_text_for_model(model, current_batch_text + diff_content)
             > model.hard_token_limit - MinimumReservedLength.DIFF.value
         ):
             batches.append(current_batch)

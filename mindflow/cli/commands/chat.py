@@ -13,16 +13,11 @@ from mindflow.db.objects.conversation import Conversation
 from mindflow.db.objects.static_definition.conversation import ConversationID
 
 
-def _parse_chat_prompt_args(prompt_args: Tuple[str]):
-    # takes a list of strings and returns a string along with any filenames/directories that were passed.
-    # note: if the user passes a string that contains a bunch of text, with a filename/directory in the middle,
-    # those filenames/directories will be ignored and treated as plain text.
-
+def parse_chat_prompt_and_paths_from_args(prompt_args: Tuple[str]):
     prompt = " ".join(prompt_args)  # include files/directories in prompt
     paths = []
 
     for arg in prompt_args:
-        # check if valid path string
         if os.path.exists(arg):
             paths.append(arg)
 
@@ -35,16 +30,9 @@ def _parse_chat_prompt_args(prompt_args: Tuple[str]):
 @click.option("-s", "--skip-index", type=bool, default=False, is_flag=True)
 @click.argument("prompt_args", nargs=-1, type=str, required=True)
 def chat(prompt_args: Tuple[str], skip_index: bool):
-    prompt, paths = _parse_chat_prompt_args(prompt_args)
+    prompt, paths = parse_chat_prompt_and_paths_from_args(prompt_args)
 
-    # if paths:
-    has_dirs = False
-    for path in paths:
-        if os.path.isdir(path):
-            has_dirs = True
-            break
-
-    if has_dirs:
+    if any(os.path.isdir(path) for path in paths):
         if skip_index:
             click.echo(
                 "Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths."
@@ -57,9 +45,9 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
             run_index(paths, refresh=False, verbose=False)
             click.echo("")
         print(run_query(paths, prompt))
-    else:
-        print(run_chat(paths, prompt))
-        JSON_DATABASE.save_file()
+
+    print(run_chat(paths, prompt))
+    JSON_DATABASE.save_file()
 
 
 @click.group(help="Manage conversation histories.")
