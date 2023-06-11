@@ -8,9 +8,9 @@ class BaseResolver(ABC):
     @staticmethod
     @abstractmethod
     def should_resolve(document_path: str) -> bool:
-        """Checks if a string is a valid document path for this resolver."""
         pass
 
+    @abstractmethod
     def resolve_to_document_reference(
         self, document_path: str
     ) -> List[DocumentReference]:

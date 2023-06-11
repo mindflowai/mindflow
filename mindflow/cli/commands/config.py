@@ -12,7 +12,7 @@ from mindflow.db.objects.static_definition.model import (
     ModelID,
 )
 from mindflow.db.objects.model import Model
-from mindflow.db.utils import getOrCreateObject
+from mindflow.db.utils import get_or_create_object
 
 
 @click.command(
@@ -74,7 +74,7 @@ def configure_query_model():
         model_descriptions,
     )
 
-    mindflow_model_config: MindFlowModelConfig = getOrCreateObject(
+    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
         MindFlowModelConfig, f"{MindFlowModelID.QUERY.value}_config"
     )
     mindflow_model_config.model = selected_model.id
@@ -100,7 +100,7 @@ def configure_index_model():
         model_options,
         model_descriptions,
     )
-    mindflow_model_config: MindFlowModelConfig = getOrCreateObject(
+    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
         MindFlowModelConfig, f"{MindFlowModelID.INDEX.value}_config"
     )
     mindflow_model_config.model = selected_model.id
@@ -122,7 +122,7 @@ def configure_embedding_model():
         model_descriptions,
     )
 
-    mindflow_model_config: MindFlowModelConfig = getOrCreateObject(
+    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
         MindFlowModelConfig, f"{MindFlowModelID.EMBEDDING.value}_config"
     )
     mindflow_model_config.model = selected_model.id

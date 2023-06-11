@@ -1,14 +1,7 @@
 from typing import Union
 from mindflow.db.objects.base import BaseObject
 
-
-def set_object_params(self, params: dict):
-    for key, value in params.items():
-        setattr(self, key, value)
-    return self
-
-
-def getOrCreateObject(objectType: BaseObject, params: Union[dict, str]):
+def get_or_create_object(objectType: BaseObject, params: Union[dict, str]):
     if isinstance(params, str):
         params = {"id": params}
 
