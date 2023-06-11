@@ -12,7 +12,11 @@ from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
-from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
+from mindflow.utils.prompt_builders import (
+    Role,
+    build_conversation_from_conversation_messages,
+    create_conversation_message,
+)
 from mindflow.utils.prompts import GIT_DIFF_PROMPT_PREFIX
 
 from mindflow.utils.diff_parser import parse_git_diff
@@ -45,7 +49,9 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
         diff_response: Union[ModelError, str] = completion_model(
             build_conversation_from_conversation_messages(
                 [
-                    create_conversation_message(Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX),
+                    create_conversation_message(
+                        Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX
+                    ),
                     create_conversation_message(Role.USER.value, content),
                 ],
                 completion_model,
@@ -65,7 +71,9 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
                     completion_model,
                     build_conversation_from_conversation_messages(
                         [
-                            create_conversation_message(Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX),
+                            create_conversation_message(
+                                Role.SYSTEM.value, GIT_DIFF_PROMPT_PREFIX
+                            ),
                             create_conversation_message(Role.USER.value, content),
                         ],
                         completion_model,
@@ -91,7 +99,9 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     summarized = completion_model(
         build_conversation_from_conversation_messages(
             [
-                create_conversation_message(Role.SYSTEM.value, GIT_DIFF_SUMMARIZE_PROMPT),
+                create_conversation_message(
+                    Role.SYSTEM.value, GIT_DIFF_SUMMARIZE_PROMPT
+                ),
                 create_conversation_message(Role.USER.value, content),
             ],
             completion_model,

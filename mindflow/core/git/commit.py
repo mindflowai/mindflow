@@ -6,7 +6,11 @@ from mindflow.utils.constants import COAUTH_MSG
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
 from mindflow.utils.helpers import get_text_within_xml
-from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
+from mindflow.utils.prompt_builders import (
+    Role,
+    build_conversation_from_conversation_messages,
+    create_conversation_message,
+)
 from mindflow.utils.prompts import COMMIT_PROMPT_PREFIX
 
 
@@ -24,7 +28,9 @@ def run_commit(
         response: Union[ModelError, str] = query_model(
             build_conversation_from_conversation_messages(
                 [
-                    create_conversation_message(Role.SYSTEM.value, COMMIT_PROMPT_PREFIX),
+                    create_conversation_message(
+                        Role.SYSTEM.value, COMMIT_PROMPT_PREFIX
+                    ),
                     create_conversation_message(Role.USER.value, diff_output),
                 ],
                 query_model,

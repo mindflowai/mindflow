@@ -7,7 +7,11 @@ from mindflow.settings import Settings
 from mindflow.utils.command_parse import get_flag_values_from_args
 from mindflow.utils.errors import ModelError
 from mindflow.utils.execute import execute_no_trace
-from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
+from mindflow.utils.prompt_builders import (
+    Role,
+    build_conversation_from_conversation_messages,
+    create_conversation_message,
+)
 from mindflow.utils.prompts import PR_BODY_PREFIX
 from mindflow.utils.prompts import PR_TITLE_PREFIX
 

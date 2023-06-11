@@ -24,7 +24,11 @@ from mindflow.utils.helpers import (
     print_total_size_of_documents,
     print_total_tokens_and_ask_to_continue,
 )
-from mindflow.utils.prompt_builders import Role, build_conversation_from_conversation_messages, create_conversation_message
+from mindflow.utils.prompt_builders import (
+    Role,
+    build_conversation_from_conversation_messages,
+    create_conversation_message,
+)
 from mindflow.utils.prompts import INDEX_PROMPT_PREFIX
 from mindflow.utils.token import get_token_count_of_text_for_model
 

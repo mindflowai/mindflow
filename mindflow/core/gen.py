@@ -51,7 +51,9 @@ def run_code_generation(output_path: str, prompt: str):
     )
 
     response: Union[ModelError, str] = completion_model(
-        build_conversation_from_conversation_messages(conversation.messages, completion_model)
+        build_conversation_from_conversation_messages(
+            conversation.messages, completion_model
+        )
     )
     if isinstance(response, ModelError):
         return response.message
