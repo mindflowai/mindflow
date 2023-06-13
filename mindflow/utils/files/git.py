@@ -1,6 +1,4 @@
-"""
-Handles git related operations.
-"""
+"""Handles git related operations."""
 import logging
 import os
 import subprocess
@@ -9,15 +7,11 @@ from typing import Union
 
 
 class NotInGit(BaseException):
-    """
-    Raised when the given path is not within a git repository.
-    """
+    """Raised when the given path is not within a git repository."""
 
 
 class GitError(BaseException):
-    """
-    Raised when a git command fails.
-    """
+    """Raised when a git command fails."""
 
 
 def is_path_within_git_repo(path: Union[str, os.PathLike]) -> bool:
@@ -34,9 +28,6 @@ def is_path_within_git_repo(path: Union[str, os.PathLike]) -> bool:
 
 
 def get_all_unignored_git_files_from_path(path: Union[str, os.PathLike]) -> List[str]:
-    """
-    Extract all files from a git repository that are not gitignored.
-    """
     try:
         output = subprocess.run(
             ["git", "-C", os.fspath(path), "ls-files"],

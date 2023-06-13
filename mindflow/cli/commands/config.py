@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional
+from typing import List
 import click
 from mindflow.store.traits.json import save_json_store
 from mindflow.store.objects.mindflow_model import (

@@ -39,7 +39,6 @@ def get_token_count_from_document_query_for_model(
 ):
     texts = [query]
     for document_path in document_paths:
-        # check if directory
         if os.path.isdir(document_path):
             raise NotImplementedError("Directory support not yet implemented.")
 

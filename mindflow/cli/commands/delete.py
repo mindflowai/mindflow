@@ -1,6 +1,3 @@
-"""
-`delete` command
-"""
 from typing import List
 
 import click

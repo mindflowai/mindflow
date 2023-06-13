@@ -1,6 +1,3 @@
-"""
-`query` command
-"""
 import sys
 
 from typing import Dict, List, Union, Tuple

@@ -1,6 +1,3 @@
-"""
-`ask` command
-"""
 import click
 from typing import Tuple
 import os

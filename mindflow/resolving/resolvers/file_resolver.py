@@ -1,14 +1,13 @@
-"""File/Directory Resolver"""
 import os
 from typing import List, Union
 from mindflow.store.objects.document import DocumentReference
 
 from mindflow.store.objects.static_definition.document import DocumentType
-from mindflow.resolving.resolvers.resolver import Resolver
+from mindflow.resolving.resolvers.document_resolver import DocumentResolver
 from mindflow.utils.files.extract import extract_files_from_directory
 
 
-class FileResolver(Resolver):
+class FileResolver(DocumentResolver):
     @staticmethod
     def should_resolve(document_path: Union[str, os.PathLike]) -> bool:
         abs_path = os.path.abspath(document_path)

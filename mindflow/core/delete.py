@@ -1,6 +1,3 @@
-"""
-`delete` command
-"""
 from typing import List
 
 from mindflow.store.objects.document import (

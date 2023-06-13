@@ -1,6 +1,3 @@
-"""
-`index` command
-"""
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import sys

@@ -1,4 +1,4 @@
-"""Module for resolving documents to text."""
+"""Module for resolving documents types."""
 import sys
 from typing import List
 from mindflow.store.objects.document import DocumentReference

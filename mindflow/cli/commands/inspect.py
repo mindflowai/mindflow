@@ -1,8 +1,4 @@
-"""
-`inspect` command
-"""
 from typing import List
-
 import click
 
 from mindflow.core.inspect import run_inspect

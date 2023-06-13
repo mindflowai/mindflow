@@ -1,6 +1,3 @@
-"""
-`diff` command
-"""
 import concurrent.futures
 
 from typing import Dict, Optional, Union
@@ -25,9 +22,7 @@ from tqdm import tqdm
 
 
 def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
-    """
-    This function is used to generate a git diff response by feeding git diff to gpt.
-    """
+    """Execute git diff and summarize with GPT."""
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 

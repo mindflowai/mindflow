@@ -1,6 +1,3 @@
-"""
-Module for recursively extracting all files from a file path.
-"""
 import logging
 import os
 from typing import List
