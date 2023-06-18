@@ -6,9 +6,7 @@ from mindflow.store.objects.static_definition.mind_flow_model import (
 from mindflow.store.objects.static_definition.model import MODEL_STATIC
 from mindflow.store.objects.static_definition.service import SERVICE_STATIC
 
-
 T = TypeVar("T", bound="StaticStore")
-
 
 class StaticStore:
     def __init__(self, id: Union[str, dict]):

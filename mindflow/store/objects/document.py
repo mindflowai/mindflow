@@ -1,7 +1,6 @@
 import hashlib
 from typing import List, Optional, Union
 
-import numpy as np
 from mindflow.store.traits.pinecone import PineconeStore
 from mindflow.store.objects.static_definition.document import DocumentType
 
