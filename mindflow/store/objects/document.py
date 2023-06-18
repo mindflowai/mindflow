@@ -18,7 +18,7 @@ class DocumentReference:
 class Document(PineconeStore):
     # "{hash}"
     id: str
-    embedding: Optional[list]
+    embedding: list
     path: str
     document_type: str
     num_chunks: int

@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import List, TypeVar, Union
+from typing import List, Type, TypeVar, Union
 from typing import Optional
 
 
@@ -51,13 +51,13 @@ class JsonStore:
             self.id = id
 
     @classmethod
-    def load(cls, object_id: str) -> Optional[T]:
+    def load(cls: Type[T], object_id: str) -> Optional[T]:
         objects = collections.get(cls.__name__, {})
         object = objects.get(object_id)
         return cls(object) if object else None
 
     @classmethod
-    def load_bulk(cls, object_ids: List[str]) -> List[Optional[T]]:
+    def load_bulk(cls: Type[T], object_ids: List[str]) -> List[Optional[T]]:
         objects = collections.get(cls.__name__, {})
         loaded_objects: List[Optional[T]] = [
             cls(objects[object_id]) if objects.get(object_id) else None
@@ -66,7 +66,7 @@ class JsonStore:
         return loaded_objects
 
     @classmethod
-    def load_bulk_ignore_missing(cls, object_ids: List[str]) -> List[T]:
+    def load_bulk_ignore_missing(cls: Type[T], object_ids: List[str]) -> List[T]:
         objects = collections.get(cls.__name__, {})
         loaded_objects: List[Optional[T]] = [
             cls(objects[object_id]) if (objects.get(object_id)) else None

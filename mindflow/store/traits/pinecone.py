@@ -49,7 +49,7 @@ T = TypeVar("T", bound="PineconeStore")
 
 class PineconeStore:
     id: str
-    embedding: np.ndarray
+    embedding: list
 
     def __init__(self, id: Union[str, dict]):
         if isinstance(id, dict):
@@ -86,7 +86,7 @@ class PineconeStore:
         return cls(cls._convert_pinecone_format_to_object_format(object["matches"][0]))
 
     @classmethod
-    def load_bulk(cls, object_ids: List[str]) -> List[Optional[T]]:
+    def load_bulk(cls: Type[T], object_ids: List[str]) -> List[Optional[T]]:
         vectors = pinecone_db.get_index(cls.__name__).fetch(ids=object_ids)["vectors"]
         vector_list: List[Optional[T]] = [
             cls(cls._convert_pinecone_format_to_object_format(vectors[obj_id]))
@@ -97,7 +97,7 @@ class PineconeStore:
         return vector_list
 
     @classmethod
-    def load_bulk_ignore_missing(cls, object_ids: List[str]) -> List[T]:
+    def load_bulk_ignore_missing(cls: Type[T], object_ids: List[str]) -> List[T]:
         vectors = pinecone_db.get_index(cls.__name__).fetch(ids=object_ids)["vectors"]
         vector_list: List[Optional[T]] = [
             cls(cls._convert_pinecone_format_to_object_format(vectors[obj_id]))
@@ -123,7 +123,7 @@ class PineconeStore:
 
     @classmethod
     def query(
-        cls,
+        cls: Type[T],
         vector: np.ndarray,
         ids: List[str],
         top_k=100,
