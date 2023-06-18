@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple, TypeVar, Union
+from typing import List, Tuple, Type, TypeVar, Union
 from typing import Optional
 import numpy as np
 
@@ -79,7 +79,7 @@ class PineconeStore:
         )
 
     @classmethod
-    def load(cls, object_id: str) -> Optional[T]:
+    def load(cls: Type[T], object_id: str) -> Optional[T]:
         object = pinecone_db.get_index(cls.__name__).fetch(ids=[object_id])
         if not object:
             return None
