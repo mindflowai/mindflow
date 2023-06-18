@@ -8,6 +8,7 @@ from mindflow.store.objects.static_definition.service import SERVICE_STATIC
 
 T = TypeVar("T", bound="StaticStore")
 
+
 class StaticStore:
     def __init__(self, id: Union[str, dict]):
         if isinstance(id, dict):
