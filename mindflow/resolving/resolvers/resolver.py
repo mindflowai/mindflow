@@ -1,10 +1,10 @@
 """Base Resolver Class"""
 from typing import List
-from mindflow.db.objects.document import DocumentReference
+from mindflow.store.objects.document import DocumentReference
 from abc import ABC, abstractmethod
 
 
-class BaseResolver(ABC):
+class Resolver(ABC):
     @staticmethod
     @abstractmethod
     def should_resolve(document_path: str) -> bool:

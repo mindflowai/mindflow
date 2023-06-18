@@ -7,14 +7,14 @@ from typing import Dict, List, Union, Tuple
 
 import numpy as np
 
-from mindflow.db.objects.document import (
+from mindflow.store.objects.document import (
     Document,
     DocumentChunk,
     DocumentReference,
     get_document_chunk_ids,
     get_document_id,
 )
-from mindflow.db.objects.model import ConfiguredModel
+from mindflow.store.objects.model import ConfiguredModel
 from mindflow.resolving.resolve import resolve_paths_to_document_references
 from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
@@ -29,9 +29,7 @@ from mindflow.utils.token import get_token_count_of_text_for_model
 
 
 def run_query(document_paths: List[str], query: str):
-    """
-    This function is used to ask a custom question about files, folders, and websites.
-    """
+    """Query files, folders, and websites."""
     settings = Settings()
     completion_model = settings.mindflow_models.query.model
     embedding_model = settings.mindflow_models.embedding.model
@@ -48,7 +46,7 @@ def run_query(document_paths: List[str], query: str):
             document_hash_to_path[document_id] = document_reference.path
 
     document_chunk_ids = get_document_chunk_ids(
-        Document.load_bulk(list(document_hash_to_path.keys()), return_none=False)
+        Document.load_bulk_ignore_missing(list(document_hash_to_path.keys()))
     )
     top_document_chunks: List[DocumentChunk] = DocumentChunk.query(
         vector=np.array(embedding_model(query)).reshape(1, -1),

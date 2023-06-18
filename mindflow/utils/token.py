@@ -1,6 +1,6 @@
 import os
 from typing import Dict, List
-from mindflow.db.objects.model import ConfiguredModel
+from mindflow.store.objects.model import ConfiguredModel
 
 
 def get_token_count_of_text_for_model(model: ConfiguredModel, text: str) -> int:

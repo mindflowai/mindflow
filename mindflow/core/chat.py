@@ -1,7 +1,7 @@
 from typing import List, Union
 
-from mindflow.db.objects.conversation import Conversation
-from mindflow.db.objects.static_definition.conversation import ConversationID
+from mindflow.store.objects.conversation import Conversation
+from mindflow.store.objects.static_definition.conversation import ConversationID
 from mindflow.settings import Settings
 from mindflow.utils.errors import ModelError
 from mindflow.utils.prompt_builders import (

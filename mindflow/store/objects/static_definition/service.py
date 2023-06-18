@@ -1,7 +1,7 @@
-from mindflow.db.objects.static_definition.model import ModelID
-from mindflow.db.objects.static_definition.model import ModelOpenAI, ModelAnthropic
-from mindflow.db.objects.static_definition.model import ModelTextCompletionOpenAI
-from mindflow.db.objects.static_definition.model import ModelTextEmbeddingOpenAI
+from mindflow.store.objects.static_definition.model import ModelID
+from mindflow.store.objects.static_definition.model import ModelOpenAI, ModelAnthropic
+from mindflow.store.objects.static_definition.model import ModelTextCompletionOpenAI
+from mindflow.store.objects.static_definition.model import ModelTextEmbeddingOpenAI
 from mindflow.utils.enum import ExtendedEnum
 
 

@@ -1,36 +1,28 @@
 import sys
 from typing import Dict
 from typing import Optional
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.db.static import STATIC_DATABASE
+from mindflow.store.traits.static import StaticStore
+from mindflow.store.traits.json import JsonStore
 
-from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.model import ConfiguredModel
-from mindflow.db.objects.service import ConfiguredServices
-from mindflow.db.objects.static_definition.mind_flow_model import MindFlowModelID
-from mindflow.db.objects.static_definition.service import (
+from mindflow.store.objects.model import ConfiguredModel
+from mindflow.store.objects.service import ConfiguredServices
+from mindflow.store.objects.static_definition.mind_flow_model import MindFlowModelID
+from mindflow.store.objects.static_definition.service import (
     ServiceConfigParameterKey,
     ServiceID,
 )
 
 
-class MindFlowModel(BaseObject):
+class MindFlowModel(StaticStore):
     id: str  # index, query, embedding
     name: str
     defaults: Dict[str, str]
     model: str
 
-    _collection: Collection = Collection.MIND_FLOW_MODEL
-    _database = STATIC_DATABASE
 
-
-class MindFlowModelConfig(BaseObject):
+class MindFlowModelConfig(JsonStore):
     id: str
     model: str
-
-    _collection: Collection = Collection.CONFIGURATIONS
-    _database = JSON_DATABASE
 
 
 class ConfiguredMindFlowModel:
@@ -63,6 +55,7 @@ class ConfiguredMindFlowModel:
         self, mindflow_model_id: str, configured_services: ConfiguredServices
     ) -> str:
         model_id: Optional[str] = None
+        # print(configured_services.openai.__dict__)
         if hasattr(configured_services.openai, ServiceConfigParameterKey.API_KEY.value):
             service = configured_services.openai
             model_id = self.defaults.get(ServiceID.OPENAI.value, None)

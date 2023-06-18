@@ -1,4 +1,4 @@
-from mindflow.db.objects.static_definition.model_type import ModelType
+from mindflow.store.objects.static_definition.model_type import ModelType
 from mindflow.utils.enum import ExtendedEnum
 
 

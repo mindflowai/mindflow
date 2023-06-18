@@ -7,21 +7,19 @@ import anthropic
 import numpy as np
 from traitlets import Callable
 
-from mindflow.db.objects.static_definition.model_type import ModelType
+from mindflow.store.objects.static_definition.model_type import ModelType
 
 import tiktoken
 
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.db.static import STATIC_DATABASE
-from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.objects.static_definition.model import ModelID
-from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.store.traits.json import JsonStore
+from mindflow.store.traits.static import StaticStore
+from mindflow.store.objects.service import ServiceConfig
+from mindflow.store.objects.static_definition.model import ModelID
+from mindflow.store.objects.static_definition.service import ServiceID
 from mindflow.utils.errors import ModelError
 
 
-class Model(BaseObject):
+class Model(StaticStore):
     id: str
     api: str
     name: str
@@ -36,16 +34,10 @@ class Model(BaseObject):
     # Config
     soft_token_limit: int
 
-    _collection: Collection = Collection.MODEL
-    _database = STATIC_DATABASE
 
-
-class ModelConfig(BaseObject):
+class ModelConfig(JsonStore):
     id: str
     soft_token_limit: int
-
-    _collection: Collection = Collection.CONFIGURATIONS
-    _database = JSON_DATABASE
 
 
 class ConfiguredModel(Callable):

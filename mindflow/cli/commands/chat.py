@@ -8,9 +8,9 @@ import os
 from mindflow.core.chat import run_chat
 from mindflow.core.index import run_index
 from mindflow.core.query import run_query
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.objects.conversation import Conversation
-from mindflow.db.objects.static_definition.conversation import ConversationID
+from mindflow.store.traits.json import save_json_store
+from mindflow.store.objects.conversation import Conversation
+from mindflow.store.objects.static_definition.conversation import ConversationID
 
 
 def parse_chat_prompt_and_paths_from_args(prompt_args: Tuple[str]):
@@ -45,11 +45,11 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
             run_index(paths, verbose=False)
             click.echo("")
         print(run_query(paths, prompt))
-        JSON_DATABASE.save_file()
+        save_json_store()
         return
 
     print(run_chat(paths, prompt))
-    JSON_DATABASE.save_file()
+    save_json_store()
 
 
 @click.group(help="Manage conversation histories.")

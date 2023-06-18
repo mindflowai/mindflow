@@ -1,7 +1,7 @@
 """Module for resolving documents to text."""
 import sys
 from typing import List
-from mindflow.db.objects.document import DocumentReference
+from mindflow.store.objects.document import DocumentReference
 
 from mindflow.resolving.resolvers.file_resolver import FileResolver
 

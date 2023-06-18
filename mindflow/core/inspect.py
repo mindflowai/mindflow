@@ -4,7 +4,7 @@
 import json
 from typing import List
 
-from mindflow.db.objects.document import (
+from mindflow.store.objects.document import (
     Document,
     DocumentChunk,
     DocumentReference,
@@ -30,7 +30,7 @@ def run_inspect(document_paths: List[str]) -> str:
         if document_id is not None
     ]
     document_chunk_ids = get_document_chunk_ids(
-        Document.load_bulk(document_ids, return_none=False)
+        Document.load_bulk_ignore_missing(document_ids)
     )
 
     if not document_chunk_ids:
@@ -43,9 +43,7 @@ def run_inspect(document_paths: List[str]) -> str:
     inspect_output = json.dumps(
         {
             document_chunk.id: {
-                k: v
-                for k, v in document_chunk.todict(document_chunk).items()
-                if k != "embedding"
+                k: v for k, v in document_chunk.__dict__.items() if k != "embedding"
             }
             for document_chunk in document_chunks
             if document_chunk is not None

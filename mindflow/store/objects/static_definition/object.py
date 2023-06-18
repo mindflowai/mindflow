@@ -1,10 +1,10 @@
-from mindflow.db.objects.document import Document
-from mindflow.db.objects.mindflow_model import MindFlowModel
-from mindflow.db.objects.mindflow_model import MindFlowModelConfig
-from mindflow.db.objects.model import Model
-from mindflow.db.objects.model import ModelConfig
-from mindflow.db.objects.service import Service
-from mindflow.db.objects.service import ServiceConfig
+from mindflow.store.objects.document import Document
+from mindflow.store.objects.mindflow_model import MindFlowModel
+from mindflow.store.objects.mindflow_model import MindFlowModelConfig
+from mindflow.store.objects.model import Model
+from mindflow.store.objects.model import ModelConfig
+from mindflow.store.objects.service import Service
+from mindflow.store.objects.service import ServiceConfig
 from mindflow.utils.enum import ExtendedEnum
 
 

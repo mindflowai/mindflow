@@ -1,28 +1,20 @@
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.db.static import STATIC_DATABASE
-from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.store.traits.json import JsonStore
+from mindflow.store.traits.static import StaticStore
+from mindflow.store.objects.static_definition.service import ServiceID
 
 
-class Service(BaseObject):
+class Service(StaticStore):
     id: str
     name: str
     url: str
     api_url: str
 
-    _collection: Collection = Collection.SERVICE
-    _database = STATIC_DATABASE
 
-
-class ServiceConfig(BaseObject):
+class ServiceConfig(JsonStore):
     id: str
     api_key: str
     api_secret: str
     environment: str
-
-    _collection: Collection = Collection.CONFIGURATIONS
-    _database = JSON_DATABASE
 
 
 class ConfiguredService:

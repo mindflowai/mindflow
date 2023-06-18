@@ -2,11 +2,8 @@ import hashlib
 from typing import List, Optional, Union
 
 import numpy as np
-from mindflow.db.db.pinecone import PINECONE_DATABASE
-
-from mindflow.db.db.database import Collection
-from mindflow.db.objects.base import BaseObject
-from mindflow.db.objects.static_definition.document import DocumentType
+from mindflow.store.traits.pinecone import PineconeStore
+from mindflow.store.objects.static_definition.document import DocumentType
 
 
 class DocumentReference:
@@ -18,42 +15,25 @@ class DocumentReference:
         self.document_type = document_type.value
 
 
-class Document(BaseObject):
+class Document(PineconeStore):
     # "{hash}"
     id: str
-    embedding: Optional[np.ndarray]
+    embedding: Optional[list]
     path: str
     document_type: str
     num_chunks: int
     size: int
     tokens: int
 
-    _collection = Collection.DOCUMENT
-    _database = PINECONE_DATABASE
 
-
-class DocumentChunk(BaseObject):
+class DocumentChunk(PineconeStore):
     # ("{hash}_{chunk_id}"
     id: str
-    embedding: np.ndarray
+    embedding: list
     summary: str
     start_pos: int
     end_pos: int
     tokens = Optional[int]
-
-    _collection = Collection.DOCUMENT_CHUNK
-    _database = PINECONE_DATABASE
-
-    @classmethod
-    def query(
-        cls, vector: np.ndarray, ids: List[str], top_k=100, include_metadata=True
-    ):
-        return [
-            cls(chunk)
-            for chunk in cls._database.query(
-                cls._collection.value, vector, ids, top_k, include_metadata
-            )
-        ]
 
 
 def read_file_supported_encodings(path: str, supported_encodings=["utf-8", "us-ascii"]):
@@ -83,6 +63,10 @@ def get_document_id(path: str, document_type: str) -> Optional[str]:
 def get_document_chunk_ids(documents: Union[List[Document], Document]):
     if isinstance(documents, Document):
         documents = [documents]
+
+    for document in documents:
+        if not hasattr(document, "num_chunks"):
+            print(document.__dict__)
 
     total_chunks = sum([document.num_chunks + 1 for document in documents])
     document_chunk_ids = [""] * int(total_chunks)
