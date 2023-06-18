@@ -26,7 +26,7 @@ def run_delete(document_paths: List[str]):
         ]
         if document_id is not None
     ]
-    documents: List[Document] = Document.load_bulk(document_ids, return_none=False)
+    documents: List[Document] = Document.load_bulk_ignore_missing(document_ids)
     if not documents:
         return "No documents to delete"
 

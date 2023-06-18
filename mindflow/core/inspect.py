@@ -36,8 +36,8 @@ def run_inspect(document_paths: List[str]) -> str:
     if not document_chunk_ids:
         return "No documents to inspect"
 
-    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk(
-        document_chunk_ids, return_none=False
+    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk_ignore_missing(
+        document_chunk_ids
     )
 
     inspect_output = json.dumps(

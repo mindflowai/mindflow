@@ -7,7 +7,7 @@ from mindflow.store.objects.static_definition.model import MODEL_STATIC
 from mindflow.store.objects.static_definition.service import SERVICE_STATIC
 
 
-T = TypeVar("T", bound="PineconeStore")
+T = TypeVar("T", bound="StaticStore")
 
 
 class StaticStore:

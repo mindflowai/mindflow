@@ -41,6 +41,8 @@ T = TypeVar("T", bound="JsonStore")
 
 
 class JsonStore:
+    id: str
+
     def __init__(self, id: Union[str, dict]):
         if isinstance(id, dict):
             if not "id" in id:

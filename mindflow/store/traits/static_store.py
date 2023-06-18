@@ -1,4 +1,4 @@
-from typing import TypeVar, Union
+from typing import TypeVar, Union, Type
 from mindflow.store import Collection
 from mindflow.store.objects.static_definition.mind_flow_model import (
     MINDFLOW_MODEL_STATIC,
@@ -21,7 +21,7 @@ class StaticStore:
             self.id = id
 
     @classmethod
-    def load(cls, object_key: str) -> T:
+    def load(cls: Type[T], object_key: str) -> T:
         if cls.__name__ == Collection.SERVICE.value:
             return cls(SERVICE_STATIC[object_key])
         elif cls.__name__ == Collection.MODEL.value:
