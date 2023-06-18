@@ -42,7 +42,7 @@ T = TypeVar("T", bound="JsonStore")
 
 class JsonStore:
     id: str
-
+    
     def __init__(self, id: Union[str, dict]):
         if isinstance(id, dict):
             if not "id" in id:
@@ -105,12 +105,12 @@ class JsonStore:
 
     @classmethod
     def save_bulk(cls, objects: List[T]):
-        objects = collections.get(cls.__name__, {})
-        if objects == {}:
-            collections[cls.__name__] = objects
+        saved_objects = collections.get(cls.__name__, {})
+        if not saved_objects:
+            collections[cls.__name__] = saved_objects
 
         for object in objects:
             if not hasattr(object, "id"):
                 raise ValueError("No ID found in object")
 
-            objects[object.id] = object.__dict__
+            saved_objects[object.id] = object.__dict__

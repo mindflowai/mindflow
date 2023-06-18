@@ -81,7 +81,9 @@ class ConfiguredModel(Callable):
             pass
 
         service_config = ServiceConfig.load(f"{self.service}_config")
-        self.api_key = service_config.api_key
+        if service_config:
+            if hasattr(service_config, "api_key"):
+                self.api_key = service_config.api_key
 
     def openai_chat_completion(
         self,
