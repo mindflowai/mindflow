@@ -1,5 +1,5 @@
-from mindflow.db.objects.mindflow_model import ConfiguredMindFlowModels
-from mindflow.db.objects.service import ConfiguredServices
+from mindflow.store.objects.mindflow_model import ConfiguredMindFlowModels
+from mindflow.store.objects.service import ConfiguredServices
 
 
 class Settings:

@@ -10,14 +10,14 @@ from typing import List, Optional, TypeVar
 from alive_progress import alive_bar
 import numpy as np
 
-from mindflow.db.objects.document import (
+from mindflow.store.objects.document import (
     Document,
     DocumentChunk,
     DocumentReference,
     get_document_id,
 )
-from mindflow.db.objects.model import ConfiguredModel
-from mindflow.db.objects.document import read_document
+from mindflow.store.objects.model import ConfiguredModel
+from mindflow.store.objects.document import read_document
 from mindflow.resolving.resolve import resolve_paths_to_document_references
 from mindflow.settings import Settings
 from mindflow.utils.helpers import (
@@ -79,10 +79,16 @@ def index_documents(
                 document_chunks = document_chunk_future.result()
 
                 document.num_chunks = len(document_chunks)
-                document.embedding = np.mean(
-                    [document_chunk.embedding for document_chunk in document_chunks],
-                    axis=0,
+                document.embedding = list(
+                    np.mean(
+                        [
+                            document_chunk.embedding
+                            for document_chunk in document_chunks
+                        ],
+                        axis=0,
+                    )
                 )
+
                 DocumentChunk.save_bulk(document_chunks)
                 document.save()
 

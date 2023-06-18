@@ -1,7 +1,7 @@
 from mindflow.cli.commands.config import select_option
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.objects.service import ServiceConfig
-from mindflow.db.objects.static_definition.service import ServiceConfigID
+from mindflow.store.traits.json import save_json_store
+from mindflow.store.objects.service import ServiceConfig
+from mindflow.store.objects.static_definition.service import ServiceConfigID
 
 
 def run_login():
@@ -26,4 +26,4 @@ def run_login():
 
     service_config.save()
 
-    JSON_DATABASE.save_file()
+    save_json_store()

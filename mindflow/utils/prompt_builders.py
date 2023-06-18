@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Dict, Union
 from typing import List
-from mindflow.db.objects.model import ConfiguredModel
+from mindflow.store.objects.model import ConfiguredModel
 
-from mindflow.db.objects.static_definition.service import ServiceID
+from mindflow.store.objects.static_definition.service import ServiceID
 import anthropic
 from mindflow.utils.constants import MinimumReservedLength
 

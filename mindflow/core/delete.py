@@ -3,7 +3,7 @@
 """
 from typing import List
 
-from mindflow.db.objects.document import (
+from mindflow.store.objects.document import (
     Document,
     DocumentChunk,
     DocumentReference,
@@ -26,14 +26,13 @@ def run_delete(document_paths: List[str]):
         ]
         if document_id is not None
     ]
-    documents: List[Document] = Document.load_bulk(document_ids, return_none=False)
+    documents: List[Document] = Document.load_bulk_ignore_missing(document_ids)
     if not documents:
         return "No documents to delete"
 
     document_chunk_ids = get_document_chunk_ids(documents)
-    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk(
+    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk_ignore_missing(
         document_chunk_ids,
-        return_none=False,
     )
     if not document_chunks:
         return "No documents to delete"

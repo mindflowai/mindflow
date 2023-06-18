@@ -7,7 +7,7 @@ from typing import Dict, Optional, Union
 from typing import List
 from typing import Tuple
 
-from mindflow.db.objects.model import ConfiguredModel
+from mindflow.store.objects.model import ConfiguredModel
 from mindflow.settings import Settings
 from mindflow.utils.constants import MinimumReservedLength
 from mindflow.utils.errors import ModelError

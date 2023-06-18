@@ -1,18 +1,17 @@
 import sys
-from typing import List
+from typing import List, Optional
 import click
-from mindflow.db.db.json import JSON_DATABASE
-from mindflow.db.objects.mindflow_model import (
+from mindflow.store.traits.json import save_json_store
+from mindflow.store.objects.mindflow_model import (
     MindFlowModel,
     MindFlowModelConfig,
     MindFlowModelID,
 )
 
-from mindflow.db.objects.static_definition.model import (
+from mindflow.store.objects.static_definition.model import (
     ModelID,
 )
-from mindflow.db.objects.model import Model
-from mindflow.db.utils import get_or_create_object
+from mindflow.store.objects.model import Model
 
 
 @click.command(
@@ -26,7 +25,7 @@ def config():
     if selected_config == "model":
         configure_model()
 
-    JSON_DATABASE.save_file()
+    save_json_store()
 
 
 def configure_model():
@@ -73,10 +72,9 @@ def configure_query_model():
         model_options,
         model_descriptions,
     )
-
-    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
-        MindFlowModelConfig, f"{MindFlowModelID.QUERY.value}_config"
-    )
+    mindflow_model_config: MindFlowModelConfig = MindFlowModelConfig.load(
+        f"{MindFlowModelID.QUERY.value}_config"
+    ) or MindFlowModelConfig(f"{MindFlowModelID.QUERY.value}_config")
     mindflow_model_config.model = selected_model.id
     mindflow_model_config.save()
 
@@ -100,9 +98,9 @@ def configure_index_model():
         model_options,
         model_descriptions,
     )
-    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
-        MindFlowModelConfig, f"{MindFlowModelID.INDEX.value}_config"
-    )
+    mindflow_model_config: MindFlowModelConfig = MindFlowModelConfig.load(
+        f"{MindFlowModelID.INDEX.value}_config"
+    ) or MindFlowModelConfig(f"{MindFlowModelID.INDEX.value}_config")
     mindflow_model_config.model = selected_model.id
     mindflow_model_config.save()
 
@@ -121,10 +119,9 @@ def configure_embedding_model():
         model_options,
         model_descriptions,
     )
-
-    mindflow_model_config: MindFlowModelConfig = get_or_create_object(
-        MindFlowModelConfig, f"{MindFlowModelID.EMBEDDING.value}_config"
-    )
+    mindflow_model_config: MindFlowModelConfig = MindFlowModelConfig.load(
+        f"{MindFlowModelID.EMBEDDING.value}_config"
+    ) or MindFlowModelConfig(f"{MindFlowModelID.EMBEDDING.value}_config")
     mindflow_model_config.model = selected_model.id
     mindflow_model_config.save()
 

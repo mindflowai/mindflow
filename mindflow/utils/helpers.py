@@ -1,8 +1,8 @@
 import sys
 from typing import List
 
-from mindflow.db.objects.document import Document
-from mindflow.db.objects.model import ConfiguredModel
+from mindflow.store.objects.document import Document
+from mindflow.store.objects.model import ConfiguredModel
 
 
 def print_total_size_of_documents(documents: List[Document]):
