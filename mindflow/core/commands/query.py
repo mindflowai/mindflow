@@ -13,7 +13,7 @@ from mindflow.core.types.document import (
 from mindflow.core.types.model import ConfiguredModel
 from mindflow.core.resolving.resolve import resolve_paths_to_document_references
 from mindflow.core.settings import Settings
-from mindflow.core.commands.constants import MinimumReservedLength
+from mindflow.core.constants import MinimumReservedLength
 from mindflow.core.errors import ModelError
 from mindflow.core.prompt_builders import (
     Role,

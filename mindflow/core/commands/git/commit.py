@@ -2,7 +2,6 @@ from typing import Tuple, Optional, Union
 
 from mindflow.core.commands.git.diff import run_diff
 from mindflow.core.settings import Settings
-from mindflow.core.commands.constants import COAUTH_MSG
 from mindflow.core.errors import ModelError
 from mindflow.core.execute import execute_no_trace
 from mindflow.core.text_processing.xml import get_text_within_xml
@@ -13,6 +12,7 @@ from mindflow.core.prompt_builders import (
 )
 from mindflow.core.prompts import COMMIT_PROMPT_PREFIX
 
+COAUTH_MSG = "Co-authored-by: MindFlow <mf@mindflo.ai>"
 
 def run_commit(
     args: Tuple[str], message_overwrite: Optional[str] = None

@@ -15,10 +15,6 @@ from mindflow.core.prompt_builders import (
 )
 from mindflow.core.token_counting import get_token_count_of_messages_for_model
 
-
-CODE_GEN_SYSTEM_PROMPT = "All responses must be valid code for the specified language. Do not use any special characters or symbols, any additional information must be put in comments."
-
-
 def run_code_generation(output_path: str, prompt: str):
     settings = Settings()
     completion_model = settings.mindflow_models.query.model

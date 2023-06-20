@@ -7,7 +7,7 @@ from typing import Tuple
 
 from mindflow.core.types.model import ConfiguredModel
 from mindflow.core.settings import Settings
-from mindflow.core.commands.constants import MinimumReservedLength
+from mindflow.core.constants import MinimumReservedLength
 from mindflow.core.errors import ModelError
 from mindflow.core.execute import execute_no_trace
 from mindflow.core.prompt_builders import (

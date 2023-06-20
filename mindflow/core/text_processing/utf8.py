@@ -1,6 +1,3 @@
-"""Quick UTF-8 validation."""
-
-
 def is_valid_utf8(document_text: str) -> bool:
     try:
         document_text.encode("utf-8")

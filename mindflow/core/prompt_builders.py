@@ -6,7 +6,7 @@ from mindflow.core.types.model import ConfiguredModel
 import anthropic
 
 from mindflow.core.types.definitions.service import ServiceID
-from mindflow.core.commands.constants import MinimumReservedLength
+from mindflow.core.constants import MinimumReservedLength
 from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
