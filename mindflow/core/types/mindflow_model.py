@@ -1,9 +1,15 @@
 import sys
-from typing import Dict
+from typing import Dict, Generic, TypeVar, cast
+from mindflow.core.types.definitions.model import ModelID
 from mindflow.core.types.store_traits.static import StaticStore
 from mindflow.core.types.store_traits.json import JsonStore
 
-from mindflow.core.types.model import ConfiguredModel
+from mindflow.core.types.model import (
+    ConfiguredModel,
+    ConfiguredOpenAIChatCompletionModel,
+    ConfiguredAnthropicChatCompletionModel,
+    ConfiguredOpenAITextEmbeddingModel,
+)
 from mindflow.core.types.service import ConfiguredServices
 from mindflow.core.types.definitions.mind_flow_model import MindFlowModelID
 from mindflow.core.types.definitions.service import (
@@ -24,11 +30,14 @@ class MindFlowModelConfig(JsonStore):
     model: str
 
 
-class ConfiguredMindFlowModel:
+T = TypeVar("T", bound="ConfiguredModel")
+
+
+class ConfiguredMindFlowModel(Generic[T]):
     id: str  # index, query, embedding
     name: str
     defaults: Dict[str, str]
-    model: ConfiguredModel
+    model: T
 
     def __init__(self, mindflow_model_id: str, configured_services: ConfiguredServices):
         self.id = mindflow_model_id
@@ -44,7 +53,14 @@ class ConfiguredMindFlowModel:
         ) is None:
             model_id = self.get_default_model_id(mindflow_model_id, configured_services)
 
-        self.model = ConfiguredModel(model_id)
+        if model_id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_4.value]:
+            self.model = cast(T, ConfiguredOpenAIChatCompletionModel(model_id))
+        elif model_id in [ModelID.CLAUDE_INSTANT_V1.value, ModelID.CLAUDE_V1.value]:
+            self.model = cast(T, ConfiguredAnthropicChatCompletionModel(model_id))
+        elif model_id == ModelID.TEXT_EMBEDDING_ADA_002.value:
+            self.model = cast(T, ConfiguredOpenAITextEmbeddingModel(model_id))
+        else:
+            raise Exception("Unsupported model: " + model_id)
 
     def get_default_model_id(
         self, mindflow_model_id: str, configured_services: ConfiguredServices

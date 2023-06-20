@@ -67,17 +67,3 @@ MINDFLOW_MODEL_STATIC = {
         MindFlowModelParameterKey.DESCRIPTION.value: MindFlowModelDescription.EMBEDDING.value,
     },
 }
-
-# MindFlowModelUnion = Union[
-#     MindFlowModelID,
-#     MindFlowModelDefaults,
-#     MindFlowModelName,
-#     MindFlowModelType,
-#     MindFlowModelDescription,
-# ]
-
-
-# def get_mind_flow_model_static(
-#     static: Type[MindFlowModelUnion], key: MindFlowModelUnion
-# ) -> MindFlowModelUnion:
-#     return static.__members__[key.name]

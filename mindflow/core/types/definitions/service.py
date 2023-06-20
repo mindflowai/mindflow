@@ -118,19 +118,3 @@ SERVICE_STATIC = {
         ServiceParameterKey.API_URL.value: ServiceURL.PINECONE.value,
     },
 }
-
-
-# ServiceUnion = Union[
-#     ServiceID,
-#     ServiceParameterKey,
-#     ServiceConfigParameterKey,
-#     ServiceName,
-#     ServiceURL,
-#     ServiceModel,
-#     ServiceModelTypeTextEmbedding,
-#     ServiceModelTypeTextCompletion,
-# ]
-
-
-# def get_service_static(static: Type[ServiceUnion], key: ServiceUnion) -> ServiceUnion:
-#     return static.__members__[key.name]
