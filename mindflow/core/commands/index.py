@@ -39,7 +39,7 @@ def run_index(document_paths: List[str]) -> str:
         indexable_documents := get_indexable_documents(
             document_references, completion_model
         )
-    ):  
+    ):
         return "No documents to index"
 
     print_total_size_of_documents(indexable_documents)
