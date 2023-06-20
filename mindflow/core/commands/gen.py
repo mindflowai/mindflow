@@ -51,7 +51,9 @@ def run_code_generation(output_path: str, prompt: str):
     if isinstance(response, ModelError):
         return response.message
 
-    parse_and_write_file(get_text_within_xml(response, "GEN"), output_path)
+    with open(output_path, "w") as f:
+        f.write(get_text_within_xml(response, "GEN"))
+
     conversation.total_tokens = get_token_count_of_messages_for_model(
         conversation.messages, completion_model
     )
@@ -59,8 +61,3 @@ def run_code_generation(output_path: str, prompt: str):
     conversation.save()
 
     return f"Code generation complete. Your code is ready to go at {output_path}!"
-
-
-def parse_and_write_file(response: str, output_path: str):
-    with open(output_path, "w") as f:
-        f.write(response)

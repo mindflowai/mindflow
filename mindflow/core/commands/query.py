@@ -30,16 +30,18 @@ def run_query(document_paths: List[str], query: str):
     completion_model = settings.mindflow_models.query.model
     embedding_model = settings.mindflow_models.embedding.model
 
-    document_hash_to_path: Dict[str, str] = {}
-    for document_reference in resolve_paths_to_document_references(document_paths):
+    document_hash_to_path: Dict[str, str] = {
+        document_id: doc_reference.path
+        for doc_reference in resolve_paths_to_document_references(document_paths)
         if (
             document_id := get_document_id(
-                document_reference.path, document_reference.document_type
+                doc_reference.path, doc_reference.document_type
             )
-        ) is not None:
-            document_hash_to_path[document_id] = document_reference.path
+        )
+        is not None
+    }
 
-    document_chunk_ids = get_document_chunk_ids(
+    document_chunk_ids: List[str] = get_document_chunk_ids(
         Document.load_bulk_ignore_missing(list(document_hash_to_path.keys()))
     )
 
@@ -89,12 +91,11 @@ def select_and_trim_text_to_fit_context_window(
     for path, document_chunk in top_document_chunks:
         with open(path, "r", encoding="utf-8") as file:
             file.seek(document_chunk.start_pos)
-            text = file.read(
-                int(document_chunk.end_pos) - int(document_chunk.start_pos)
+            selected_content += formatted_chunk(
+                path,
+                document_chunk,
+                file.read(int(document_chunk.end_pos) - int(document_chunk.start_pos)),
             )
-
-            selected_content += formatted_chunk(path, document_chunk, text)
-
             if (
                 get_token_count_of_text_for_model(
                     completion_model, query + selected_content
@@ -113,11 +114,10 @@ def select_and_trim_text_to_fit_context_window(
             <= completion_model.hard_token_limit - MinimumReservedLength.QUERY.value
         ):
             left = mid + 1
-        else:
-            right = mid - 1
+            continue
+        right = mid - 1
 
-    selected_content = selected_content[:right]
-    return selected_content
+    return selected_content[:right]
 
 
 def formatted_chunk(path: str, document_chunk: DocumentChunk, text: str) -> str:

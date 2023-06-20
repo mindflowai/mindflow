@@ -34,11 +34,12 @@ def run_index(document_paths: List[str], verbose: bool = True) -> None:
     document_references: List[DocumentReference] = resolve_paths_to_document_references(
         document_paths
     )
-    indexable_documents: List[Document] = get_indexable_documents(
-        document_references, completion_model
-    )
 
-    if not indexable_documents:
+    if not (
+        indexable_documents := get_indexable_documents(
+            document_references, completion_model
+        )
+    ):
         if verbose:
             print("No documents to index")
         return
@@ -68,11 +69,14 @@ def print_total_tokens_and_ask_to_continue(
     if total_cost_usd > usd_threshold:
         print(f"Total cost: ${total_cost_usd:.2f}")
         while True:
-            user_input = input("Would you like to continue? (yes/no): ")
-            if user_input.lower() in ["no", "n"]:
+            if (
+                user_input := input("Would you like to continue? (yes/no): ").lower()
+            ) in ["no", "n"]:
                 sys.exit(0)
-            elif user_input.lower() in ["yes", "y"]:
+            elif user_input in ["yes", "y"]:
                 break
+            else:
+                print("Invalid input. Please try again.")
 
 
 def index_documents(
@@ -125,18 +129,17 @@ def get_indexable_documents(
         ]
         if document_id is not None
     ]
-    documents = Document.load_bulk(document_ids)
-    indexable_documents = []
-
-    for document, document_reference in zip(documents, document_references):
+    documents: List[Optional[Document]] = Document.load_bulk(document_ids)
+    return [
+        indexable_document
+        for document, document_reference in zip(documents, document_references)
         if (
-            indexable_doc := get_indexable_document(
+            indexable_document := get_indexable_document(
                 document, document_reference, completion_model
             )
-        ) is not None:
-            indexable_documents.append(indexable_doc)
-
-    return indexable_documents
+        )
+        is not None
+    ]
 
 
 def get_indexable_document(
@@ -355,9 +358,7 @@ def create_hierarchical_summary_tree(
     )
 
     parent_id = f"parent_{left_tree.id.split('_')[1]}_{right_tree.id.split('_')[1]}"
-    parent_node = Node(parent_id, merged_summary, [left_tree, right_tree])
-
-    return parent_node
+    return Node(parent_id, merged_summary, [left_tree, right_tree])
 
 
 def collect_leaves_with_embeddings_from_appended_branch_summaries(
@@ -369,12 +370,10 @@ def collect_leaves_with_embeddings_from_appended_branch_summaries(
         node.embedding = embedding_model(f"{ancestor_summaries} {node.summary}")
         return [node]
 
-    leaves = []
-    for child in node.children:
-        leaves.extend(
-            collect_leaves_with_embeddings_from_appended_branch_summaries(
-                child, f"{ancestor_summaries} {node.summary}", embedding_model
-            )
+    return [
+        leaf
+        for child in node.children
+        for leaf in collect_leaves_with_embeddings_from_appended_branch_summaries(
+            child, f"{ancestor_summaries} {node.summary}", embedding_model
         )
-
-    return leaves
+    ]

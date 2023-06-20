@@ -17,9 +17,7 @@ from mindflow.core.prompts import PR_TITLE_PREFIX
 
 
 def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = None):
-    base_branch_name = get_flag_values_from_args(args, ["--base", "-B"])
-
-    if base_branch_name is None:
+    if (base_branch_name := get_flag_values_from_args(args, ["--base", "-B"])) is None:
         base_branch_name = (
             subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
             .decode()

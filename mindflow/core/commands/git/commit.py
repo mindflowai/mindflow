@@ -22,8 +22,7 @@ def run_commit(
     query_model = settings.mindflow_models.query.model
 
     if message_overwrite is None:
-        diff_output = run_diff(("--cached",))
-        if diff_output is None:
+        if (diff_output := run_diff(("--cached",))) is None:
             return "Nothing to commit."
 
         response: Union[ModelError, str] = query_model(

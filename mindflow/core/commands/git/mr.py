@@ -9,9 +9,9 @@ from mindflow.core.execute import execute_no_trace
 def run_mr(
     args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
 ):
-    base_branch_name = get_flag_values_from_args(args, ["--target-branch", "-b"])
-
-    if base_branch_name is None:
+    if (
+        base_branch_name := get_flag_values_from_args(args, ["--target-branch", "-b"])
+    ) is None:
         base_branch_name = (
             subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD"])
             .decode()
