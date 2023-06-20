@@ -39,7 +39,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 "Indexing paths... Note: this may take a while, if you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n"
             )
 
-            run_index(paths, verbose=False)
+            run_index(paths)
             click.echo("")
         print(run_query(paths, prompt))
         save_json_store()
