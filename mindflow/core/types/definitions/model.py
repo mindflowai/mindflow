@@ -282,16 +282,3 @@ MODEL_STATIC: dict = {
         ModelParameterKey.CONFIG_DESCRIPTION.value: ModelConfigDescription.TEXT_EMBEDDING_ADA_002.value,
     },
 }
-
-
-# ModelUnion = Union[
-#     ModelID,
-#     ModelParameterKey,
-#     ModelName,
-#     ModelHardTokenLimit,
-#     ModelDescription,
-# ]
-
-
-# def get_model_static(static: Type[ModelUnion], key: ModelUnion) -> ModelUnion:
-#     return static.__members__[key.name]
