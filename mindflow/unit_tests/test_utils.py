@@ -1,4 +1,4 @@
-from mindflow.utils.diff_parser import parse_git_diff
+from mindflow.core.commands.git.diff import parse_git_diff
 
 
 def test_diff_parser():
