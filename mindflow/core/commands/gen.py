@@ -15,6 +15,7 @@ from mindflow.core.prompt_builders import (
 )
 from mindflow.core.token_counting import get_token_count_of_messages_for_model
 
+
 def run_code_generation(output_path: str, prompt: str):
     settings = Settings()
     completion_model = settings.mindflow_models.query.model

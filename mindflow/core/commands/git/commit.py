@@ -14,6 +14,7 @@ from mindflow.core.prompts import COMMIT_PROMPT_PREFIX
 
 COAUTH_MSG = "Co-authored-by: MindFlow <mf@mindflo.ai>"
 
+
 def run_commit(
     args: Tuple[str], message_overwrite: Optional[str] = None
 ) -> Optional[str]:
