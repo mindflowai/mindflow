@@ -32,6 +32,7 @@ class MindFlowModelConfig(JsonStore):
 
 T = TypeVar("T", bound="ConfiguredModel")
 
+
 class ConfiguredMindFlowModel(Generic[T]):
     id: str  # index, query, embedding
     name: str

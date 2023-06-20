@@ -37,6 +37,7 @@ class ModelConfig(JsonStore):
     id: str
     soft_token_limit: int
 
+
 class ConfiguredModel(ABC, Callable):
     id: str
     name: str
