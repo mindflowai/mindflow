@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from mindflow.core.commands.git.pr import create_title_and_body
 from mindflow.core.command_parse import get_flag_values_from_args
-from mindflow.core.execute import execute_no_trace
+from mindflow.core.execute import execute_command_and_print_without_trace
 
 
 def run_mr(
@@ -31,7 +31,7 @@ def run_mr(
         return
 
     print(
-        execute_no_trace(
+        execute_command_and_print_without_trace(
             ["glab", "mr", "create"]
             + list(args)
             + ["--title", title, "--description", description]

@@ -1,7 +1,7 @@
 from typing import Tuple
 
-from mindflow.core.execute import execute_no_trace
+from mindflow.core.execute import execute_command_and_print_without_trace
 
 
 def run_push(args: Tuple[str]):
-    print(execute_no_trace(["git", "push"] + list(args)))
+    print(execute_command_and_print_without_trace(["git", "push"] + list(args)))

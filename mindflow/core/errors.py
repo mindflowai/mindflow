@@ -3,8 +3,6 @@ CONNECTION_MESSAGE = "Please check your internet connection and try again."
 
 
 class ModelError(Exception):
-    """Base class for all exceptions raised by this module."""
-
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
@@ -43,8 +41,6 @@ class ModelError(Exception):
 
 
 class EmbeddingModelError(Exception):
-    """Base class for all exceptions raised by this module."""
-
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

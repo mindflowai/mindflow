@@ -9,7 +9,7 @@ from mindflow.core.types.model import ConfiguredModel
 from mindflow.core.settings import Settings
 from mindflow.core.constants import MinimumReservedLength
 from mindflow.core.errors import ModelError
-from mindflow.core.execute import execute_no_trace
+from mindflow.core.execute import execute_command_and_print_without_trace
 from mindflow.core.prompt_builders import (
     Role,
     build_prompt_from_conversation_messages,
@@ -26,7 +26,7 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 
-    diff_result = execute_no_trace(["git", "diff"] + list(args)).strip()
+    diff_result = execute_command_and_print_without_trace(["git", "diff"] + list(args)).strip()
     if not diff_result:
         return None
 

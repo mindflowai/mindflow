@@ -6,7 +6,7 @@ from mindflow.core.commands.git.diff import run_diff
 from mindflow.core.settings import Settings
 from mindflow.core.command_parse import get_flag_values_from_args
 from mindflow.core.errors import ModelError
-from mindflow.core.execute import execute_no_trace
+from mindflow.core.execute import execute_command_and_print_without_trace
 from mindflow.core.prompt_builders import (
     Role,
     build_prompt_from_conversation_messages,
@@ -35,7 +35,7 @@ def run_pr(args: Tuple[str], title: Optional[str] = None, body: Optional[str] = 
         return
 
     print(
-        execute_no_trace(
+        execute_command_and_print_without_trace(
             ["gh", "pr", "create"] + list(args) + ["--title", title, "--body", body]
         )
     )
