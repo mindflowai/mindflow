@@ -45,4 +45,6 @@ def run_commit(
             + list(args)
         )
 
-    return execute_command_and_print_without_trace(["git", "commit", "-m"] + [message_overwrite] + list(args))
+    return execute_command_and_print_without_trace(
+        ["git", "commit", "-m"] + [message_overwrite] + list(args)
+    )

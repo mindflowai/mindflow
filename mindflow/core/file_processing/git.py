@@ -5,6 +5,7 @@ import subprocess
 from typing import List
 from typing import Union
 
+
 def is_path_within_git_repo(path: Union[str, os.PathLike]) -> bool:
     try:
         output = subprocess.run(

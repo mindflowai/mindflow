@@ -26,7 +26,7 @@ from mindflow.core.prompts import INDEX_PROMPT_PREFIX
 from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
-def run_index(document_paths: List[str], verbose: bool = True) -> None:
+def run_index(document_paths: List[str]) -> str:
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
@@ -40,14 +40,14 @@ def run_index(document_paths: List[str], verbose: bool = True) -> None:
             document_references, completion_model
         )
     ):
-        if verbose:
-            print("No documents to index")
-        return
+        return "No documents to index"
 
     print_total_size_of_documents(indexable_documents)
     print_total_tokens_and_ask_to_continue(indexable_documents, completion_model)
 
     index_documents(indexable_documents, completion_model, embedding_model)
+
+    return "Successfully indexed documents"
 
 
 def print_total_size_of_documents(documents: List[Document]):
@@ -155,14 +155,14 @@ def get_indexable_document(
         return None
 
     document_text_bytes = document_text.encode("utf-8")
-    doc_hash = hashlib.sha256(document_text_bytes).hexdigest()
+    document_hash = hashlib.sha256(document_text_bytes).hexdigest()
 
-    if document and document.id == doc_hash:
+    if document and document.id == document_hash:
         return None
 
     return Document(
         {
-            "id": doc_hash,
+            "id": document_hash,
             "path": document_reference.path,
             "document_type": document_reference.document_type,
             "num_chunks": document.num_chunks if document else 0,

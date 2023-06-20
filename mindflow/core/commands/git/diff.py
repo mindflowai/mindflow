@@ -26,7 +26,9 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.query.model
 
-    diff_result = execute_command_and_print_without_trace(["git", "diff"] + list(args)).strip()
+    diff_result = execute_command_and_print_without_trace(
+        ["git", "diff"] + list(args)
+    ).strip()
     if not diff_result:
         return None
 

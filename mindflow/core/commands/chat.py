@@ -17,7 +17,7 @@ from mindflow.core.token_counting import (
 )
 
 
-def run_chat(document_paths: List[str], user_query: str):
+def run_chat(document_paths: List[str], user_query: str) -> str:
     settings = Settings()
     completion_model = settings.mindflow_models.query.model
 

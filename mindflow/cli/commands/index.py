@@ -10,4 +10,4 @@ from mindflow.core.commands.index import run_index
 @click.argument("document_paths", type=str, nargs=-1, required=True)
 @click.option("--refresh", is_flag=True, default=False)
 def index(document_paths: List[str], refresh: bool) -> None:
-    run_index(document_paths, refresh)
+    print(run_index(document_paths, refresh))

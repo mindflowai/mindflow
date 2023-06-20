@@ -24,7 +24,7 @@ from mindflow.core.prompts import QUERY_PROMPT_PREFIX
 from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
-def run_query(document_paths: List[str], query: str):
+def run_query(document_paths: List[str], query: str) -> str:
     """Query files, folders, and websites."""
     settings = Settings()
     completion_model = settings.mindflow_models.query.model
@@ -52,10 +52,7 @@ def run_query(document_paths: List[str], query: str):
             top_k=100,
         )
     ):
-        print(
-            "No index for requested hashes. Please generate index for passed content."
-        )
-        sys.exit(1)
+        return "No index for requested hashes. Please generate index for passed content."
 
     document_selection_batch: List[Tuple[str, DocumentChunk]] = [
         (document_hash_to_path[document_chunk.id.split("_")[0]], document_chunk)
