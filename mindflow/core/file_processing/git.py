@@ -5,25 +5,16 @@ import subprocess
 from typing import List
 from typing import Union
 
-
-class NotInGit(BaseException):
-    """Raised when the given path is not within a git repository."""
-
-
-class GitError(BaseException):
-    """Raised when a git command fails."""
-
-
 def is_path_within_git_repo(path: Union[str, os.PathLike]) -> bool:
     try:
         output = subprocess.run(
-            ["git", "-C", path, "rev-parse", "--git-dir"],
+            ["git", "-C", str(path), "rev-parse", "--git-dir"],
             capture_output=True,
             timeout=10,
             check=True,
         )
         return output.returncode == 0
-    except NotInGit:
+    except subprocess.CalledProcessError:
         return False
 
 
