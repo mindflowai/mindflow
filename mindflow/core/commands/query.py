@@ -52,7 +52,9 @@ def run_query(document_paths: List[str], query: str) -> str:
             top_k=100,
         )
     ):
-        return "No index for requested hashes. Please generate index for passed content."
+        return (
+            "No index for requested hashes. Please generate index for passed content."
+        )
 
     document_selection_batch: List[Tuple[str, DocumentChunk]] = [
         (document_hash_to_path[document_chunk.id.split("_")[0]], document_chunk)

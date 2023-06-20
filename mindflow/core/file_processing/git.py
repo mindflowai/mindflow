@@ -29,6 +29,6 @@ def get_all_unignored_git_files_from_path(path: Union[str, os.PathLike]) -> List
         )
         git_files = output.stdout.decode().strip().split("\n")
         return [os.path.abspath(os.path.join(os.fspath(path), f)) for f in git_files]
-    except GitError as error:
+    except subprocess.CalledProcessError as error:
         logging.debug("Failed extract git files with 'git ls-files': %s", error)
         return []
