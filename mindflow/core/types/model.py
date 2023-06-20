@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import time
-from typing import Optional, TypeVar, Union
+from typing import Optional, Union
 
 import openai
 import anthropic
