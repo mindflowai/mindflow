@@ -92,7 +92,7 @@ class JsonStore:
             objects.pop(object_id, None)
 
     def save(self):
-        if not (objects := collections.get(self.__name__, {})):
+        if not (objects := collections.get(self.__class__.__name__, {})):
             collections[self.__class__.__name__] = objects
 
         if not hasattr(self, "id"):
