@@ -1,14 +1,12 @@
+from abc import ABC, abstractmethod
 import time
-from typing import Optional, Union
+from typing import Optional, TypeVar, Union
 
 import openai
 import anthropic
 
 import numpy as np
 from traitlets import Callable
-
-from mindflow.core.types.definitions.model_type import ModelType
-
 import tiktoken
 
 from mindflow.core.types.store_traits.json import JsonStore
@@ -39,8 +37,7 @@ class ModelConfig(JsonStore):
     id: str
     soft_token_limit: int
 
-
-class ConfiguredModel(Callable):
+class ConfiguredModel(ABC, Callable):
     id: str
     name: str
     service: str
@@ -80,7 +77,28 @@ class ConfiguredModel(Callable):
         except NameError:
             pass
 
-    def openai_chat_completion(
+    @abstractmethod
+    def __call__(self, *args, **kwargs):
+        pass
+
+
+class ConfiguredOpenAIChatCompletionModel(ConfiguredModel):
+    id: str
+    name: str
+    service: str
+    model_type: str
+
+    tokenizer: tiktoken.Encoding
+
+    hard_token_limit: int
+    token_cost: int
+    token_cost_unit: str
+
+    # Config
+    soft_token_limit: int
+    api_key: str
+
+    def __call__(
         self,
         messages: list,
         temperature: float = 0.0,
@@ -106,7 +124,24 @@ class ConfiguredModel(Callable):
 
         return ModelError(error_message)
 
-    def anthropic_chat_completion(
+
+class ConfiguredAnthropicChatCompletionModel(ConfiguredModel):
+    id: str
+    name: str
+    service: str
+    model_type: str
+
+    tokenizer: tiktoken.Encoding
+
+    hard_token_limit: int
+    token_cost: int
+    token_cost_unit: str
+
+    # Config
+    soft_token_limit: int
+    api_key: str
+
+    def __call__(
         self,
         prompt: str,
         temperature: float = 0.0,
@@ -131,7 +166,24 @@ class ConfiguredModel(Callable):
 
         return ModelError(error_message)
 
-    def openai_embedding(self, text: str) -> Union[np.ndarray, ModelError]:
+
+class ConfiguredOpenAITextEmbeddingModel(ConfiguredModel):
+    id: str
+    name: str
+    service: str
+    model_type: str
+
+    tokenizer: tiktoken.Encoding
+
+    hard_token_limit: int
+    token_cost: int
+    token_cost_unit: str
+
+    # Config
+    soft_token_limit: int
+    api_key: str
+
+    def __call__(self, text: str) -> Union[np.ndarray, ModelError]:
         try_count = 0
         error_message = ""
         while try_count < 5:
@@ -146,24 +198,3 @@ class ConfiguredModel(Callable):
                 time.sleep(5)
 
         return ModelError(error_message)
-
-    def __call__(self, prompt, *args, **kwargs):
-        service_model_mapping = {
-            (
-                ServiceID.OPENAI.value,
-                ModelType.TEXT_COMPLETION.value,
-            ): self.openai_chat_completion,
-            (
-                ServiceID.OPENAI.value,
-                ModelType.TEXT_EMBEDDING.value,
-            ): self.openai_embedding,
-            (
-                ServiceID.ANTHROPIC.value,
-                ModelType.TEXT_COMPLETION.value,
-            ): self.anthropic_chat_completion,
-        }
-        if (
-            func := service_model_mapping.get((self.service, self.model_type))
-        ) is not None:
-            return func(prompt, *args, **kwargs)
-        raise NotImplementedError(f"Service {self.service} not implemented.")
