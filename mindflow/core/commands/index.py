@@ -27,6 +27,7 @@ from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
 def run_index(document_paths: List[str]) -> str:
+    print("Starting to index documents...")
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
