@@ -58,7 +58,9 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
             return diff_response.diff_message
         diff_summary += diff_response
     else:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(len(batched_parsed_diff_result), 100)
+        ) as executor:
             futures = []
             for batch in batched_parsed_diff_result:
                 content = ""
@@ -78,7 +80,6 @@ def run_diff(args: Tuple[str], detailed: bool = True) -> Optional[str]:
                 )
                 futures.append(future)
 
-            # Process the results as they become available
             for future in tqdm(concurrent.futures.as_completed(futures)):
                 diff_partial_response: Union[ModelError, str] = future.result()
                 if isinstance(diff_partial_response, ModelError):

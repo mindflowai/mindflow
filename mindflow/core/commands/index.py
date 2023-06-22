@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import sys
 
@@ -27,7 +27,6 @@ from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
 def run_index(document_paths: List[str]) -> str:
-    print("Starting to index documents...")
     settings = Settings()
     completion_model: ConfiguredModel = settings.mindflow_models.index.model
     embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
@@ -49,74 +48,6 @@ def run_index(document_paths: List[str]) -> str:
     index_documents(indexable_documents, completion_model, embedding_model)
 
     return "Successfully indexed documents"
-
-
-def print_total_size_of_documents(documents: List[Document]):
-    print(
-        f"Total content size: MB {sum([document.size for document in documents]) / 1024 / 1024:.2f}"
-    )
-
-
-def print_total_tokens_and_ask_to_continue(
-    documents: List[Document],
-    completion_model: ConfiguredModel,
-    usd_threshold: float = 0.5,
-):
-    total_tokens = sum([document.tokens for document in documents])
-    print(f"Total tokens: {total_tokens}")
-    total_cost_usd: float = (
-        total_tokens / float(completion_model.token_cost_unit)
-    ) * completion_model.token_cost
-    if total_cost_usd > usd_threshold:
-        print(f"Total cost: ${total_cost_usd:.2f}")
-        while True:
-            if (
-                user_input := input("Would you like to continue? (yes/no): ").lower()
-            ) in ["no", "n"]:
-                sys.exit(0)
-            elif user_input in ["yes", "y"]:
-                break
-            else:
-                print("Invalid input. Please try again.")
-
-
-def index_documents(
-    documents: List[Document],
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
-) -> None:
-    with alive_bar(len(documents), bar="blocks", spinner="twirls") as progress_bar:
-        with ThreadPoolExecutor(max_workers=50) as executor:
-            document_chunk_futures = [
-                executor.submit(
-                    split_document_to_chunks_by_token_count_and_generate_embeddings,
-                    completion_model,
-                    embedding_model,
-                    indexable_document,
-                )
-                for indexable_document in documents
-            ]
-
-            for document, document_chunk_future in zip(
-                documents, document_chunk_futures
-            ):
-                document_chunks = document_chunk_future.result()
-
-                document.num_chunks = len(document_chunks)
-                document.embedding = list(
-                    np.mean(
-                        [
-                            document_chunk.embedding
-                            for document_chunk in document_chunks
-                        ],
-                        axis=0,
-                    )
-                )
-
-                DocumentChunk.save_bulk(document_chunks)
-                document.save()
-
-                progress_bar()
 
 
 def get_indexable_documents(
@@ -175,73 +106,78 @@ def get_indexable_document(
     )
 
 
-def split_document_to_chunks_by_token_count_and_generate_embeddings(
+def print_total_size_of_documents(documents: List[Document]):
+    print(
+        f"Total content size: MB {sum([document.size for document in documents]) / 1024 / 1024:.2f}"
+    )
+
+
+def print_total_tokens_and_ask_to_continue(
+    documents: List[Document],
+    completion_model: ConfiguredModel,
+    usd_threshold: float = 0.5,
+):
+    total_tokens = sum([document.tokens for document in documents])
+    print(f"Total tokens: {total_tokens}")
+    total_cost_usd: float = (
+        total_tokens / float(completion_model.token_cost_unit)
+    ) * completion_model.token_cost
+    if total_cost_usd > usd_threshold:
+        print(f"Total cost: ${total_cost_usd:.2f}")
+        while True:
+            if (
+                user_input := input("Would you like to continue? (yes/no): ").lower()
+            ) in ["no", "n"]:
+                sys.exit(0)
+            elif user_input in ["yes", "y"]:
+                break
+            print("Invalid input. Please try again.")
+
+
+def index_documents(
+    documents: List[Document],
     completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
+) -> None:
+    print("Starting to index documents...")
+    with alive_bar(len(documents), bar="blocks", spinner="twirls") as progress_bar:
+        with ThreadPoolExecutor(max_workers=min(len(documents), 100)) as executor:
+            futures = {
+                executor.submit(
+                    index_document,
+                    indexable_document,
+                    completion_model,
+                    embedding_model,
+                ): indexable_document
+                for indexable_document in documents
+            }
+
+            for future in as_completed(futures):
+                document = futures[future]
+                if future.exception():
+                    print(
+                        f"Exception occurred while indexing document {document}: {future.exception()}"
+                    )
+                progress_bar()
+
+
+def index_document(
     indexable_document: Document,
-) -> List[DocumentChunk]:
+    completion_model: ConfiguredModel,
+    embedding_model: ConfiguredModel,
+) -> None:
     if not (
         text := read_document(indexable_document.path, indexable_document.document_type)
     ):
         print("Document staged for indexing could not be read")
         sys.exit(1)
 
-    if (
-        token_count := get_token_count_of_text_for_model(completion_model, text)
-    ) < completion_model.soft_token_limit:
-        return [
-            process_small_document(
-                completion_model,
-                embedding_model,
-                text,
-                indexable_document.id,
-                token_count,
-            )
-        ]
-
-    return process_large_document(
-        completion_model, embedding_model, text, indexable_document.id
-    )
-
-
-def process_small_document(
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
-    text: str,
-    document_id: str,
-    tokens: int,
-) -> DocumentChunk:
-    summary: str = completion_model(
-        build_prompt_from_conversation_messages(
-            [
-                create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                create_conversation_message(Role.USER.value, text),
-            ],
-            completion_model,
-        )
-    )
-    return DocumentChunk(
-        {
-            "id": f"{document_id}_0",
-            "summary": summary,
-            "embedding": embedding_model(summary),
-            "start_pos": 0,
-            "end_pos": len(text),
-            "num_tokens": tokens,
-        }
-    )
-
-
-def process_large_document(
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
-    text: str,
-    document_id: str,
-) -> List[DocumentChunk]:
-    return collect_leaves_with_embeddings_from_appended_branch_summaries(
+    document_chunks: List[
+        DocumentChunk
+    ] = collect_leaves_with_embeddings_from_appended_branch_summaries(
         create_hierarchical_summary_tree(
             split_raw_text_to_document_chunks(
-                completion_model, embedding_model, text, document_id
+                indexable_document.id, text, completion_model, embedding_model
             ),
             completion_model,
         ),
@@ -249,12 +185,23 @@ def process_large_document(
         embedding_model,
     )
 
+    indexable_document.num_chunks = len(document_chunks)
+    indexable_document.embedding = list(
+        np.mean(
+            [document_chunk.embedding for document_chunk in document_chunks],
+            axis=0,
+        )
+    )
+
+    DocumentChunk.save_bulk(document_chunks)
+    indexable_document.save()
+
 
 def split_raw_text_to_document_chunks(
+    document_hash: str,
+    text: str,
     completion_model: ConfiguredModel,
     embedding_model: ConfiguredModel,
-    text: str,
-    document_hash: str,
 ) -> List[DocumentChunk]:
     start = 0
     end = len(text)
@@ -309,8 +256,8 @@ def binary_search_max_raw_text_chunk_size_for_token_limit(
             <= completion_model.soft_token_limit
         ):
             left = mid
-        else:
-            right = mid - 1
+            continue
+        right = mid - 1
     return left
 
 
