@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 import click
 
 from mindflow.cli.util import passthrough_command
-from mindflow.core.git.commit import run_commit
+from mindflow.core.commands.git.commit import run_commit
 
 
 @passthrough_command(help="Generate a git commit response by feeding git diff to gpt")

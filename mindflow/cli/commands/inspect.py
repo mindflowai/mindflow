@@ -1,7 +1,7 @@
 from typing import List
 import click
 
-from mindflow.core.inspect import run_inspect
+from mindflow.core.commands.inspect import run_inspect
 
 
 @click.command(help="Inspect your MindFlow index")

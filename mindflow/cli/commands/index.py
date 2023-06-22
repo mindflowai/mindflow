@@ -1,7 +1,7 @@
 from typing import List
 import click
 
-from mindflow.core.index import run_index
+from mindflow.core.commands.index import run_index
 
 
 @click.command(

@@ -1,6 +1,6 @@
 import click
 
-from mindflow.core.login import run_login
+from mindflow.core.commands.login import run_login
 
 
 @click.command(help="Set your API Key")

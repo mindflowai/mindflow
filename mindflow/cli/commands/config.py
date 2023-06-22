@@ -1,17 +1,17 @@
 import sys
 from typing import List
 import click
-from mindflow.store.traits.json import save_json_store
-from mindflow.store.objects.mindflow_model import (
+from mindflow.core.types.store_traits.json import save_json_store
+from mindflow.core.types.mindflow_model import (
     MindFlowModel,
     MindFlowModelConfig,
     MindFlowModelID,
 )
 
-from mindflow.store.objects.static_definition.model import (
+from mindflow.core.types.definitions.model import (
     ModelID,
 )
-from mindflow.store.objects.model import Model
+from mindflow.core.types.model import Model
 
 
 @click.command(
@@ -140,9 +140,12 @@ def select_option(prompt: str, options: List, descriptions: List[str]) -> int:
 
     lines_to_clear = len(descriptions)
     while True:
-        selected_option_index = click.prompt(prompt, type=int)
         lines_to_clear += 1
-        if 1 <= selected_option_index <= len(descriptions):
+        if (
+            1
+            <= (selected_option_index := click.prompt(prompt, type=int))
+            <= len(descriptions)
+        ):
             break
         click.echo("Invalid selection. Please try again.")
         lines_to_clear += 1

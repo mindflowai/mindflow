@@ -5,7 +5,7 @@ from typing import Tuple
 import click
 
 from mindflow.cli.util import passthrough_command
-from mindflow.core.git.diff import run_diff
+from mindflow.core.commands.git.diff import run_diff
 
 
 @passthrough_command(
@@ -17,8 +17,5 @@ def diff(args: Tuple[str], detailed: bool):
         click.echo(
             "Working on a summary of the diff, use the `--detailed` flag to show a much more thorough breakdown of the diff...\n"
         )
-    diff_output = run_diff(args, detailed=detailed)
-    if diff_output is not None:
+    if (diff_output := run_diff(args, detailed=detailed)) is not None:
         click.echo(diff_output)
-    else:
-        pass

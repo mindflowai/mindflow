@@ -2,7 +2,7 @@ from typing import List
 
 import click
 
-from mindflow.core.delete import run_delete
+from mindflow.core.commands.delete import run_delete
 
 
 @click.command(help="Delete your MindFlow index")

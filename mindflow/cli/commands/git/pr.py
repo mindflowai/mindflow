@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import click
 from mindflow.cli.util import passthrough_command
-from mindflow.core.git.pr import run_pr
+from mindflow.core.commands.git.pr import run_pr
 
 
 @click.group()

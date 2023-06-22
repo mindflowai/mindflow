@@ -1,6 +1,6 @@
 import click
 
-from mindflow.core.gen import run_code_generation
+from mindflow.core.commands.gen import run_code_generation
 
 
 @click.command(help="AI powered boilerplate code generation.")

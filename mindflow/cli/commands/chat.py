@@ -2,12 +2,12 @@ import click
 from typing import Tuple
 import os
 
-from mindflow.core.chat import run_chat
-from mindflow.core.index import run_index
-from mindflow.core.query import run_query
-from mindflow.store.traits.json import save_json_store
-from mindflow.store.objects.conversation import Conversation
-from mindflow.store.objects.static_definition.conversation import ConversationID
+from mindflow.core.commands.chat import run_chat
+from mindflow.core.commands.index import run_index
+from mindflow.core.commands.query import run_query
+from mindflow.core.types.store_traits.json import save_json_store
+from mindflow.core.types.conversation import Conversation
+from mindflow.core.types.definitions.conversation import ConversationID
 
 
 def parse_chat_prompt_and_paths_from_args(prompt_args: Tuple[str]):
@@ -56,8 +56,7 @@ def history():
 
 @history.command(help="View chat history stats.")
 def stats():
-    conversation = Conversation.load(ConversationID.CHAT_0.value)
-    if conversation is None:
+    if (conversation := Conversation.load(ConversationID.CHAT_0.value)) is None:
         print("No conversation history found.")
         return
 
@@ -67,8 +66,7 @@ def stats():
 
 @history.command(help="Clear the chat history.")
 def clear():
-    conversation = Conversation.load(ConversationID.CHAT_0.value)
-    if conversation is None:
+    if (conversation := Conversation.load(ConversationID.CHAT_0.value)) is None:
         print("No conversation history found.")
         return
 

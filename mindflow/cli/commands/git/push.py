@@ -4,7 +4,7 @@
 from typing import Tuple
 
 from mindflow.cli.util import passthrough_command
-from mindflow.core.git.push import run_push
+from mindflow.core.commands.git.push import run_push
 
 
 @passthrough_command(
