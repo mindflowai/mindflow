@@ -19,9 +19,6 @@ from mindflow.core.types.definitions.service import (
     ServiceID,
 )
 
-import cachetools
-
-
 class MindFlowModel(StaticStore):
     id: str  # index, query, embedding
     name: str

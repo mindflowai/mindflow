@@ -10,4 +10,3 @@ pytest
 scikit-learn
 tqdm
 traitlets
-cachetools
