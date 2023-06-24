@@ -1,7 +1,9 @@
 import asyncio
 import numpy as np
 
-from typing import Dict, List, Tuple
+from io import TextIOWrapper
+
+from typing import Dict, List, Optional, Tuple
 from result import Err, Ok, Result
 
 from mindflow.core.types.document import (
@@ -98,15 +100,31 @@ def select_and_trim_text_to_fit_context_window(
     query: str,
     top_document_chunks: List[Tuple[str, DocumentChunk]],
 ) -> str:
-    selected_content: str = ""
-    for path, document_chunk in top_document_chunks:
-        with open(path, "r", encoding="utf-8") as file:
+    selected_content: str
+    selected_content_parts: List[str] = []
+    prev_path = None
+    file: Optional[TextIOWrapper] = None
+    top_document_chunks.sort(key=lambda x: x[0])  # Sorting by path
+    try:
+        for path, document_chunk in top_document_chunks:
+            if path != prev_path:
+                if file is not None:
+                    file.close()
+                file = open(path, "r", encoding="utf-8")
+                prev_path = path
+
+            assert file is not None
             file.seek(document_chunk.start_pos)
-            selected_content += formatted_chunk(
-                path,
-                document_chunk,
-                file.read(int(document_chunk.end_pos) - int(document_chunk.start_pos)),
+            selected_content_parts.append(
+                formatted_chunk(
+                    path,
+                    document_chunk,
+                    file.read(
+                        int(document_chunk.end_pos) - int(document_chunk.start_pos)
+                    ),
+                )
             )
+            selected_content = "".join(selected_content_parts)
             if (
                 get_token_count_of_text_for_model(
                     configured_model.tokenizer, query + selected_content
@@ -114,7 +132,11 @@ def select_and_trim_text_to_fit_context_window(
                 > configured_model.model.hard_token_limit
             ):
                 break
+    finally:
+        if file is not None:
+            file.close()
 
+    selected_content = "".join(selected_content_parts)
     left, right = 0, len(selected_content)
     while left <= right:
         mid = (left + right) // 2
