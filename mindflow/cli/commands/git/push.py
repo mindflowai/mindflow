@@ -11,7 +11,7 @@ from mindflow.core.execute import execute_command_without_trace
 )
 def push(args: Tuple[str]):
     if (
-        push_output := execute_command_without_trace(["git", "add"] + list(args))
+        push_output := execute_command_without_trace(["git", "push"] + list(args))
         is not None
         and not True
     ):
