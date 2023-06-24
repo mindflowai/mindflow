@@ -1,9 +1,14 @@
+import asyncio
 from typing import Tuple, Optional
 
 import click
+from result import Err, Result
 
 from mindflow.cli.util import passthrough_command
-from mindflow.core.commands.git.commit import run_commit
+from mindflow.core.commands.git.commit import create_gpt_commit_message
+from mindflow.core.execute import execute_command_without_trace
+from mindflow.core.settings import Settings
+from mindflow.core.types.model import ModelApiCallError
 
 
 @passthrough_command(help="Generate a git commit response by feeding git diff to gpt")
@@ -26,4 +31,16 @@ def commit(args: Tuple[str], message: Optional[str] = None):
         )
         click.echo("It's recommended that you don't use the -m/--message flag.")
 
-    print(run_commit(args, message_overwrite=message))
+    if not message:
+        diff_output = execute_command_without_trace(["git", "diff", "--cached"])
+        run_commit_result: Result[str, ModelApiCallError] = asyncio.run(
+            create_gpt_commit_message(Settings(), diff_output)
+        )
+        if isinstance(run_commit_result, Err):
+            print(run_commit_result.value)
+            return
+        message = run_commit_result.value
+
+    click.echo(
+        execute_command_without_trace(["git", "commit", "-m", message] + list(args))
+    )

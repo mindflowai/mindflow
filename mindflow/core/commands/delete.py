@@ -1,42 +1,29 @@
+import asyncio
 from typing import List
+
+from result import Err, Ok, Result
 
 from mindflow.core.types.document import (
     Document,
     DocumentChunk,
-    DocumentReference,
     get_document_chunk_ids,
-    get_document_id,
 )
-from mindflow.core.resolving.resolve import resolve_paths_to_document_references
 
 
-def run_delete(document_paths: List[str]) -> str:
+async def run_delete(document_ids: List[str]) -> Result[str, str]:
     """Delete documents from MindFlow index."""
-    document_references: List[DocumentReference] = resolve_paths_to_document_references(
-        document_paths
-    )
-
-    document_ids = [
-        document_id
-        for document_id in [
-            get_document_id(document_reference.path, document_reference.document_type)
-            for document_reference in document_references
-        ]
-        if document_id is not None
-    ]
-
-    if not document_ids:
-        return "No document IDs resolved. Nothing to delete."
-
-    documents = Document.load_bulk_ignore_missing(document_ids)
+    documents = await Document.load_bulk_ignore_missing(document_ids)
     if not documents:
-        return "No documents found to delete."
+        return Ok("No documents found to delete.")
 
     document_chunk_ids = get_document_chunk_ids(documents)
-    if not DocumentChunk.load_bulk_ignore_missing(document_chunk_ids):
-        return "No document chunks found to delete."
+    if not await DocumentChunk.load_bulk_ignore_missing(document_chunk_ids):
+        return Err("Unable to locate indexed documents.")
 
-    Document.delete_bulk(document_ids)
-    DocumentChunk.delete_bulk(document_chunk_ids)
-
-    return "Documents and associated chunks deleted successfully."
+    await asyncio.gather(
+        *[
+            Document.delete_bulk(document_ids),
+            DocumentChunk.delete_bulk(document_chunk_ids),
+        ]
+    )
+    return Ok("Documents and associated chunks deleted successfully.")

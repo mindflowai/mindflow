@@ -1,11 +1,12 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
 import hashlib
 import sys
 
-from typing import List, Optional, TypeVar
+from typing import List, Optional
 
 from alive_progress import alive_bar
 import numpy as np
+from result import Err, Ok, Result
 
 from mindflow.core.types.document import (
     Document,
@@ -13,7 +14,11 @@ from mindflow.core.types.document import (
     DocumentReference,
     get_document_id,
 )
-from mindflow.core.types.model import ConfiguredModel
+from mindflow.core.types.model import (
+    ConfiguredTextCompletionModel,
+    ConfiguredEmbeddingModel,
+    ModelApiCallError,
+)
 from mindflow.core.types.document import read_document
 from mindflow.core.resolving.resolve import resolve_paths_to_document_references
 from mindflow.core.settings import Settings
@@ -26,32 +31,32 @@ from mindflow.core.prompts import INDEX_PROMPT_PREFIX
 from mindflow.core.token_counting import get_token_count_of_text_for_model
 
 
-def run_index(document_paths: List[str]) -> str:
-    settings = Settings()
-    completion_model: ConfiguredModel = settings.mindflow_models.index.model
-    embedding_model: ConfiguredModel = settings.mindflow_models.embedding.model
+async def run_index(settings: Settings, document_paths: List[str]) -> str:
+    index_model: ConfiguredTextCompletionModel = settings.mindflow_models.index
+    embedding_model: ConfiguredEmbeddingModel = settings.mindflow_models.embedding
 
     document_references: List[DocumentReference] = resolve_paths_to_document_references(
         document_paths
     )
 
     if not (
-        indexable_documents := get_indexable_documents(
-            document_references, completion_model
+        indexable_documents := await get_indexable_documents(
+            document_references, index_model
         )
     ):
         return "No documents to index"
 
     print_total_size_of_documents(indexable_documents)
-    print_total_tokens_and_ask_to_continue(indexable_documents, completion_model)
+    print_total_tokens_and_ask_to_continue(indexable_documents, index_model)
 
-    index_documents(indexable_documents, completion_model, embedding_model)
+    await index_documents(indexable_documents, index_model, embedding_model)
 
-    return "Successfully indexed documents"
+    return "Indexing complete"
 
 
-def get_indexable_documents(
-    document_references: List[DocumentReference], completion_model: ConfiguredModel
+async def get_indexable_documents(
+    document_references: List[DocumentReference],
+    index_model: ConfiguredTextCompletionModel,
 ) -> List[Document]:
     document_ids = [
         document_id
@@ -61,13 +66,13 @@ def get_indexable_documents(
         ]
         if document_id is not None
     ]
-    documents: List[Optional[Document]] = Document.load_bulk(document_ids)
+    documents: List[Optional[Document]] = await Document.load_bulk(document_ids)
     return [
         indexable_document
         for document, document_reference in zip(documents, document_references)
         if (
             indexable_document := get_indexable_document(
-                document, document_reference, completion_model
+                document, document_reference, index_model
             )
         )
         is not None
@@ -77,7 +82,7 @@ def get_indexable_documents(
 def get_indexable_document(
     document: Optional[Document],
     document_reference: DocumentReference,
-    completion_model: ConfiguredModel,
+    index_model: ConfiguredTextCompletionModel,
 ) -> Optional[Document]:
     if not (
         document_text := read_document(
@@ -100,7 +105,7 @@ def get_indexable_document(
             "num_chunks": document.num_chunks if document else 0,
             "size": len(document_text_bytes),
             "tokens": get_token_count_of_text_for_model(
-                completion_model, document_text
+                index_model.tokenizer, document_text
             ),
         }
     )
@@ -114,14 +119,14 @@ def print_total_size_of_documents(documents: List[Document]):
 
 def print_total_tokens_and_ask_to_continue(
     documents: List[Document],
-    completion_model: ConfiguredModel,
+    index_model: ConfiguredTextCompletionModel,
     usd_threshold: float = 0.5,
 ):
     total_tokens = sum([document.tokens for document in documents])
     print(f"Total tokens: {total_tokens}")
     total_cost_usd: float = (
-        total_tokens / float(completion_model.token_cost_unit)
-    ) * completion_model.token_cost
+        total_tokens / float(index_model.model.token_cost_unit)
+    ) * index_model.model.token_cost
     if total_cost_usd > usd_threshold:
         print(f"Total cost: ${total_cost_usd:.2f}")
         while True:
@@ -134,116 +139,153 @@ def print_total_tokens_and_ask_to_continue(
             print("Invalid input. Please try again.")
 
 
-def index_documents(
+async def index_documents(
     documents: List[Document],
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
+    index_model: ConfiguredTextCompletionModel,
+    embedding_model: ConfiguredEmbeddingModel,
 ) -> None:
     print("Starting to index documents...")
     with alive_bar(len(documents), bar="blocks", spinner="twirls") as progress_bar:
-        with ThreadPoolExecutor(max_workers=min(len(documents), 100)) as executor:
-            futures = {
-                executor.submit(
-                    index_document,
-                    indexable_document,
-                    completion_model,
-                    embedding_model,
-                ): indexable_document
-                for indexable_document in documents
-            }
+        tasks = [
+            index_document(indexable_document, index_model, embedding_model)
+            for indexable_document in documents
+        ]
 
-            for future in as_completed(futures):
-                document = futures[future]
-                if future.exception():
-                    print(
-                        f"Exception occurred while indexing document {document}: {future.exception()}"
-                    )
-                progress_bar()
+        for future in asyncio.as_completed(tasks):
+            index_document_result = await future
+            if isinstance(index_document_result, Err):
+                print(f"Failed to index document {index_document_result.value}")
+            progress_bar()
 
 
-def index_document(
+async def index_document(
     indexable_document: Document,
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
-) -> None:
+    index_model: ConfiguredTextCompletionModel,
+    embedding_model: ConfiguredEmbeddingModel,
+) -> Result[bool, ModelApiCallError]:
     if not (
         text := read_document(indexable_document.path, indexable_document.document_type)
     ):
         print("Document staged for indexing could not be read")
         sys.exit(1)
 
-    document_chunks: List[
-        DocumentChunk
-    ] = collect_leaves_with_embeddings_from_appended_branch_summaries(
-        create_hierarchical_summary_tree(
-            split_raw_text_to_document_chunks(
-                indexable_document.id, text, completion_model, embedding_model
-            ),
-            completion_model,
-        ),
-        "",
+    partitioned_nodes_result: Result[
+        List[Node], ModelApiCallError
+    ] = await partition_document_into_nodes(text, index_model)
+    if isinstance(partitioned_nodes_result, Err):
+        return partitioned_nodes_result
+
+    hierarchical_summary_tree_result: Result[
+        Node, ModelApiCallError
+    ] = await create_hierarchical_summary_tree(
+        partitioned_nodes_result.value,
+        index_model,
+    )
+    if isinstance(hierarchical_summary_tree_result, Err):
+        return hierarchical_summary_tree_result
+
+    document_chunks_result: Result[
+        List[DocumentChunk], ModelApiCallError
+    ] = await collect_leaves_with_embeddings_from_appended_branch_summaries(
+        indexable_document.id,
+        hierarchical_summary_tree_result.value,
         embedding_model,
     )
 
-    indexable_document.num_chunks = len(document_chunks)
+    if isinstance(document_chunks_result, Err):
+        return document_chunks_result
+
+    indexable_document.num_chunks = len(document_chunks_result.value)
     indexable_document.embedding = list(
         np.mean(
-            [document_chunk.embedding for document_chunk in document_chunks],
+            [
+                document_chunk.embedding
+                for document_chunk in document_chunks_result.value
+            ],
             axis=0,
         )
     )
 
-    DocumentChunk.save_bulk(document_chunks)
-    indexable_document.save()
+    await asyncio.gather(
+        *[
+            DocumentChunk.save_bulk(document_chunks_result.value),
+            indexable_document.save(),
+        ]
+    )
+    return Ok(True)
 
 
-def split_raw_text_to_document_chunks(
-    document_hash: str,
+class Node:
+    def __init__(
+        self, start_pos: int, end_pos: int, summary: str, children: List["Node"]
+    ):
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.summary = summary
+        self.children = children
+
+    @classmethod
+    async def create_node(
+        cls,
+        text: str,
+        start_pos: int,
+        end_pos: int,
+        index_model: ConfiguredTextCompletionModel,
+        children: List["Node"] = [],
+    ) -> Result["Node", ModelApiCallError]:
+        prompt = build_prompt_from_conversation_messages(
+            [
+                create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
+                create_conversation_message(Role.USER.value, f"{text}..."),
+            ],
+            index_model,
+        )
+
+        index_model_result = await index_model.call_api(prompt)
+        if isinstance(index_model_result, Err):
+            return index_model_result
+
+        return Ok(cls(start_pos, end_pos, index_model_result.value, children))
+
+    def __repr__(self):
+        return f"Node(start_pos={self.start_pos}, end_pos={self.end_pos}, summary={self.summary}, children={self.children})"
+
+
+async def partition_document_into_nodes(
     text: str,
-    completion_model: ConfiguredModel,
-    embedding_model: ConfiguredModel,
-) -> List[DocumentChunk]:
+    index_model: ConfiguredTextCompletionModel,
+) -> Result[List[Node], ModelApiCallError]:
     start = 0
     end = len(text)
-    document_chunks: List[DocumentChunk] = []
+    document_partition_nodes: List[Node] = []
+    tasks: List[asyncio.Task[Result[Node, ModelApiCallError]]] = []
 
     while start < end:
         text_chunk_size = binary_search_max_raw_text_chunk_size_for_token_limit(
-            completion_model, text, start, end
+            text, start, end, index_model
         )
-
-        text_str = text[start : start + text_chunk_size]
-        summary: str = completion_model(
-            build_prompt_from_conversation_messages(
-                [
-                    create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                    create_conversation_message(Role.USER.value, text_str),
-                ],
-                completion_model,
+        tasks.append(
+            asyncio.create_task(
+                Node.create_node(
+                    text[start : start + text_chunk_size],
+                    start,
+                    start + text_chunk_size,
+                    index_model,
+                )
             )
         )
-        document_chunks.append(
-            DocumentChunk(
-                {
-                    "id": f"{document_hash}_{len(document_chunks)}",
-                    "summary": summary,
-                    "embedding": embedding_model(summary),
-                    "start_pos": start,
-                    "end_pos": start + text_chunk_size,
-                    "num_tokens": get_token_count_of_text_for_model(
-                        completion_model, text_str
-                    ),
-                }
-            )
-        )
-
         start += text_chunk_size
 
-    return document_chunks
+    for future in asyncio.as_completed(tasks):
+        if isinstance(node_result := await future, Err):
+            return node_result
+        document_partition_nodes.append(node_result.value)
+
+    return Ok(document_partition_nodes)
 
 
 def binary_search_max_raw_text_chunk_size_for_token_limit(
-    completion_model: ConfiguredModel, text: str, start: int, end: int
+    text: str, start: int, end: int, index_model: ConfiguredTextCompletionModel
 ) -> int:
     left = 0
     right = end - start
@@ -251,9 +293,9 @@ def binary_search_max_raw_text_chunk_size_for_token_limit(
         mid = (left + right + 1) // 2
         if (
             get_token_count_of_text_for_model(
-                completion_model, text[start : start + mid]
+                index_model.tokenizer, text[start : start + mid]
             )
-            <= completion_model.soft_token_limit
+            <= index_model.config.soft_token_limit
         ):
             left = mid
             continue
@@ -261,67 +303,112 @@ def binary_search_max_raw_text_chunk_size_for_token_limit(
     return left
 
 
-class Node:
-    def __init__(self, id, summary, children=None):
-        self.id = id
-        self.summary = summary
-        self.children: List[T] = children if children else []
+async def create_hierarchical_summary_tree(
+    nodes: List[Node], index_model: ConfiguredTextCompletionModel
+) -> Result[Node, ModelApiCallError]:
+    if len(nodes) == 1:
+        return Ok(nodes[0])
 
-    def __repr__(self):
-        return (
-            f"Node(id={self.id}, summary={self.summary}, children={len(self.children)})"
-        )
-
-
-T = TypeVar("T", Node, DocumentChunk)
-
-
-def create_hierarchical_summary_tree(
-    nodes: List[T], completion_model: ConfiguredModel
-) -> Node:
     if (
         get_token_count_of_text_for_model(
-            completion_model, (summary := " ".join(node.summary for node in nodes))
+            index_model.tokenizer,
+            (appended_summaries := " ".join(node.summary for node in nodes)),
         )
-        <= completion_model.soft_token_limit
+        <= index_model.config.soft_token_limit
     ):
-        summary = " ".join(node.summary for node in nodes)
-        node_id = f"parent_{nodes[0].id.split('_')[0]}"
-        return Node(node_id, summary, nodes)
+        return await Node.create_node(
+            appended_summaries,
+            nodes[0].start_pos,
+            nodes[-1].end_pos,
+            index_model,
+            nodes,
+        )
 
     mid = len(nodes) // 2
-    left_tree = create_hierarchical_summary_tree(nodes[:mid], completion_model)
-    right_tree = create_hierarchical_summary_tree(nodes[mid:], completion_model)
+    tasks: List[asyncio.Task[Result[Node, ModelApiCallError]]] = [
+        asyncio.create_task(create_hierarchical_summary_tree(nodes[:mid], index_model)),
+        asyncio.create_task(create_hierarchical_summary_tree(nodes[mid:], index_model)),
+    ]
 
-    merged_summary = completion_model(
-        build_prompt_from_conversation_messages(
-            [
-                create_conversation_message(Role.SYSTEM.value, INDEX_PROMPT_PREFIX),
-                create_conversation_message(
-                    Role.USER.value, f"{left_tree.summary} {right_tree.summary}"
-                ),
-            ],
-            completion_model,
+    tree_result: List[Result[Node, ModelApiCallError]] = await asyncio.gather(*tasks)
+    if isinstance(tree_result[0], Err):
+        return tree_result[0]
+    if isinstance(tree_result[1], Err):
+        return tree_result[1]
+
+    left_tree, right_tree = tree_result[0].value, tree_result[1].value
+    return await Node.create_node(
+        f"{left_tree.summary} {right_tree.summary}",
+        left_tree.start_pos,
+        right_tree.end_pos,
+        index_model,
+        [left_tree, right_tree],
+    )
+
+
+async def create_document_chunk(
+    id: str,
+    start_pos: int,
+    end_pos: int,
+    appended_summaries: str,
+    embedding_model: ConfiguredEmbeddingModel,
+) -> Result[DocumentChunk, ModelApiCallError]:
+    embedding_result = await embedding_model.call_api(appended_summaries)
+    if isinstance(embedding_result, Err):
+        return embedding_result
+
+    return Ok(
+        DocumentChunk(
+            {
+                "id": id,
+                "start_pos": start_pos,
+                "end_pos": end_pos,
+                "summary": appended_summaries,
+                "embedding": list(embedding_result.value),
+            }
         )
     )
 
-    parent_id = f"parent_{left_tree.id.split('_')[1]}_{right_tree.id.split('_')[1]}"
-    return Node(parent_id, merged_summary, [left_tree, right_tree])
 
+async def collect_leaves_with_embeddings_from_appended_branch_summaries(
+    document_hash: str,
+    root_node: Node,
+    embedding_model: ConfiguredEmbeddingModel,
+) -> Result[List[DocumentChunk], ModelApiCallError]:
+    stack = [(root_node, "")]
+    tasks: List[asyncio.Task[Result[DocumentChunk, ModelApiCallError]]] = []
+    document_chunk_id = 0
+    while stack:
+        node, ancestor_summaries = stack.pop()
+        if not node.children:
+            tasks.append(
+                asyncio.create_task(
+                    create_document_chunk(
+                        f"{document_hash}_{document_chunk_id}",
+                        node.start_pos,
+                        node.end_pos,
+                        f"{ancestor_summaries} {node.summary}",
+                        embedding_model,
+                    )
+                )
+            )
+            document_chunk_id += 1
+        else:
+            for child in node.children:
+                stack.append((child, f"{ancestor_summaries} {node.summary}"))
 
-def collect_leaves_with_embeddings_from_appended_branch_summaries(
-    node: T,
-    ancestor_summaries: str,
-    embedding_model: ConfiguredModel,
-) -> List[DocumentChunk]:
-    if isinstance(node, DocumentChunk):
-        node.embedding = embedding_model(f"{ancestor_summaries} {node.summary}")
-        return [node]
+    create_document_chunk_result: List[
+        Result[DocumentChunk, ModelApiCallError]
+    ] = await asyncio.gather(*tasks)
 
-    return [
-        leaf
-        for child in node.children
-        for leaf in collect_leaves_with_embeddings_from_appended_branch_summaries(
-            child, f"{ancestor_summaries} {node.summary}", embedding_model
-        )
-    ]
+    for result in create_document_chunk_result:
+        if isinstance(result, Err):
+            return result
+
+    return Ok(
+        [
+            result.value
+            for result in create_document_chunk_result
+            if isinstance(result, Ok)
+        ]
+    )
