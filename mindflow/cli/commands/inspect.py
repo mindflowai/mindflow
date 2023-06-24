@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
 import click
-from result import Err, Result
+from result import Result
 
 from mindflow.core.commands.inspect import run_inspect
 from mindflow.core.resolving.resolve import resolve_paths_to_document_references

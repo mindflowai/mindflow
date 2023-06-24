@@ -10,8 +10,7 @@ from mindflow.core.prompt_builders import (
     build_prompt_from_conversation_messages,
     create_conversation_message,
 )
-from mindflow.core.prompts import PR_BODY_PREFIX
-from mindflow.core.prompts import PR_TITLE_PREFIX
+from mindflow.core.prompts import PR_BODY_PREFIX, PR_TITLE_PREFIX
 from mindflow.core.token_counting import get_token_count_of_text_for_model
 from mindflow.core.types.model import ConfiguredTextCompletionModel, ModelApiCallError
 
@@ -34,7 +33,7 @@ async def create_gpt_title_and_body(
         if isinstance(gpt_summarize_diff_result, Err):
             return gpt_summarize_diff_result
         pr_context = gpt_summarize_diff_result.value
-        
+
     tasks: List[asyncio.Task[Result[str, ModelApiCallError]]] = []
     if title is None:
         tasks.append(

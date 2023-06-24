@@ -1,6 +1,3 @@
-"""
-`add` command
-"""
 from typing import Tuple
 
 import click

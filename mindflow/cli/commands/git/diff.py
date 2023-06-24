@@ -1,6 +1,3 @@
-"""
-`diff` command
-"""
 import asyncio
 from typing import Tuple
 import click
