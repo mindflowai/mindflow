@@ -1,6 +1,6 @@
 import asyncio
-from typing import List
 
+from typing import List
 from result import Err, Ok, Result
 
 from mindflow.core.types.document import (

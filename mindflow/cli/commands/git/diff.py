@@ -1,6 +1,7 @@
-import asyncio
-from typing import Tuple
 import click
+import asyncio
+
+from typing import Tuple
 from result import Err
 
 from mindflow.cli.util import execute_command_without_trace, passthrough_command

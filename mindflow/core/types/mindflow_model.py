@@ -1,6 +1,8 @@
-from functools import cached_property
 import sys
+
 from typing import Dict
+from functools import cached_property
+
 from mindflow.core.types.definitions.model import ModelID
 from mindflow.core.types.store_traits.static import StaticStore
 from mindflow.core.types.store_traits.json import JsonStore

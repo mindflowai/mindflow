@@ -1,8 +1,8 @@
-import asyncio
-import click
-from typing import Tuple
 import os
+import click
+import asyncio
 
+from typing import Tuple
 from result import Result
 
 from mindflow.core.commands.chat import run_chat

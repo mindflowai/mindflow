@@ -1,4 +1,5 @@
 from typing import Type, TypeVar, Union
+
 from mindflow.core.types import Collection
 from mindflow.core.types.definitions.mind_flow_model import (
     MINDFLOW_MODEL_STATIC,

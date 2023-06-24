@@ -1,6 +1,7 @@
-import asyncio
-from typing import List
 import click
+import asyncio
+
+from typing import List
 from result import Result
 
 from mindflow.core.commands.inspect import run_inspect

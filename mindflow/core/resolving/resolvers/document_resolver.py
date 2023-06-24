@@ -1,6 +1,7 @@
-from typing import List
-from mindflow.core.types.document import DocumentReference
 from abc import ABC, abstractmethod
+from typing import List
+
+from mindflow.core.types.document import DocumentReference
 
 
 class DocumentResolver(ABC):

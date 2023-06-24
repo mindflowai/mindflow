@@ -1,5 +1,5 @@
-from typing import List
 import click
+from typing import List
 
 from mindflow.core.commands.index import run_index
 from mindflow.core.settings import Settings

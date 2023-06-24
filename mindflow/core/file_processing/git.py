@@ -1,9 +1,9 @@
 """Handles git related operations."""
-import logging
 import os
+import logging
 import subprocess
-from typing import List
-from typing import Union
+
+from typing import List, Union
 
 
 def is_path_within_git_repo(path: Union[str, os.PathLike]) -> bool:

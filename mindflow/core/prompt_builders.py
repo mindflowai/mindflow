@@ -1,10 +1,9 @@
+import anthropic  # type: ignore
+
 from enum import Enum
-
 from typing import Dict, Union, List
+
 from mindflow.core.types.model import ConfiguredModel
-
-import anthropic # type: ignore
-
 from mindflow.core.types.definitions.service import ServiceID
 from mindflow.core.constants import MinimumReservedLength
 from mindflow.core.token_counting import get_token_count_of_text_for_model

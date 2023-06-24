@@ -1,5 +1,6 @@
-import logging
 import os
+import logging
+
 from typing import List
 
 from mindflow.core.file_processing.git import (

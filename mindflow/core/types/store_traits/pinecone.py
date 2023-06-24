@@ -1,9 +1,9 @@
 import sys
-from typing import List, Tuple, Type, TypeVar, Union
-from typing import Optional
 import numpy as np
-
 import pinecone  # type: ignore
+
+from typing import List, Tuple, Type, TypeVar, Union, Optional
+
 from mindflow.core.settings import Settings
 
 

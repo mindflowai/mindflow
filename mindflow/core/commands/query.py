@@ -1,8 +1,8 @@
 import asyncio
+import numpy as np
+
 from typing import Dict, List, Tuple
 from result import Err, Ok, Result
-
-import numpy as np
 
 from mindflow.core.types.document import (
     Document,

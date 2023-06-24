@@ -1,5 +1,6 @@
 """Module for resolving documents types."""
 import sys
+
 from typing import List
 from mindflow.core.types.document import DocumentReference
 

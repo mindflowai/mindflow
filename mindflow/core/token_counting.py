@@ -1,7 +1,7 @@
 import os
-from typing import Dict, List
-
 import tiktoken
+
+from typing import Dict, List
 
 
 def get_token_count_of_text_for_model(tokenizer: tiktoken.Encoding, text: str) -> int:

@@ -1,8 +1,7 @@
-import json
 import os
+import json
 
-from typing import List, Type, TypeVar, Union
-from typing import Optional
+from typing import List, Type, TypeVar, Union, Optional
 
 
 def get_mindflow_dir():

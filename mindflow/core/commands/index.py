@@ -1,12 +1,12 @@
+import sys
 import asyncio
 import hashlib
-import sys
+import numpy as np
 
 from typing import List, Optional
-
-from alive_progress import alive_bar # type: ignore
-import numpy as np
 from result import Err, Ok, Result
+
+from alive_progress import alive_bar  # type: ignore
 
 from mindflow.core.types.document import (
     Document,

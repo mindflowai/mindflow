@@ -1,10 +1,15 @@
+import click
 import asyncio
 import subprocess
-from typing import Optional, Tuple
 
-import click
+from typing import Optional, Tuple
 from result import Err
-from mindflow.cli.util import execute_command_without_trace, get_flag_values_from_args, passthrough_command
+
+from mindflow.cli.util import (
+    execute_command_without_trace,
+    get_flag_values_from_args,
+    passthrough_command,
+)
 from mindflow.core.commands.git.pr import create_gpt_title_and_body
 from mindflow.core.settings import Settings
 

@@ -1,6 +1,7 @@
-import asyncio
 import os
 import click
+import asyncio
+
 from result import Result, Err
 
 from mindflow.core.commands.gen import run_code_generation

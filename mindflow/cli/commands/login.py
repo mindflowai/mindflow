@@ -1,6 +1,6 @@
 import click
-from mindflow.cli.commands.config import select_option
 
+from mindflow.cli.commands.config import select_option
 from mindflow.core.types.definitions.service import ServiceConfigID
 from mindflow.core.types.service import ServiceConfig
 from mindflow.core.types.store_traits.json import save_json_store

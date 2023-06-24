@@ -1,7 +1,7 @@
 import os
 from typing import List, Union
-from mindflow.core.types.document import DocumentReference
 
+from mindflow.core.types.document import DocumentReference
 from mindflow.core.types.definitions.document import DocumentType
 from mindflow.core.resolving.resolvers.document_resolver import DocumentResolver
 from mindflow.core.file_processing.extract import extract_files_from_directory

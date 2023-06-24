@@ -1,6 +1,7 @@
 import sys
-from typing import List
 import click
+from typing import List
+
 from mindflow.core.types.store_traits.json import save_json_store
 from mindflow.core.types.mindflow_model import (
     MindFlowModel,

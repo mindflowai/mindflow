@@ -1,5 +1,4 @@
 from typing import List
-
 from result import Err, Result
 
 from mindflow.core.types.conversation import Conversation

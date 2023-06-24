@@ -1,4 +1,5 @@
 from typing import List, Dict
+
 from mindflow.core.types.store_traits.json import JsonStore
 
 

@@ -1,4 +1,5 @@
 from result import Err, Ok, Result
+
 from mindflow.core.types.conversation import Conversation
 from mindflow.core.types.definitions.conversation import ConversationID
 from mindflow.core.settings import Settings
