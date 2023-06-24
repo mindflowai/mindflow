@@ -19,6 +19,7 @@ from mindflow.core.types.definitions.service import (
     ServiceID,
 )
 
+
 class MindFlowModel(StaticStore):
     id: str  # index, query, embedding
     name: str
