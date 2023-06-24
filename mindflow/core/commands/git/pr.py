@@ -2,6 +2,7 @@ import asyncio
 from typing import List, Optional, Tuple
 
 from result import Err, Ok, Result
+from mindflow.core.commands.git.diff import create_gpt_summarized_diff
 
 from mindflow.core.settings import Settings
 from mindflow.core.prompt_builders import (
@@ -11,14 +12,29 @@ from mindflow.core.prompt_builders import (
 )
 from mindflow.core.prompts import PR_BODY_PREFIX
 from mindflow.core.prompts import PR_TITLE_PREFIX
+from mindflow.core.token_counting import get_token_count_of_text_for_model
 from mindflow.core.types.model import ConfiguredTextCompletionModel, ModelApiCallError
 
 
 async def create_gpt_title_and_body(
     settings: Settings, diff_output: str, title: Optional[str], body: Optional[str]
 ) -> Result[Tuple[str, str], ModelApiCallError]:
-    query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query.model
+    pr_context: str = diff_output
+    query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
 
+    if (
+        get_token_count_of_text_for_model(
+            query_model.tokenizer, diff_output + PR_TITLE_PREFIX
+        )
+        > query_model.model.hard_token_limit
+    ):
+        gpt_summarize_diff_result = await create_gpt_summarized_diff(
+            settings, diff_output
+        )
+        if isinstance(gpt_summarize_diff_result, Err):
+            return gpt_summarize_diff_result
+        pr_context = gpt_summarize_diff_result.value
+        
     tasks: List[asyncio.Task[Result[str, ModelApiCallError]]] = []
     if title is None:
         tasks.append(
@@ -29,7 +45,7 @@ async def create_gpt_title_and_body(
                             create_conversation_message(
                                 Role.SYSTEM.value, PR_TITLE_PREFIX
                             ),
-                            create_conversation_message(Role.USER.value, diff_output),
+                            create_conversation_message(Role.USER.value, pr_context),
                         ],
                         query_model,
                     )
@@ -45,7 +61,7 @@ async def create_gpt_title_and_body(
                             create_conversation_message(
                                 Role.SYSTEM.value, PR_BODY_PREFIX
                             ),
-                            create_conversation_message(Role.USER.value, diff_output),
+                            create_conversation_message(Role.USER.value, pr_context),
                         ],
                         query_model,
                     )
