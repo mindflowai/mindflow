@@ -67,7 +67,7 @@ async def run_query(
         top_document_chunks := await DocumentChunk.query(
             vector=np.array(query_embedding_result.value).reshape(1, -1),
             ids=document_chunk_ids,
-            top_k=100,
+            top_k=25,
         )
     ):
         return Ok(
