@@ -4,7 +4,7 @@ import sys
 
 from typing import List, Optional
 
-from alive_progress import alive_bar
+from alive_progress import alive_bar # type: ignore
 import numpy as np
 from result import Err, Ok, Result
 

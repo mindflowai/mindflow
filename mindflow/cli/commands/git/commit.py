@@ -1,12 +1,11 @@
 import asyncio
+import click
+
+from result import Err, Result
 from typing import Tuple, Optional
 
-import click
-from result import Err, Result
-
-from mindflow.cli.util import passthrough_command
+from mindflow.cli.util import passthrough_command, execute_command_without_trace
 from mindflow.core.commands.git.commit import create_gpt_commit_message
-from mindflow.core.execute import execute_command_without_trace
 from mindflow.core.settings import Settings
 from mindflow.core.types.model import ModelApiCallError
 

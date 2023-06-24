@@ -4,10 +4,8 @@ from typing import Optional, Tuple
 
 import click
 from result import Err
-from mindflow.cli.util import passthrough_command
-from mindflow.core.command_parse import get_flag_values_from_args
+from mindflow.cli.util import execute_command_without_trace, get_flag_values_from_args, passthrough_command
 from mindflow.core.commands.git.pr import create_gpt_title_and_body
-from mindflow.core.execute import execute_command_without_trace
 from mindflow.core.settings import Settings
 
 

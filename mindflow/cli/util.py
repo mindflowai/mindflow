@@ -1,5 +1,23 @@
 import click
 
+import subprocess
+from typing import List, Tuple, Optional
+
+
+def get_flag_values_from_args(args: Tuple[str], flag: List[str]) -> Optional[str]:
+    for i, arg in enumerate(args):
+        if arg in flag:
+            try:
+                return args[i + 1]
+            except IndexError:
+                return None
+    return None
+
+
+def execute_command_without_trace(command: List[str]) -> str:
+    output = subprocess.Popen(command, stdout=subprocess.PIPE)
+    return output.communicate()[0].decode("utf-8")
+
 
 def passthrough_command(*command_args, **command_kwargs):
     """Just like the @click.command decorator, but allows all args to pass through (for wrapper cli commands)."""

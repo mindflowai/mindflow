@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup # type: ignore
 
 # get version from mindflow/__init__.py
 with open("mindflow/__init__.py", "r") as f:

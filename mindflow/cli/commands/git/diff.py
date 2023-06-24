@@ -3,9 +3,8 @@ from typing import Tuple
 import click
 from result import Err
 
-from mindflow.cli.util import passthrough_command
+from mindflow.cli.util import execute_command_without_trace, passthrough_command
 from mindflow.core.commands.git.diff import create_gpt_summarized_diff
-from mindflow.core.execute import execute_command_without_trace
 from mindflow.core.settings import Settings
 
 

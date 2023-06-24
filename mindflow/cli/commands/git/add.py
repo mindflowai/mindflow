@@ -2,8 +2,7 @@ from typing import Tuple
 
 import click
 
-from mindflow.cli.util import passthrough_command
-from mindflow.core.execute import execute_command_without_trace
+from mindflow.cli.util import execute_command_without_trace, passthrough_command
 
 
 @passthrough_command(
