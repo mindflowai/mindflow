@@ -1,10 +1,15 @@
+import asyncio
 import click
 from typing import Tuple
 import os
 
+from result import Result
+
 from mindflow.core.commands.chat import run_chat
 from mindflow.core.commands.index import run_index
 from mindflow.core.commands.query import run_query
+from mindflow.core.settings import Settings
+from mindflow.core.types.model import ModelApiCallError
 from mindflow.core.types.store_traits.json import save_json_store
 from mindflow.core.types.conversation import Conversation
 from mindflow.core.types.definitions.conversation import ConversationID
@@ -28,8 +33,8 @@ def parse_chat_prompt_and_paths_from_args(prompt_args: Tuple[str]):
 @click.argument("prompt_args", nargs=-1, type=str, required=True)
 def chat(prompt_args: Tuple[str], skip_index: bool):
     prompt, paths = parse_chat_prompt_and_paths_from_args(prompt_args)
-
-    if any(os.path.isdir(path) for path in paths):
+    settings = Settings()
+    if paths:
         if skip_index:
             click.echo(
                 "Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths."
@@ -39,13 +44,20 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 "Indexing paths... Note: this may take a while, if you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n"
             )
 
-            run_index(paths)
-            click.echo("")
-        print(run_query(paths, prompt))
+            asyncio.run(run_index(settings, paths))
+
+        run_query_result: Result[str, ModelApiCallError] = asyncio.run(
+            run_query(settings, paths, prompt)
+        )
+        click.echo(run_query_result.value)
+
         save_json_store()
         return
 
-    print(run_chat(paths, prompt))
+    run_chat_result: Result[str, ModelApiCallError] = asyncio.run(
+        run_chat(settings, [], prompt)
+    )
+    click.echo(run_chat_result.value)
     save_json_store()
 
 

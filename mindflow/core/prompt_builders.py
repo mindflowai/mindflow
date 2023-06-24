@@ -21,9 +21,9 @@ def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
 
 
 def build_prompt_from_conversation_messages(
-    messages: List[Dict[str, str]], model: ConfiguredModel
+    messages: List[Dict[str, str]], configured_model: ConfiguredModel
 ) -> Union[List[Dict], str]:
-    if model.service == ServiceID.OPENAI.value:
+    if configured_model.model.service == ServiceID.OPENAI.value:
         return messages
 
     prompt_parts = []
@@ -51,15 +51,15 @@ def build_prompt_from_conversation_messages(
 
 
 def prune_messages_to_fit_context_window(
-    messages: List[Dict[str, str]], model: ConfiguredModel
+    messages: List[Dict[str, str]], configured_model: ConfiguredModel
 ) -> List[Dict[str, str]]:
     # Improvement can be made on the estimation here for Anthropic system messages
     content = ""
     for i in range(0, len(messages)):
         content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
         if (
-            get_token_count_of_text_for_model(model, content)
-            > model.hard_token_limit - MinimumReservedLength.CHAT.value
+            get_token_count_of_text_for_model(configured_model.tokenizer, content)
+            > configured_model.model.hard_token_limit - MinimumReservedLength.CHAT.value
         ):
             return messages[:i]
     return messages

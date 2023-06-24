@@ -1,30 +1,31 @@
 import os
 from typing import Dict, List
-from mindflow.core.types.model import ConfiguredModel
+
+import tiktoken
 
 
-def get_token_count_of_text_for_model(model: ConfiguredModel, text: str) -> int:
+def get_token_count_of_text_for_model(tokenizer: tiktoken.Encoding, text: str) -> int:
     try:
-        return len(model.tokenizer.encode(text))
+        return len(tokenizer.encode(text))
     except Exception:
         return len(text) // 3
 
 
 def get_batch_token_count_of_text_for_model(
-    model: ConfiguredModel, texts: List[str]
+    tokenizer: tiktoken.Encoding, texts: List[str]
 ) -> int:
     try:
-        return sum(len(encoding) for encoding in model.tokenizer.encode_batch(texts))
+        return sum(len(encoding) for encoding in tokenizer.encode_batch(texts))
     except Exception:
         return sum(len(text) // 3 for text in texts)
 
 
 def get_token_count_of_messages_for_model(
+    tokenizer: tiktoken.Encoding,
     messages: List[Dict[str, str]],
-    model: ConfiguredModel,
 ):
     return get_token_count_of_text_for_model(
-        model,
+        tokenizer,
         "\n\n".join(
             [f"{message['role']}\n\n{message['content']}" for message in messages]
         ),
@@ -32,9 +33,9 @@ def get_token_count_of_messages_for_model(
 
 
 def get_token_count_from_document_query_for_model(
+    tokenizer: tiktoken.Encoding,
     document_paths: List[str],
     query: str,
-    model: ConfiguredModel,
     return_texts: bool = False,
 ):
     texts = [query]
@@ -48,7 +49,7 @@ def get_token_count_from_document_query_for_model(
         file_text = {open(document_path, "r").read()}
         texts.append(f"```{file_text}```")
 
-    tokens = get_batch_token_count_of_text_for_model(model, texts)
+    tokens = get_batch_token_count_of_text_for_model(tokenizer, texts)
     if return_texts:
         return tokens, texts
     return tokens

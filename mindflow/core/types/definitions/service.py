@@ -39,43 +39,31 @@ class ServiceConfigParameterKey(Enum):
     MODELS = "models"
 
 
-class ServiceConfigParameterName(Enum):
-    API_KEY = "API Key"
-    API_SECRET = "API Secret"
-
-    MODELS = "Models"
-
-
-class ServiceName(Enum):
-    OPENAI = "OpenAI"
-    ANTHROPIC = "Anthropic"
-    PINECONE = "Pinecone"
-
-
-class ServiceURL(Enum):
-    OPENAI = ""
-    ANTHROPIC = ""
-    PINECONE = ""
-
-
-class ServiceAPIURL(Enum):
-    OPENAI = ""
-    ANTHROPIC = ""
-    PINECONE = ""
-
-
-class ServiceDefaultIndexModel(Enum):
-    OPENAI = ModelID.GPT_3_5_TURBO.value
-    ANTHROPIC = ModelID.CLAUDE_INSTANT_V1.value
-
-
-class ServiceDefaultQueryModel(Enum):
-    OPENAI = ModelID.GPT_3_5_TURBO.value
-    ANTHROPIC = ModelID.CLAUDE_V1.value
-
-
-class ServiceDefaultEmbeddingModel(Enum):
-    OPENAI = ModelID.TEXT_EMBEDDING_ADA_002.value
+SERVICE_STATIC = {
+    ServiceID.OPENAI.value: {
+        ServiceParameterKey.ID.value: ServiceID.OPENAI.value,
+        ServiceParameterKey.NAME.value: "OpenAI",
+        ServiceParameterKey.URL.value: "https://api.openai.com",
+        ServiceParameterKey.API_URL.value: "https://api.openai.com/v1/",
+        ServiceParameterKey.DEFAULT_INDEX_MODEL.value: ModelID.GPT_3_5_TURBO.value,
+        ServiceParameterKey.DEFAULT_QUERY_MODEL.value: ModelID.GPT_3_5_TURBO.value,
+        ServiceParameterKey.DEFAULT_EMBEDDING_MODEL.value: ModelID.TEXT_EMBEDDING_ADA_002.value,
+    },
+    ServiceID.ANTHROPIC.value: {
+        ServiceParameterKey.ID.value: ServiceID.ANTHROPIC.value,
+        ServiceParameterKey.NAME.value: "Anthropic",
+        ServiceParameterKey.URL.value: "",
+        ServiceParameterKey.API_URL.value: "",
+        ServiceParameterKey.DEFAULT_INDEX_MODEL.value: ModelID.CLAUDE_V1.value,
+        ServiceParameterKey.DEFAULT_QUERY_MODEL.value: ModelID.CLAUDE_INSTANT_V1.value,
+    },
+    ServiceID.PINECONE.value: {
+        ServiceParameterKey.ID.value: ServiceID.PINECONE.value,
+        ServiceParameterKey.NAME.value: "Pinecone",
+        ServiceParameterKey.URL.value: "",
+        ServiceParameterKey.API_URL.value: "",
+    },
+}
 
 
 ## Service Model Types
@@ -91,30 +79,3 @@ class ServiceModelTypeTextCompletion(Enum):
 class ServiceModel(Enum):
     OPENAI = ModelOpenAI
     ANTHROPIC = ModelAnthropic
-
-
-SERVICE_STATIC = {
-    ServiceID.OPENAI.value: {
-        ServiceParameterKey.ID.value: ServiceID.OPENAI.value,
-        ServiceParameterKey.NAME.value: ServiceName.OPENAI.value,
-        ServiceParameterKey.URL.value: ServiceURL.OPENAI.value,
-        ServiceParameterKey.API_URL.value: ServiceURL.OPENAI.value,
-        ServiceParameterKey.DEFAULT_INDEX_MODEL.value: ServiceDefaultIndexModel.OPENAI.value,
-        ServiceParameterKey.DEFAULT_QUERY_MODEL.value: ServiceDefaultQueryModel.OPENAI.value,
-        ServiceParameterKey.DEFAULT_EMBEDDING_MODEL.value: ServiceDefaultEmbeddingModel.OPENAI.value,
-    },
-    ServiceID.ANTHROPIC.value: {
-        ServiceParameterKey.ID.value: ServiceID.ANTHROPIC.value,
-        ServiceParameterKey.NAME.value: ServiceName.ANTHROPIC.value,
-        ServiceParameterKey.URL.value: ServiceURL.ANTHROPIC.value,
-        ServiceParameterKey.API_URL.value: ServiceURL.ANTHROPIC.value,
-        ServiceParameterKey.DEFAULT_INDEX_MODEL.value: ServiceDefaultIndexModel.ANTHROPIC.value,
-        ServiceParameterKey.DEFAULT_QUERY_MODEL.value: ServiceDefaultQueryModel.ANTHROPIC.value,
-    },
-    ServiceID.PINECONE.value: {
-        ServiceParameterKey.ID.value: ServiceID.PINECONE.value,
-        ServiceParameterKey.NAME.value: ServiceName.PINECONE.value,
-        ServiceParameterKey.URL.value: ServiceURL.PINECONE.value,
-        ServiceParameterKey.API_URL.value: ServiceURL.PINECONE.value,
-    },
-}

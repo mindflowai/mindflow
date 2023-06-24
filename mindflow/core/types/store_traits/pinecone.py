@@ -79,13 +79,13 @@ class PineconeStore:
         )
 
     @classmethod
-    def load(cls: Type[T], object_id: str) -> Optional[T]:
+    async def load(cls: Type[T], object_id: str) -> Optional[T]:
         if not (object := pinecone_db.get_index(cls.__name__).fetch(ids=[object_id])):
             return None
         return cls(cls._convert_pinecone_format_to_object_format(object["matches"][0]))
 
     @classmethod
-    def load_bulk(cls: Type[T], object_ids: List[str]) -> List[Optional[T]]:
+    async def load_bulk(cls: Type[T], object_ids: List[str]) -> List[Optional[T]]:
         vectors = pinecone_db.get_index(cls.__name__).fetch(ids=object_ids)["vectors"]
         vector_list: List[Optional[T]] = [
             cls(cls._convert_pinecone_format_to_object_format(vectors[obj_id]))
@@ -96,7 +96,7 @@ class PineconeStore:
         return vector_list
 
     @classmethod
-    def load_bulk_ignore_missing(cls: Type[T], object_ids: List[str]) -> List[T]:
+    async def load_bulk_ignore_missing(cls: Type[T], object_ids: List[str]) -> List[T]:
         vectors = pinecone_db.get_index(cls.__name__).fetch(ids=object_ids)["vectors"]
         vector_list: List[Optional[T]] = [
             cls(cls._convert_pinecone_format_to_object_format(vectors[obj_id]))
@@ -107,21 +107,21 @@ class PineconeStore:
         return list(filter(None, vector_list))
 
     @classmethod
-    def delete_bulk(cls, object_ids: List[str]):
+    async def delete_bulk(cls, object_ids: List[str]):
         pinecone_db.get_index(cls.__name__).delete(ids=object_ids)
 
-    def save(self):
+    async def save(self):
         pinecone_db.get_index(self.__class__.__name__).upsert(
             vectors=[self._convert_object_to_pinecone_format()]
         )
 
     @classmethod
-    def save_bulk(cls, objects: List[T]):
+    async def save_bulk(cls, objects: List[T]):
         vectors = [object._convert_object_to_pinecone_format() for object in objects]
         pinecone_db.get_index(cls.__name__).upsert(vectors=vectors)
 
     @classmethod
-    def query(
+    async def query(
         cls: Type[T],
         vector: np.ndarray,
         ids: List[str],

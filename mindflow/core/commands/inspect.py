@@ -1,39 +1,24 @@
 import json
 from typing import List
 
+from result import Err, Ok, Result
+
 from mindflow.core.types.document import (
     Document,
     DocumentChunk,
-    DocumentReference,
     get_document_chunk_ids,
-    get_document_id,
 )
-from mindflow.core.resolving.resolve import resolve_paths_to_document_references
 
 
-def run_inspect(document_paths: List[str]) -> str:
-    document_references: List[DocumentReference] = resolve_paths_to_document_references(
-        document_paths
-    )
-    document_ids = document_ids = [
-        document_id
-        for document_reference in document_references
-        if (
-            document_id := get_document_id(
-                document_reference.path, document_reference.document_type
-            )
-        )
-        is not None
-    ]
-
+async def run_inspect(document_ids: List[str]) -> Result[str, str]:
     if not (
         document_chunk_ids := get_document_chunk_ids(
-            Document.load_bulk_ignore_missing(document_ids)
+            await Document.load_bulk_ignore_missing(document_ids)
         )
     ):
-        return "No documents to inspect"
+        return Ok("No documents to inspect")
 
-    document_chunks: List[DocumentChunk] = DocumentChunk.load_bulk_ignore_missing(
+    document_chunks: List[DocumentChunk] = await DocumentChunk.load_bulk_ignore_missing(
         document_chunk_ids
     )
 
@@ -49,5 +34,5 @@ def run_inspect(document_paths: List[str]) -> str:
     )
 
     if inspect_output != "null":
-        return inspect_output
-    return "No documents to inspect"
+        return Ok(inspect_output)
+    return Err("Unable to locate indexed documents")

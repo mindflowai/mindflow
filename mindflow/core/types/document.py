@@ -1,5 +1,7 @@
 import hashlib
 from typing import List, Optional, Union
+from mindflow.core.errors import ModelError
+from mindflow.core.types.model import ConfiguredModel
 
 from mindflow.core.types.store_traits.pinecone import PineconeStore
 from mindflow.core.types.definitions.document import DocumentType

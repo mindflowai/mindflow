@@ -1,10 +1,7 @@
-import os
-from typing import Union
-import click
+from result import Err, Ok, Result
 from mindflow.core.types.conversation import Conversation
 from mindflow.core.types.definitions.conversation import ConversationID
 from mindflow.core.settings import Settings
-from mindflow.core.errors import ModelError
 from mindflow.core.text_processing.xml import get_text_within_xml
 
 from mindflow.core.prompt_builders import (
@@ -14,22 +11,13 @@ from mindflow.core.prompt_builders import (
     prune_messages_to_fit_context_window,
 )
 from mindflow.core.token_counting import get_token_count_of_messages_for_model
+from mindflow.core.types.model import ConfiguredTextCompletionModel, ModelApiCallError
 
 
-def run_code_generation(output_path: str, prompt: str) -> str:
-    settings = Settings()
-    completion_model = settings.mindflow_models.query.model
-
-    if os.path.exists(output_path):
-        click.confirm(
-            f"The output path '{output_path}' already exists. Do you want to overwrite it?",
-            abort=True,
-        )
-        os.remove(output_path)
-
-    if len((output_path_dir := os.path.dirname(output_path))) > 0:
-        os.makedirs(output_path_dir, exist_ok=True)
-
+async def run_code_generation(
+    settings: Settings, output_path: str, prompt: str
+) -> Result[str, ModelApiCallError]:
+    query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
     if (conversation := Conversation.load(ConversationID.CODE_GEN_0.value)) is None:
         conversation = Conversation(
             {"id": ConversationID.CODE_GEN_0.value, "messages": [], "total_tokens": 0}
@@ -42,22 +30,19 @@ def run_code_generation(output_path: str, prompt: str) -> str:
         )
     )
     conversation.messages = prune_messages_to_fit_context_window(
-        conversation.messages, completion_model
+        conversation.messages, query_model
     )
 
-    response: Union[ModelError, str] = completion_model(
-        build_prompt_from_conversation_messages(conversation.messages, completion_model)
+    query_model_result: Result[str, ModelApiCallError] = await query_model.call_api(
+        build_prompt_from_conversation_messages(conversation.messages, query_model)
     )
-    if isinstance(response, ModelError):
-        return response.message
-
-    with open(output_path, "w") as f:
-        f.write(get_text_within_xml(response, "GEN"))
+    if isinstance(query_model_result, Err):
+        return query_model_result
 
     conversation.total_tokens = get_token_count_of_messages_for_model(
-        conversation.messages, completion_model
+        query_model.tokenizer, conversation.messages
     )
 
     conversation.save()
 
-    return f"Code generation complete. Your code is ready to go at {output_path}!"
+    return Ok(get_text_within_xml(query_model_result.value, "GEN"))
