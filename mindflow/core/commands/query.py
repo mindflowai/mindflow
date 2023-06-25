@@ -65,7 +65,7 @@ async def run_query(
     document_chunk_ids: List[str] = get_document_chunk_ids(documents)
     if not (
         top_document_chunks := await DocumentChunk.query(
-            vector=np.array(query_embedding_result.value).reshape(1, -1),
+            vector=query_embedding_result.value,
             ids=document_chunk_ids,
             top_k=25,
         )

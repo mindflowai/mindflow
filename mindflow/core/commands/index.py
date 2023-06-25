@@ -364,7 +364,7 @@ async def create_document_chunk(
                 "start_pos": start_pos,
                 "end_pos": end_pos,
                 "summary": appended_summaries,
-                "embedding": list(embedding_result.value),
+                "embedding": embedding_result.value,
             }
         )
     )

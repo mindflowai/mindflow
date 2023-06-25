@@ -7,7 +7,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 from result import Err, Ok, Result
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from mindflow.core.token_counting import (
     get_token_count_of_messages_for_model,
@@ -220,7 +220,7 @@ class ApiTextCompletionModel(ABC):
 
 class ApiEmbeddingModel(ABC):
     @abstractmethod
-    async def call_api(self, *args, **kwargs) -> Result[np.ndarray, ModelApiCallError]:
+    async def call_api(self, *args, **kwargs) -> Result[List[float], ModelApiCallError]:
         pass
 
 
@@ -388,7 +388,7 @@ class ConfiguredAnthropicChatCompletionModel(ConfiguredTextCompletionModel):
 class ConfiguredOpenAITextEmbeddingModel(ConfiguredEmbeddingModel):
     async def call_api(
         self, text: str, request_tokens: Optional[int] = None
-    ) -> Result[np.ndarray, ModelApiCallError]:
+    ) -> Result[List[float], ModelApiCallError]:
         assert isinstance(text, str) and text != ""
 
         payload = {
@@ -429,7 +429,7 @@ class ConfiguredOpenAITextEmbeddingModel(ConfiguredEmbeddingModel):
                         if "error" not in result:
                             await self.status_tracker.increment_requests_count_successful()
                             await self.status_tracker.decrement_requests_count_in_progress()
-                            return Ok(np.array(result["data"][0]["embedding"]))
+                            return Ok(result["data"][0]["embedding"])
 
                         e = str(result["error"])
                         logging.warning(

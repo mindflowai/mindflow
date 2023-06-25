@@ -123,13 +123,13 @@ class PineconeStore:
     @classmethod
     async def query(
         cls: Type[T],
-        vector: np.ndarray,
+        vector: List[float],
         ids: List[str],
         top_k=100,
         include_metadata=True,
     ) -> List[T]:
         results = pinecone_db.get_index(cls.__name__).query(
-            vector=vector.tolist(),
+            vector=vector,
             filter={"id": {"$in": ids}},
             top_k=top_k,
             include_metadata=include_metadata,
