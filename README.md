@@ -12,6 +12,9 @@ The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the 
 - [Automatic Pull Requests](#automatic-pull-requests)
 - [Use-case showcase](#showcase)
 
+## Demo
+[![Alternate Text](http://img.youtube.com/vi/e2bedjyv-Nw/0.jpg)](https://www.youtube.com/watch?v=e2bedjyv-Nw)
+
 ## Join Our Community!
 1. Follow us on [Twitter](https://twitter.com/mindflow_ai)
 2. Join our [discord](https://discord.com/invite/P2cQACzB)
