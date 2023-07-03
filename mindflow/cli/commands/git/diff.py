@@ -1,6 +1,5 @@
 import click
 from typing import Tuple
-
 from mindflow.cli.util import passthrough_command
 
 
@@ -11,11 +10,12 @@ from mindflow.cli.util import passthrough_command
 def diff(args: Tuple[str], detailed: bool):
     import asyncio
 
+    from termcolor import colored
+    from result import Ok
+
     from mindflow.core.commands.git.diff import create_gpt_summarized_diff
     from mindflow.cli.util import execute_command_without_trace
     from mindflow.core.settings import Settings
-    from termcolor import colored
-    from result import Ok
 
     diff_output = execute_command_without_trace(["git", "diff"] + list(args)).strip()
     if not diff_output:

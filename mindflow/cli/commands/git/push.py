@@ -1,7 +1,5 @@
 import click
-
 from typing import Tuple
-
 from mindflow.cli.util import passthrough_command
 
 

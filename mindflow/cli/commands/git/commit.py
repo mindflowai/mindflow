@@ -14,12 +14,12 @@ def commit(args: Tuple[str], message: Optional[str] = None):
     import asyncio
 
     from result import Err, Result
+    from termcolor import colored
 
     from mindflow.cli.util import execute_command_without_trace
     from mindflow.core.commands.git.commit import create_gpt_commit_message
     from mindflow.core.settings import Settings
     from mindflow.core.types.model import ModelApiCallError
-    from termcolor import colored
 
     if message is not None:
         click.echo(

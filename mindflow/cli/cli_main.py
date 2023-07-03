@@ -15,8 +15,6 @@ from mindflow.cli.commands.login import login
 from mindflow.cli.commands.gen import gen
 from mindflow.cli.commands.config import config
 
-# from mindflow.cli.new_click_cli.commands.config import config
-
 
 @click.group()
 def mindflow_cli():
