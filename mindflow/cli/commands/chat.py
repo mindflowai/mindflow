@@ -26,6 +26,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
 
     from typing import List
     from result import Ok
+    from termcolor import colored
 
     from mindflow.core.commands.chat import run_chat
     from mindflow.core.commands.index import run_index
@@ -34,7 +35,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
     from mindflow.core.types.store_traits.json import save_json_store
 
     async def stream_chat(settings: Settings, prompt: str):
-        print("\nGPT:")
+        click.echo(colored("\nGPT:", attrs=["bold"]))
         async for char_stream_chunk in run_chat(settings, [], prompt):
             if isinstance(char_stream_chunk, Ok):
                 click.echo(char_stream_chunk.value, nl=False)
@@ -42,7 +43,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 click.echo(char_stream_chunk.value)
 
     async def stream_query(settings: Settings, file_paths: List[str], prompt: str):
-        print("\nGPT:")
+        click.echo(colored("\nGPT:", attrs=["bold"]))
         async for char_stream_chunk in run_query(settings, file_paths, prompt):
             if isinstance(char_stream_chunk, Ok):
                 click.echo(char_stream_chunk.value, nl=False)

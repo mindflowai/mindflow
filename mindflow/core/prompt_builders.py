@@ -55,9 +55,9 @@ def prune_messages_to_fit_context_window(
     for i in range(0, len(messages)):
         if (
             get_token_count_of_text_for_model(
-                configured_model.tokenizer, json.dumps(messages[i : len(messages) - 1])
+                configured_model.tokenizer, json.dumps(messages[i : len(messages)])
             )
             < configured_model.model.hard_token_limit - 1500
         ):
-            return messages[i : len(messages) - 1]
+            return messages[i : len(messages)]
     return []
