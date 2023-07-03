@@ -1,18 +1,19 @@
-import os
 import click
-import asyncio
-
-from result import Result, Err
-
-from mindflow.core.commands.gen import run_code_generation
-from mindflow.core.settings import Settings
-from mindflow.core.types.model import ModelApiCallError
 
 
 @click.command(help="AI powered boilerplate code generation.")
 @click.argument("output_path", type=str)
 @click.argument("prompt", type=str)
 def gen(output_path: str, prompt: str):
+    import os
+    import asyncio
+
+    from result import Result, Err
+
+    from mindflow.core.commands.gen import run_code_generation
+    from mindflow.core.settings import Settings
+    from mindflow.core.types.model import ModelApiCallError
+
     if os.path.exists(output_path):
         click.confirm(
             f"The output path '{output_path}' already exists. Do you want to overwrite it?",

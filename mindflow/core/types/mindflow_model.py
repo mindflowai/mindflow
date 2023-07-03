@@ -10,7 +10,6 @@ from mindflow.core.types.store_traits.json import JsonStore
 from mindflow.core.types.model import (
     ConfiguredEmbeddingModel,
     ConfiguredOpenAIChatCompletionModel,
-    ConfiguredAnthropicChatCompletionModel,
     ConfiguredOpenAITextEmbeddingModel,
     ConfiguredTextCompletionModel,
 )
@@ -54,8 +53,6 @@ class ConfiguredMindFlowModels:
 
         if model_id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_4.value]:
             return ConfiguredOpenAIChatCompletionModel(model_id)
-        elif model_id in [ModelID.CLAUDE_INSTANT_V1.value, ModelID.CLAUDE_V1.value]:
-            return ConfiguredAnthropicChatCompletionModel(model_id)
         raise Exception("Unsupported model: " + model_id)
 
     @cached_property
@@ -74,8 +71,6 @@ class ConfiguredMindFlowModels:
 
         if model_id in [ModelID.GPT_3_5_TURBO.value, ModelID.GPT_4.value]:
             return ConfiguredOpenAIChatCompletionModel(model_id)
-        elif model_id in [ModelID.CLAUDE_INSTANT_V1.value, ModelID.CLAUDE_V1.value]:
-            return ConfiguredAnthropicChatCompletionModel(model_id)
         raise Exception("Unsupported model: " + model_id)
 
     @cached_property

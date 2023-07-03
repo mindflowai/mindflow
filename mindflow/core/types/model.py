@@ -1,13 +1,13 @@
+import json
 import time
 import aiohttp
 import logging
 import asyncio
 import tiktoken
-import numpy as np
 
 from abc import ABC, abstractmethod
 from result import Err, Ok, Result
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, Union
 
 from mindflow.core.token_counting import (
     get_token_count_of_messages_for_model,
@@ -217,6 +217,17 @@ class ApiTextCompletionModel(ABC):
     async def call_api(self, *args, **kwargs) -> Result[str, ModelApiCallError]:
         pass
 
+    @abstractmethod
+    async def call_api_stream(
+        self,
+        messages: List[Any],
+        temperature: float = 0.0,
+        max_tokens: Optional[int] = None,
+        stop: Optional[List[Any]] = None,
+        request_tokens: Optional[int] = None,
+    ) -> AsyncGenerator[Result[str, ModelApiCallError], None]:
+        pass
+
 
 class ApiEmbeddingModel(ABC):
     @abstractmethod
@@ -282,14 +293,18 @@ class ConfiguredOpenAIChatCompletionModel(ConfiguredTextCompletionModel):
             while try_count < 5:
                 try:
                     async with session.post(
-                        self.model.url, headers=self.headers, json=payload
+                        self.model.url,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                        },
+                        json=payload,
                     ) as response:
                         result = await response.json()
 
                         if "error" not in result:
                             await self.status_tracker.increment_requests_count_successful()
                             await self.status_tracker.decrement_requests_count_in_progress()
-                            # print(result)
                             return Ok(result["choices"][0]["message"]["content"])
 
                         logging.warning(
@@ -312,30 +327,33 @@ class ConfiguredOpenAIChatCompletionModel(ConfiguredTextCompletionModel):
 
             return model_error
 
-
-class ConfiguredAnthropicChatCompletionModel(ConfiguredTextCompletionModel):
-    async def call_api(
+    async def call_api_stream(
         self,
-        prompt: str,
+        messages: list,
         temperature: float = 0.0,
-        max_tokens: Optional[int] = 100,
+        max_tokens: Optional[int] = None,
+        stop: Optional[list] = None,
         request_tokens: Optional[int] = None,
-    ) -> Result[str, ModelApiCallError]:
-        assert isinstance(prompt, str) and prompt != ""
+    ) -> AsyncGenerator[Result[str, ModelApiCallError], None]:
+        assert isinstance(messages, list) and len(messages) > 0
         assert request_tokens is None or request_tokens > 0
         assert max_tokens is None or max_tokens > 0
         assert temperature >= 0.0 and temperature <= 1.0
+        assert stop is None or isinstance(stop, list)
 
         payload = {
             "model": self.model.id,
-            "prompt": prompt,
-            "stop_sequences": [],
-            "max_tokens": max_tokens,
+            "messages": messages,
             "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stop": stop,
+            "stream": True,
         }
 
         if request_tokens is None:
-            request_tokens = get_token_count_of_text_for_model(self.tokenizer, prompt)
+            request_tokens = get_token_count_of_messages_for_model(
+                self.tokenizer, messages
+            )
 
         while True:
             (
@@ -355,34 +373,55 @@ class ConfiguredAnthropicChatCompletionModel(ConfiguredTextCompletionModel):
         await self.status_tracker.increment_requests_count_total()
         await self.status_tracker.increment_requests_count_in_progress()
         await self.status_tracker.add_tokens_count_total(request_tokens)
+
+        # The rest of your setup remains the same...
         async with aiohttp.ClientSession() as session:
             while try_count < 5:
                 try:
                     async with session.post(
-                        self.model.url, headers=self.headers, json=payload
+                        self.model.url,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                        },
+                        json=payload,
                     ) as response:
-                        result = await response.json()
-
-                        if "error" not in result:
-                            await self.status_tracker.increment_requests_count_successful()
-                            await self.status_tracker.decrement_requests_count_in_progress()
-                            return Ok(result["completion"])
-
-                        logging.warning(
-                            f"Request {payload} failed with exception {result['error']}"
-                        )
-
-                        # Figure out how to catch rate limiting errors
-                        try_count += 1
-                        model_error = Err(APIError(result["error"]))
-                        await self.status_tracker.increment_error_count_other()
-
+                        buffer = ""
+                        async for data in response.content.iter_any():
+                            buffer += data.decode("utf-8")
+                            event, buffer = buffer.split("\n\n", 1)
+                            lines = event.split("\n")
+                            try:
+                                result = json.loads(lines[-1][5:])  # remove "data: "
+                            except Exception as e:
+                                return
+                            if "error" not in result:
+                                await self.status_tracker.increment_requests_count_successful()
+                                await self.status_tracker.decrement_requests_count_in_progress()
+                                if not result["choices"][0]["delta"]:
+                                    print("No delta")
+                                    continue
+                                yield Ok(
+                                    result["choices"][0]["delta"]["content"]
+                                )  # Yield the result
+                            else:
+                                logging.warning(
+                                    f"Request {payload} failed with error {result['error']}"
+                                )
+                                try_count += 1
+                                if "Rate limit" in result["error"].get("message", ""):
+                                    model_error = Err(RateLimitError(result["error"]))
+                                    await self.status_tracker.increment_error_count_rate_limit()
+                                    await asyncio.sleep(5)
+                                    continue
+                                model_error = Err(APIError(result["error"]))
+                                await self.status_tracker.increment_error_count_api()
+                                yield model_error
+                        return
                 except Exception as e:
                     logging.warning(f"Request {payload} failed with exception {e}")
                     await self.status_tracker.increment_error_count_other()
-                    return Err(UncaughtModelException(str(e)))
-
-            return model_error
+                    yield Err(UncaughtModelException(str(e)))
 
 
 class ConfiguredOpenAITextEmbeddingModel(ConfiguredEmbeddingModel):

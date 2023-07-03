@@ -1,4 +1,4 @@
-from typing import List
+from typing import AsyncGenerator, List
 from result import Err, Result
 
 from mindflow.core.types.conversation import Conversation
@@ -20,7 +20,7 @@ from mindflow.core.types.model import ConfiguredTextCompletionModel, ModelApiCal
 
 async def run_chat(
     settings: Settings, document_paths: List[str], user_query: str
-) -> Result[str, ModelApiCallError]:
+) -> AsyncGenerator[Result[str, ModelApiCallError], None]:
     query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
     if (conversation := Conversation.load(ConversationID.CHAT_0.value)) is None:
         first_message = create_conversation_message(
@@ -45,18 +45,22 @@ async def run_chat(
         conversation.messages, query_model
     )
 
-    query_model_result: Result[str, ModelApiCallError] = await query_model.call_api(
+    result = ""
+    async for char_stream_chunk in query_model.call_api_stream(
         build_prompt_from_conversation_messages(conversation.messages, query_model)
-    )
-    if isinstance(query_model_result, Err):
-        return query_model_result
+    ):
+        if isinstance(char_stream_chunk, Err):
+            yield char_stream_chunk
+            return
+
+        result += char_stream_chunk.value
+        yield char_stream_chunk
 
     conversation.messages.append(
-        create_conversation_message(Role.ASSISTANT.value, query_model_result.value)
+        create_conversation_message(Role.ASSISTANT.value, result)
     )
     conversation.total_tokens = get_token_count_of_messages_for_model(
         query_model.tokenizer, conversation.messages
     )
 
     conversation.save()
-    return query_model_result

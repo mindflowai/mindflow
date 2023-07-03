@@ -1,3 +1,4 @@
+import json
 import anthropic  # type: ignore
 
 from enum import Enum
@@ -21,7 +22,7 @@ def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
 
 def build_prompt_from_conversation_messages(
     messages: List[Dict[str, str]], configured_model: ConfiguredModel
-) -> Union[List[Dict], str]:
+) -> List[Dict]:
     if configured_model.model.service == ServiceID.OPENAI.value:
         return messages
 
@@ -52,13 +53,12 @@ def build_prompt_from_conversation_messages(
 def prune_messages_to_fit_context_window(
     messages: List[Dict[str, str]], configured_model: ConfiguredModel
 ) -> List[Dict[str, str]]:
-    # Improvement can be made on the estimation here for Anthropic system messages
-    content = ""
     for i in range(0, len(messages)):
-        content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
         if (
-            get_token_count_of_text_for_model(configured_model.tokenizer, content)
-            > configured_model.model.hard_token_limit - MinimumReservedLength.CHAT.value
+            get_token_count_of_text_for_model(
+                configured_model.tokenizer, json.dumps(messages[i : len(messages) - 1])
+            )
+            < configured_model.model.hard_token_limit - 1500
         ):
-            return messages[:i]
-    return messages
+            return messages[i : len(messages) - 1]
+    return []

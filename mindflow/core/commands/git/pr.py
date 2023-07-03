@@ -27,12 +27,13 @@ async def create_gpt_title_and_body(
         )
         > query_model.model.hard_token_limit
     ):
-        gpt_summarize_diff_result = await create_gpt_summarized_diff(
-            settings, diff_output
-        )
-        if isinstance(gpt_summarize_diff_result, Err):
-            return gpt_summarize_diff_result
-        pr_context = gpt_summarize_diff_result.value
+        pr_context = ""
+        async for char_stream_chunk in create_gpt_summarized_diff(
+            settings, diff_output, True
+        ):
+            if isinstance(char_stream_chunk, Err):
+                return char_stream_chunk
+            pr_context += char_stream_chunk.value
 
     tasks: List[asyncio.Task[Result[str, ModelApiCallError]]] = []
     if title is None:
