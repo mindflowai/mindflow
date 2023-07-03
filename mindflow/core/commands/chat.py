@@ -46,7 +46,7 @@ async def run_chat(
     )
 
     result = ""
-    async for char_stream_chunk in query_model.call_api_stream( # type: ignore
+    async for char_stream_chunk in query_model.call_api_stream(  # type: ignore
         build_prompt_from_conversation_messages(conversation.messages, query_model)
     ):
         if isinstance(char_stream_chunk, Err):

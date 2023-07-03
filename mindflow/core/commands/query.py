@@ -82,7 +82,7 @@ async def run_query(
         completion_model, query, document_selection_batch
     )
 
-    async for char_stream_chunk in completion_model.call_api_stream( # type: ignore
+    async for char_stream_chunk in completion_model.call_api_stream(  # type: ignore
         build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
