@@ -28,12 +28,13 @@ async def create_gpt_commit_message(
         )
         > query_model.model.hard_token_limit
     ):
-        gpt_summarize_diff_result = await create_gpt_summarized_diff(
-            settings, diff_output
-        )
-        if isinstance(gpt_summarize_diff_result, Err):
-            return gpt_summarize_diff_result
-        commit_context = gpt_summarize_diff_result.value
+        summarized_diff = ""
+        async for char_stream_chunk in create_gpt_summarized_diff(
+            settings, diff_output, True
+        ):
+            if isinstance(char_stream_chunk, Err):
+                return char_stream_chunk
+            summarized_diff += char_stream_chunk.value
 
     response: Result[str, ModelApiCallError] = await query_model.call_api(
         build_prompt_from_conversation_messages(

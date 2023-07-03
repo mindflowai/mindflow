@@ -1,17 +1,6 @@
 import click
-import asyncio
-import subprocess
-
 from typing import Optional, Tuple
-from result import Err
-
-from mindflow.cli.util import (
-    execute_command_without_trace,
-    get_flag_values_from_args,
-    passthrough_command,
-)
-from mindflow.core.commands.git.pr import create_gpt_title_and_body
-from mindflow.core.settings import Settings
+from mindflow.cli.util import passthrough_command
 
 
 @click.group()
@@ -38,18 +27,34 @@ def mr():
 def create(
     args: Tuple[str], title: Optional[str] = None, description: Optional[str] = None
 ):
+    import asyncio
+    import subprocess
+
+    from result import Err
+
+    from mindflow.cli.util import (
+        execute_command_without_trace,
+        get_flag_values_from_args,
+    )
+    from mindflow.core.commands.git.pr import create_gpt_title_and_body
+    from mindflow.core.settings import Settings
+    from termcolor import colored
+
     if title is not None:
         click.echo(
-            f"Warning: Using message '{title}' instead of mindflow generated message."
+            colored(
+                f"Warning: Using message '{title}' instead of mindflow generated message. It's recommended that you don't use the -t/--title flag.",
+                "yellow",
+            )
         )
-        click.echo("It's recommended that you don't use the -t/--title flag.")
 
     if description is not None:
         click.echo(
-            f"Warning: Using message '{description}' instead of mindflow generated message."
+            colored(
+                f"Warning: Using message '{description}' instead of mindflow generated message. It's recommended that you don't use the -d/--description flag.",
+                "yellow",
+            )
         )
-        click.echo("It's recommended that you don't use the -d/--description flag.")
-
     if (
         base_branch_name := get_flag_values_from_args(args, ["--target-branch", "-b"])
     ) is None:

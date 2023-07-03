@@ -1,9 +1,8 @@
 import asyncio
-import numpy as np
 
 from io import TextIOWrapper
 
-from typing import Dict, List, Optional, Tuple
+from typing import AsyncGenerator, Dict, List, Optional, Tuple
 from result import Err, Ok, Result
 
 from mindflow.core.types.document import (
@@ -32,7 +31,7 @@ from mindflow.core.types.model import (
 
 async def run_query(
     settings: Settings, document_paths: List[str], query: str
-) -> Result[str, ModelApiCallError]:
+) -> AsyncGenerator[Result[str, ModelApiCallError], None]:
     """Query files, folders, and websites."""
     completion_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
     embedding_model: ConfiguredEmbeddingModel = settings.mindflow_models.embedding
@@ -58,9 +57,9 @@ async def run_query(
     documents, query_embedding_result = await asyncio.gather(
         document_task, query_embedding_task
     )
-
     if isinstance(query_embedding_result, Err):
-        return query_embedding_result
+        yield query_embedding_result
+        return
 
     document_chunk_ids: List[str] = get_document_chunk_ids(documents)
     if not (
@@ -70,7 +69,7 @@ async def run_query(
             top_k=25,
         )
     ):
-        return Ok(
+        yield Ok(
             "No index for requested hashes. Please generate index for passed content."
         )
 
@@ -82,7 +81,8 @@ async def run_query(
     trimmed_content: str = select_and_trim_text_to_fit_context_window(
         completion_model, query, document_selection_batch
     )
-    return await completion_model.call_api(
+
+    async for char_stream_chunk in completion_model.call_api_stream(  # type: ignore
         build_prompt_from_conversation_messages(
             [
                 create_conversation_message(Role.SYSTEM.value, QUERY_PROMPT_PREFIX),
@@ -92,7 +92,8 @@ async def run_query(
             ],
             completion_model,
         )
-    )
+    ):
+        yield char_stream_chunk
 
 
 def select_and_trim_text_to_fit_context_window(

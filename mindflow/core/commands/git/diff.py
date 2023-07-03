@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from typing import Dict, List, Tuple
+from typing import AsyncGenerator, Dict, List, Tuple
 from result import Ok, Result, Err
 
 from mindflow.core.types.model import (
@@ -26,7 +26,7 @@ async def create_gpt_summarized_diff(
     settings: Settings,
     diff_output: str,
     detailed: bool = False,  # True
-) -> Result[str, ModelApiCallError]:
+) -> AsyncGenerator[Result[str, ModelApiCallError], None]:
     """Execute git diff and summarize with GPT."""
     index_model: ConfiguredTextCompletionModel = settings.mindflow_models.index
 
@@ -52,17 +52,18 @@ async def create_gpt_summarized_diff(
     results: List[Result[str, ModelApiCallError]] = await asyncio.gather(*tasks)
     for result in results:
         if isinstance(result, Err):
-            return result
+            yield result
+            return
         diff_summary += result.value
 
     if len(excluded_filenames) > 0:
         diff_summary += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
 
     if detailed:
-        return Ok(diff_summary)
+        yield Ok(diff_summary)
 
     query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
-    return await query_model.call_api(
+    async for char_stream_chunk in query_model.call_api_stream(  # type: ignore
         build_prompt_from_conversation_messages(
             [
                 create_conversation_message(
@@ -72,7 +73,8 @@ async def create_gpt_summarized_diff(
             ],
             query_model,
         )
-    )
+    ):
+        yield char_stream_chunk
 
 
 # NOTE: make sure to have a the "." in the file extension (if applicable)

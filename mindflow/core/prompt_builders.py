@@ -1,3 +1,4 @@
+import json
 import anthropic  # type: ignore
 
 from enum import Enum
@@ -21,44 +22,42 @@ def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
 
 def build_prompt_from_conversation_messages(
     messages: List[Dict[str, str]], configured_model: ConfiguredModel
-) -> Union[List[Dict], str]:
-    if configured_model.model.service == ServiceID.OPENAI.value:
-        return messages
+) -> List[Dict]:
+    return messages
 
-    prompt_parts = []
-    for message in messages:
-        role = message["role"]
-        prompt = message["content"]
+    # prompt_parts = []
+    # for message in messages:
+    #     role = message["role"]
+    #     prompt = message["content"]
 
-        if role == Role.SYSTEM.value:
-            prompt_parts.append(anthropic.HUMAN_PROMPT + prompt)
-            prompt_parts.append(
-                anthropic.AI_PROMPT
-                + " Sure! I will respond to all following messages with a response like you have just outlined for me."
-            )
-        elif role in [Role.USER.value, Role.ASSISTANT.value]:
-            prompt_parts.append(
-                (
-                    anthropic.HUMAN_PROMPT
-                    if role == Role.USER.value
-                    else anthropic.AI_PROMPT
-                )
-                + prompt
-            )
+    #     if role == Role.SYSTEM.value:
+    #         prompt_parts.append(anthropic.HUMAN_PROMPT + prompt)
+    #         prompt_parts.append(
+    #             anthropic.AI_PROMPT
+    #             + " Sure! I will respond to all following messages with a response like you have just outlined for me."
+    #         )
+    #     elif role in [Role.USER.value, Role.ASSISTANT.value]:
+    #         prompt_parts.append(
+    #             (
+    #                 anthropic.HUMAN_PROMPT
+    #                 if role == Role.USER.value
+    #                 else anthropic.AI_PROMPT
+    #             )
+    #             + prompt
+    #         )
 
-    return "".join(prompt_parts) + anthropic.AI_PROMPT
+    # return "".join(prompt_parts) + anthropic.AI_PROMPT
 
 
 def prune_messages_to_fit_context_window(
     messages: List[Dict[str, str]], configured_model: ConfiguredModel
 ) -> List[Dict[str, str]]:
-    # Improvement can be made on the estimation here for Anthropic system messages
-    content = ""
     for i in range(0, len(messages)):
-        content += f"{messages[i]['role']}\n\n {messages[i]['content']}"
         if (
-            get_token_count_of_text_for_model(configured_model.tokenizer, content)
-            > configured_model.model.hard_token_limit - MinimumReservedLength.CHAT.value
+            get_token_count_of_text_for_model(
+                configured_model.tokenizer, json.dumps(messages[i : len(messages) - 1])
+            )
+            < configured_model.model.hard_token_limit - 1500
         ):
-            return messages[:i]
-    return messages
+            return messages[i : len(messages) - 1]
+    return []
