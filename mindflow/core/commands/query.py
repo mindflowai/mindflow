@@ -146,7 +146,7 @@ def select_and_trim_text_to_fit_context_window(
                 configured_model.tokenizer, query + selected_content[:mid]
             )
             <= configured_model.model.hard_token_limit
-            - MinimumReservedLength.QUERY.value
+            - 800
         ):
             left = mid + 1
             continue
