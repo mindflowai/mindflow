@@ -42,14 +42,14 @@ There are multiple levels to using mindflow's chat feature.
 - `mf chat "explain what a programming language is"`
     - Interact with chatGPT directly just like on the chatGPT website. We also have chat persistence, so it will remember the previous chat messages.
 2. With File Context
-- `mf chat "please summarize what this code does" path/to/code.py`
+- `mf chat path/to/code.py "please summarize what this code does"`
     - You can provide single or multi-file context to chatGPT by passing in any number of files as a separate argument in the `mf chat` call. For sufficiently small files (see: [chatGPT token limits](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them)), this will work and also maintain chat history.
 3. With Directory Context
-- `mf chat "what are these submodules responsible for? path/to/submodule1/ path/to/submodule2/`
+- `mf chat path/to/submodule1/ path/to/submodule2/ "what are these submodules responsible for?"`
     - Providing directories will actually run an indexer over your code subdirectories/files recursively. So it may take a while to fully index everything -- don't worry; we'll warn you if the cost becomes a concern! Right now the warning triggers if the index job costs >$0.50USD.
 4. Custom pre-indexed context
 - `mf index path/to/subdir/file1.txt path/to/file2.txt`
-- `mf chat -s "How do all of my classes relate to one another?" ./`
+- `mf chat -s ./ "How do all of my classes relate to one another?"`
     - If you pre-index your repository, you can narrow the scope for the context provided to the chat. Passing `-s` will skip the auto-indexing, and instead will defer to the currently existing index. This index is generated in the first step `mf index` where only those files/subdirs will be included.
     - This can save you time and money if your repository is significantly large.
 
@@ -118,7 +118,7 @@ Make some changes to your branch and stage, and then commit them. Then, run `mf 
 ![Screenshot 2023-03-11 at 8 42 11 PM](https://user-images.githubusercontent.com/26421036/224524839-45093b5d-b4d9-4dc4-a129-867d819a2136.png)
 
 ## How does it work?
-This tool allows you to build an index of text documents and search through them using GPT-based embeddings. The tool takes document paths as input, extracts the text, splits the documents into chunks, summarizes them, and builds a summarization tree. The tool then uses this tree to generate embeddings of the indexed documents and your query and selects the top text chunks based on the cosine similarity between these embeddings. The generated index can be saved to a JSON file for later reuse, making subsequent searches faster and cheaper.
+MindFlow uses state-of-the-art methods for high-throughput segmentation, processing, storage, and retrieval of documents using a recursive hierarchical summarization and embedding technique to achieve fast, and high-quality responses to questions and tasks. MindFlow then uses the embeddings made from the hierarchical summarization tree to generate embeddings of the indexed documents and your query and selects the top text chunks based on the cosine similarity between these embeddings. The generated index can be saved to a JSON file for later reuse, making subsequent searches faster and cheaper.
 
 ## What's next for MindFlow
 In the future, MindFlow plans on becoming an even more integral part of the modern developer's toolkit. We plan on adding the ability to ditch traditional documentation and instead integrate directly with your private documents and communication channels, allowing for a more seamless and intuitive experience. With MindFlow, you can have a true "stream of consciousness" with your code, documentation, and communication channels, making it easier than ever to stay on top of your projects and collaborate with your team. We are excited to continue pushing the boundaries of what's possible with language models and revolutionizing how developers work.

@@ -9,3 +9,5 @@ scikit-learn
 tqdm
 traitlets
 anthropic
+aiohttp
+termcolor
