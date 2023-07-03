@@ -53,7 +53,8 @@ async def create_gpt_summarized_diff(
     for result in results:
         if isinstance(result, Err):
             yield result
-        diff_summary += result.value
+            return
+        diff_summary += result.value 
 
     if len(excluded_filenames) > 0:
         diff_summary += f"\n\nNOTE: The following files were excluded from the diff: {', '.join(excluded_filenames)}"
@@ -62,7 +63,7 @@ async def create_gpt_summarized_diff(
         yield Ok(diff_summary)
 
     query_model: ConfiguredTextCompletionModel = settings.mindflow_models.query
-    async for char_stream_chunk in query_model.call_api_stream(
+    async for char_stream_chunk in query_model.call_api_stream( # type: ignore
         build_prompt_from_conversation_messages(
             [
                 create_conversation_message(

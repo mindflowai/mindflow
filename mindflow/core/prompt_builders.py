@@ -23,31 +23,30 @@ def create_conversation_message(role: str, prompt: str) -> Dict[str, str]:
 def build_prompt_from_conversation_messages(
     messages: List[Dict[str, str]], configured_model: ConfiguredModel
 ) -> List[Dict]:
-    if configured_model.model.service == ServiceID.OPENAI.value:
-        return messages
+    return messages
 
-    prompt_parts = []
-    for message in messages:
-        role = message["role"]
-        prompt = message["content"]
+    # prompt_parts = []
+    # for message in messages:
+    #     role = message["role"]
+    #     prompt = message["content"]
 
-        if role == Role.SYSTEM.value:
-            prompt_parts.append(anthropic.HUMAN_PROMPT + prompt)
-            prompt_parts.append(
-                anthropic.AI_PROMPT
-                + " Sure! I will respond to all following messages with a response like you have just outlined for me."
-            )
-        elif role in [Role.USER.value, Role.ASSISTANT.value]:
-            prompt_parts.append(
-                (
-                    anthropic.HUMAN_PROMPT
-                    if role == Role.USER.value
-                    else anthropic.AI_PROMPT
-                )
-                + prompt
-            )
+    #     if role == Role.SYSTEM.value:
+    #         prompt_parts.append(anthropic.HUMAN_PROMPT + prompt)
+    #         prompt_parts.append(
+    #             anthropic.AI_PROMPT
+    #             + " Sure! I will respond to all following messages with a response like you have just outlined for me."
+    #         )
+    #     elif role in [Role.USER.value, Role.ASSISTANT.value]:
+    #         prompt_parts.append(
+    #             (
+    #                 anthropic.HUMAN_PROMPT
+    #                 if role == Role.USER.value
+    #                 else anthropic.AI_PROMPT
+    #             )
+    #             + prompt
+    #         )
 
-    return "".join(prompt_parts) + anthropic.AI_PROMPT
+    # return "".join(prompt_parts) + anthropic.AI_PROMPT
 
 
 def prune_messages_to_fit_context_window(

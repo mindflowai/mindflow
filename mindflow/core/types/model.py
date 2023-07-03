@@ -327,7 +327,7 @@ class ConfiguredOpenAIChatCompletionModel(ConfiguredTextCompletionModel):
 
             return model_error
 
-    async def call_api_stream(
+    async def call_api_stream( # type: ignore
         self,
         messages: list,
         temperature: float = 0.0,
