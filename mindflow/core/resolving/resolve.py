@@ -2,8 +2,8 @@
 import sys
 
 from typing import List
-from mindflow.core.types.document import DocumentReference
 
+from mindflow.core.types.document import DocumentReference
 from mindflow.core.resolving.resolvers.file_resolver import FileResolver
 
 
