@@ -29,7 +29,9 @@ Pre-requisite:
 1. Install Mindflow:
 - If you are on Mac OS and have brew, run:
  
- ```brew tap mindflowai/homebrew-mindflow && brew install mindflow```
+ ```
+ brew tap mindflowai/homebrew-mindflow && brew install mindflow
+ ```
 
 - Otherwise run ```pip install mindflow```, or you can clone this repo and run `pip install -e path/to/mindflow`. **Note:** if you are not install in a conda environment, you may need to add the package to your path. Please ask for help in our discord if you run into any issues!
 
