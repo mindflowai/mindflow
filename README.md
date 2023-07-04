@@ -33,7 +33,17 @@ Pre-requisite:
  brew tap mindflowai/homebrew-mindflow && brew install mindflow
  ```
 
-- Otherwise run ```pip install mindflow```, or you can clone this repo and run `pip install -e path/to/mindflow`. **Note:** if you are not install in a conda environment, you may need to add the package to your path. Please ask for help in our discord if you run into any issues!
+- Otherwise run: 
+```
+pip install mindflow
+``` 
+
+- Or you can clone this repo and run: 
+```
+pip install -e path/to/mindflow
+``` 
+
+- **Note:** if you are not install in a conda environment, you may need to add the package to your path. Please ask for help in our discord if you run into any issues!
 
 2. Run `mf login`:
     - Register with OpenAI to use their models. You can find your OpenAI API key [here](https://platform.openai.com/account/api-keys).
