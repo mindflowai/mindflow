@@ -24,7 +24,7 @@ The [ChatGPT](https://openai.com/blog/chatgpt)-powered swiss army knife for the 
 
 Pre-requisite: 
 - You'll need to create an [OpenAI](https://openai.com/blog/openai-api) account.
-- Also, create a [Pinecone](https://www.pinecone.io/start) account to use their vector database.
+- Also, create a [Pinecone](https://www.pinecone.io/start) account to use their vector database if you would like to use the `chat with documents` feature.
 
 1. Run `pip install mindflow`, or you can clone this repo and run `pip install -e path/to/mindflow`.
 2. Run `mf login`:

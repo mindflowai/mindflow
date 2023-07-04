@@ -39,5 +39,6 @@ def diff(args: Tuple[str], detailed: bool):
                 click.echo(char_stream_chunk.value, nl=False)
             else:
                 click.echo(char_stream_chunk.value)
+        print("\n")
 
     asyncio.run(stream_diff(Settings(), diff_output, detailed=detailed))

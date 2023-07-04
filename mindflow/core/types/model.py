@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 import aiohttp
 import logging
@@ -189,8 +190,14 @@ class ConfiguredModel(ABC):
                 }
             )
 
-        if service_config := ServiceConfig.load(f"{self.model.service}_config"):
-            self.api_key = service_config.api_key
+        service_config = ServiceConfig.load(f"{self.model.service}_config")
+        if service_config == None or not hasattr(service_config, "api_key"):
+            print(
+                f"No {self.model.service} API key found. Please set {self.model.service} API key with `mf login`."
+            )
+            sys.exit(1)
+        
+        self.api_key = service_config.api_key
 
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -399,7 +406,6 @@ class ConfiguredOpenAIChatCompletionModel(ConfiguredTextCompletionModel):
                                 await self.status_tracker.increment_requests_count_successful()
                                 await self.status_tracker.decrement_requests_count_in_progress()
                                 if not result["choices"][0]["delta"]:
-                                    print("No delta")
                                     continue
                                 yield Ok(
                                     result["choices"][0]["delta"]["content"]

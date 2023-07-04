@@ -41,6 +41,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 click.echo(char_stream_chunk.value, nl=False)
             else:
                 click.echo(char_stream_chunk.value)
+        print("\n")
 
     async def stream_query(settings: Settings, file_paths: List[str], prompt: str):
         click.echo(colored("\nGPT:", attrs=["bold"]))
@@ -49,6 +50,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
                 click.echo(char_stream_chunk.value, nl=False)
             else:
                 click.echo(char_stream_chunk.value)
+        print("\n")
 
     prompt, paths = parse_chat_prompt_and_paths_from_args(prompt_args)
     settings = Settings()
@@ -59,7 +61,7 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
             )
         else:
             click.echo(
-                colored("Indexing paths... Note: this may take a while, if you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n", "yellow")
+                colored("Indexing paths... Note: this may take a while, especially the first time. If it fails, or gets stuck, retry and it will pick up where you left off. If you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n", "yellow")
             )
 
             asyncio.run(run_index(settings, paths))
