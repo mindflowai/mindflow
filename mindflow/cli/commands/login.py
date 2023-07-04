@@ -13,7 +13,10 @@ def login():
         ServiceConfigID.PINECONE.value,
     ]
     service_options = [
-        ServiceConfig.load(service_id) if ServiceConfig.load(service_id) is not None else ServiceConfig(service_id) for service_id in service_ids
+        ServiceConfig.load(service_id)
+        if ServiceConfig.load(service_id) is not None
+        else ServiceConfig(service_id)
+        for service_id in service_ids
     ]
     service_descriptions = ["OpenAI", "Pinecone: (Vector DB)"]
     service_config: ServiceConfig = select_option(

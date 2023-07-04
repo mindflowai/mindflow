@@ -196,7 +196,7 @@ class ConfiguredModel(ABC):
                 f"No {self.model.service} API key found. Please set {self.model.service} API key with `mf login`."
             )
             sys.exit(1)
-        
+
         self.api_key = service_config.api_key
 
         self.headers = {

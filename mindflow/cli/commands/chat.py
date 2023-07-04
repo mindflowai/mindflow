@@ -57,11 +57,17 @@ def chat(prompt_args: Tuple[str], skip_index: bool):
     if paths:
         if skip_index:
             click.echo(
-                colored("Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths.", "yellow")
+                colored(
+                    "Skipping indexing step, only using the current index for context. You can run `mf index` to pre-index specific paths.",
+                    "yellow",
+                )
             )
         else:
             click.echo(
-                colored("Indexing paths... Note: this may take a while, especially the first time. If it fails, or gets stuck, retry and it will pick up where you left off. If you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n", "yellow")
+                colored(
+                    "Indexing paths... Note: this may take a while, especially the first time. If it fails, or gets stuck, retry and it will pick up where you left off. If you want to skip this step, use the `--skip-index` flag. If you do so, you can pre-select specific paths to index with `mf index`.\n",
+                    "yellow",
+                )
             )
 
             asyncio.run(run_index(settings, paths))
